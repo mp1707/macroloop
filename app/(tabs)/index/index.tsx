@@ -17,12 +17,15 @@ import { useTranslation } from "react-i18next";
 import { WelcomeScreen } from "@/components/welcome";
 import { hasNoDailyTargets } from "@/utils/dailyTargets";
 import { Image } from "expo-image";
+import { useTheme } from "@/theme/ThemeProvider";
+import { View } from "react-native";
 
 export default function TodayTab() {
   const { safeNavigate } = useNavigationGuard();
   const { dynamicBottomPadding } = useTabBarSpacing();
   const { t } = useTranslation();
   const headerHeight = useHeaderHeight();
+  const { colors } = useTheme();
 
   const foodLogs = useAppStore((state) => state.foodLogs);
   const selectedDate = useAppStore((state) => state.selectedDate);
@@ -96,19 +99,21 @@ export default function TodayTab() {
   }
 
   return (
-    <FoodLogsList
-      foodLogs={todayFoodLogs}
-      dailyPercentages={dailyPercentages}
-      dailyTargets={state.dailyTargets}
-      dailyTotals={dailyTotals}
-      dynamicBottomPadding={dynamicBottomPadding}
-      headerOffset={headerHeight}
-      onDelete={handleDelete}
-      onToggleFavorite={handleToggleFavorite}
-      onEdit={handleEdit}
-      onLogAgain={handleLogAgain}
-      onSaveToFavorites={handleSaveToFavorites}
-      onRemoveFromFavorites={handleRemoveFromFavorites}
-    />
+    <View style={{ flex: 1, backgroundColor: colors.primaryBackground }}>
+      <FoodLogsList
+        foodLogs={todayFoodLogs}
+        dailyPercentages={dailyPercentages}
+        dailyTargets={state.dailyTargets}
+        dailyTotals={dailyTotals}
+        dynamicBottomPadding={dynamicBottomPadding}
+        headerOffset={headerHeight}
+        onDelete={handleDelete}
+        onToggleFavorite={handleToggleFavorite}
+        onEdit={handleEdit}
+        onLogAgain={handleLogAgain}
+        onSaveToFavorites={handleSaveToFavorites}
+        onRemoveFromFavorites={handleRemoveFromFavorites}
+      />
+    </View>
   );
 }
