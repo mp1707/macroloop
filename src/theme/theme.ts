@@ -43,8 +43,8 @@ const lightColors = {
 
   // Subtle tints for semantic surfaces (alpha for neutral tracks)
   semanticSurfaces: {
-    calories: "rgba(68, 235, 212, 0.18)",
-    protein: "rgba(94, 135, 255, 0.18)",
+    calories: "rgba(68, 235, 212, 0.32)",
+    protein: "rgba(94, 135, 255, 0.32)",
     carbs: "rgba(255, 109, 109, 0.16)",
     fat: "rgba(255, 194, 51, 0.18)",
   },
