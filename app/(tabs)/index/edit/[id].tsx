@@ -124,7 +124,8 @@ export default function Edit() {
   );
 
   const titleChanged = draftTitle.trim() !== (originalLog?.title || "").trim();
-  const percentageChanged = percentageEaten !== (originalLog?.percentageEaten ?? 100);
+  const percentageChanged =
+    percentageEaten !== (originalLog?.percentageEaten ?? 100);
 
   const handleOpenEditor = useCallback(
     (index: number, component: FoodComponent) => {
@@ -440,7 +441,9 @@ export default function Edit() {
                   {t("editLog.percentageEaten.title")}
                 </AppText>
                 <AppText role="Body" style={styles.percentageText}>
-                  {t("editLog.percentageEaten.value", { percentage: Math.round(percentageEaten) })}
+                  {t("editLog.percentageEaten.value", {
+                    percentage: Math.round(percentageEaten),
+                  })}
                 </AppText>
               </View>
               <View style={styles.sliderContainer}>
@@ -488,7 +491,7 @@ const createStyles = (colors: Colors, theme: Theme) =>
     contentContainer: {
       paddingHorizontal: theme.spacing.pageMargins.horizontal,
       paddingTop: theme.spacing.xl,
-      paddingBottom: theme.spacing.xl,
+      paddingBottom: theme.spacing.xxl,
       gap: theme.spacing.xl,
     },
     header: {},

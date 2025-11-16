@@ -89,7 +89,7 @@ export const createEditHandler = (safeNavigate: (path: string) => void) => {
   };
 };
 
-export const createDeleteHandler = (deleteFoodLog: (id: string) => void) => {
+export const createDeleteHandler = (deleteFoodLog: (id: string) => void | Promise<void>) => {
   return (log: FoodLog | Favorite) => {
     deleteFoodLog(log.id);
   };

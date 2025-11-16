@@ -18,7 +18,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 interface SwipeToFunctionsProps {
   children: ReactNode;
-  onDelete?: () => void;
+  onDelete?: () => void | Promise<void>;
   confirmDelete?: boolean;
   onLeftFunction?: () => void;
   confirmLeftFunction?: boolean;
@@ -117,7 +117,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
     isLeftSwiped.value = false;
     isRightSwiped.value = false;
 
-    // First slide out to the left with a natural easing
+    // Start the animation first to maintain UX
     translateX.value = withTiming(
       -SCREEN_WIDTH * 1.2, // Slide slightly further for full exit effect
       {
@@ -130,6 +130,8 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
           0,
           { duration: 200 }, // Quick collapse
           () => {
+            // Call onDelete at the end of the animation
+            // This ensures cleanup happens but animation plays first
             runOnJS(onDelete)();
           }
         );
