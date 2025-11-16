@@ -511,7 +511,6 @@
     },
     "targetMethod": {
       "title": "How would you like to set your nutrition targets?",
-      "subtitle": "Choose the approach that works best for you.",
       "options": {
         "calculate": {
           "title": "Calculate for me",

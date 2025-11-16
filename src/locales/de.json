@@ -511,7 +511,6 @@
     },
     "targetMethod": {
       "title": "Wie möchtest du deine Ernährungsziele festlegen?",
-      "subtitle": "Wähle den Ansatz, der am besten zu dir passt.",
       "options": {
         "calculate": {
           "title": "Für mich berechnen",

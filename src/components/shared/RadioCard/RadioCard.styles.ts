@@ -43,6 +43,9 @@ export const createStyles = (colors: Colors, theme: Theme) => {
       flex: 1,
       gap: spacing.xs / 2,
     },
+    contentCentered: {
+      justifyContent: "center",
+    },
     titleRow: {
       flexDirection: "row",
       alignItems: "center",
