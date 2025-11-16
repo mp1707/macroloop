@@ -14,11 +14,12 @@ import {
   createToggleFavoriteHandler,
 } from "@/utils/foodLogHandlers";
 import { useTranslation } from "react-i18next";
-import { WelcomeScreen } from "@/components/welcome";
 import { hasNoDailyTargets } from "@/utils/dailyTargets";
 import { Image } from "expo-image";
 import { useTheme } from "@/theme/ThemeProvider";
 import { View } from "react-native";
+import { TargetMethodContent } from "app/onboarding/target-method";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TodayTab() {
   const { safeNavigate } = useNavigationGuard();
@@ -26,6 +27,7 @@ export default function TodayTab() {
   const { t } = useTranslation();
   const headerHeight = useHeaderHeight();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const foodLogs = useAppStore((state) => state.foodLogs);
   const selectedDate = useAppStore((state) => state.selectedDate);
@@ -95,7 +97,17 @@ export default function TodayTab() {
 
   // Show welcome screen for first-time users without daily targets
   if (hasNoDailyTargets(dailyTargets)) {
-    return <WelcomeScreen />;
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.primaryBackground,
+          paddingTop: insets.top,
+        }}
+      >
+        <TargetMethodContent />
+      </View>
+    );
   }
 
   return (

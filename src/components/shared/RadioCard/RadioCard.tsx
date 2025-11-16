@@ -18,7 +18,7 @@ import { createStyles } from "./RadioCard.styles";
 
 interface RadioCardProps {
   title: string;
-  description: string;
+  description?: string;
   factor?: number;
   badge?: { label: string };
   recommended?: boolean;
@@ -149,6 +149,10 @@ export const RadioCard: React.FC<RadioCardProps> = ({
     [cardLayout]
   );
 
+  const hasDescription = Boolean(description);
+
+  const descriptionHint = description ? ` ${description}` : "";
+
   return (
     <View style={styles.wrapper}>
       <Animated.View style={animatedCardStyle} onLayout={handleCardLayout}>
@@ -162,8 +166,8 @@ export const RadioCard: React.FC<RadioCardProps> = ({
           accessibilityHint={
             accessibilityHint ||
             (factor
-              ? `Select ${factor} grams per kilogram protein goal. ${description}`
-              : `Select ${title}. ${description}`)
+              ? `Select ${factor} grams per kilogram protein goal.${descriptionHint}`
+              : `Select ${title}.${descriptionHint}`)
           }
         >
           <Card elevated={true} padding={theme.spacing.md} style={styles.card}>
@@ -171,7 +175,12 @@ export const RadioCard: React.FC<RadioCardProps> = ({
               <View style={styles.radioGutter} />
 
               {/* Content */}
-              <View style={styles.content}>
+              <View
+                style={[
+                  styles.content,
+                  !hasDescription && styles.contentCentered,
+                ]}
+              >
                 <View style={styles.titleRow}>
                   <View style={styles.titleWithIcon}>
                     <AppText
@@ -205,14 +214,16 @@ export const RadioCard: React.FC<RadioCardProps> = ({
                     </View>
                   )}
                 </View>
-                <AppText
-                  role="Caption"
-                  color="secondary"
-                  numberOfLines={2}
-                  style={styles.description}
-                >
-                  {description}
-                </AppText>
+                {hasDescription && (
+                  <AppText
+                    role="Caption"
+                    color="secondary"
+                    numberOfLines={2}
+                    style={styles.description}
+                  >
+                    {description}
+                  </AppText>
+                )}
               </View>
             </View>
             {recommended && (

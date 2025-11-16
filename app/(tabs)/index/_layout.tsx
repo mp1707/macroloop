@@ -9,12 +9,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { BlurView } from "expo-blur";
 import { DateSlider } from "@/components/shared/DateSlider";
+import { hasDailyTargetsSet } from "@/utils/dailyTargets";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function IndexLayout() {
   const { colors, theme, colorScheme } = useTheme();
   const isIOS = Platform.OS === "ios";
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const dailyTargets = useAppStore((state) => state.dailyTargets);
+  const hasGoals = hasDailyTargetsSet(dailyTargets);
 
   const hasLiquidGlass = isLiquidGlassAvailable();
   const transparentBackground = colors.primaryBackground + "00";
@@ -34,7 +38,7 @@ export default function IndexLayout() {
       <Stack.Screen
         name="index"
         options={{
-          headerShown: true,
+          headerShown: hasGoals,
           headerTransparent: true,
           header: () => (
             <View style={[styles.headerContainer, { height: headerHeight }]}>
