@@ -56,7 +56,6 @@ export const TextInput = forwardRef<RNTextInput, CustomTextInputProps>(
   ) => {
     const { colors, theme, colorScheme } = useTheme();
     const [isFocused, setIsFocused] = useState(false);
-    const fontScale = PixelRatio.getFontScale();
     const styles = createStyles(
       colors,
       theme,
@@ -97,7 +96,9 @@ export const TextInput = forwardRef<RNTextInput, CustomTextInputProps>(
           accessibilityLabel={accessibilityLabel}
           accessibilityHint={
             hasError && errorMessage
-              ? `${accessibilityHint ? accessibilityHint + ". " : ""}Error: ${errorMessage}`
+              ? `${
+                  accessibilityHint ? accessibilityHint + ". " : ""
+                }Error: ${errorMessage}`
               : accessibilityHint
           }
           accessibilityState={{ disabled: props.editable === false }}
