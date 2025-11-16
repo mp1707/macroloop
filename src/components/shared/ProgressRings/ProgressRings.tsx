@@ -71,13 +71,15 @@ const TWO_PI = Math.PI * 2;
 const deriveStops = (
   baseColor: string,
   sweep: number,
-  effectIntensity: number
+  effectIntensity: number,
+  isDark: boolean
 ): GradientStop[] => {
   const normalized = clamp01(sweep);
   const intensity = clamp01(effectIntensity);
 
-  const darkBase = adjustColor(baseColor, -0.35);
-  const lightBase = adjustColor(baseColor, 0.12);
+  // Tone down gradient adjustments for light mode
+  const darkBase = adjustColor(baseColor, isDark ? -0.35 : -0.18);
+  const lightBase = adjustColor(baseColor, isDark ? 0.12 : 0.06);
 
   const midShade = baseColor;
   const startShade = interpolateColor(midShade, darkBase, intensity);
@@ -86,8 +88,9 @@ const deriveStops = (
   const tailShade = startShade;
 
   const highlightEnd = Math.max(normalized, 0);
+  // Reduce highlight flare width in light mode
   const highlightStart = Math.max(
-    Math.min(highlightEnd - 0.12, highlightEnd),
+    Math.min(highlightEnd - (isDark ? 0.12 : 0.08), highlightEnd),
     0
   );
   const warmPoint = Math.max(
@@ -150,7 +153,8 @@ const calculateRingState = (
   center: number,
   radius: number,
   strokeWidth: number,
-  baseColor: string
+  baseColor: string,
+  isDark: boolean
 ): RingAnimationState => {
   const ratio = Math.max(rawRatio, 0);
   const capped = Math.min(ratio, 1);
@@ -165,7 +169,7 @@ const calculateRingState = (
   const shadowY = endY + Math.sin(tangentAngle) * offsetDistance;
   const opacity = ratio > 0.002 ? 1 : 0;
   const effectIntensity = clamp01((sweepValue - 0.1) / 0.3);
-  const stops = deriveStops(baseColor, sweepValue, effectIntensity);
+  const stops = deriveStops(baseColor, sweepValue, effectIntensity, isDark);
   const color = colorAtOffset(sweepValue, stops);
 
   return {
@@ -200,6 +204,7 @@ interface BaseRingLayerProps {
   baseColor: string;
   trackOpacity: number;
   shadowColor: string;
+  isDark: boolean;
 }
 
 interface AnimatedRingLayerProps extends BaseRingLayerProps {
@@ -299,7 +304,8 @@ const AnimatedRingLayer: React.FC<AnimatedRingLayerProps> = ({
       baseProps.center,
       baseProps.radius,
       baseProps.strokeWidth,
-      baseProps.baseColor
+      baseProps.baseColor,
+      baseProps.isDark
     )
   );
 
@@ -310,7 +316,8 @@ const AnimatedRingLayer: React.FC<AnimatedRingLayerProps> = ({
         baseProps.center,
         baseProps.radius,
         baseProps.strokeWidth,
-        baseProps.baseColor
+        baseProps.baseColor,
+        baseProps.isDark
       );
       setState((prev) => (ringStatesEqual(prev, nextState) ? prev : nextState));
     },
@@ -319,6 +326,7 @@ const AnimatedRingLayer: React.FC<AnimatedRingLayerProps> = ({
       baseProps.radius,
       baseProps.strokeWidth,
       baseProps.baseColor,
+      baseProps.isDark,
     ]
   );
 
@@ -348,7 +356,8 @@ const StaticRingLayer: React.FC<StaticRingLayerProps> = ({
         baseProps.center,
         baseProps.radius,
         baseProps.strokeWidth,
-        baseProps.baseColor
+        baseProps.baseColor,
+        baseProps.isDark
       ),
     [
       value,
@@ -356,6 +365,7 @@ const StaticRingLayer: React.FC<StaticRingLayerProps> = ({
       baseProps.radius,
       baseProps.strokeWidth,
       baseProps.baseColor,
+      baseProps.isDark,
     ]
   );
 
@@ -469,7 +479,11 @@ export const ProgressRings: React.FC<ProgressRingsProps> = ({
       }}
       pointerEvents="none"
     >
-      <Canvas style={{ width: size, height: size }} pointerEvents="none">
+      <Canvas
+        style={{ width: size, height: size }}
+        pointerEvents="none"
+        key={isDark ? "dark" : "light"}
+      >
         <Group
           origin={vec(center, center)}
           transform={[{ rotate: -Math.PI / 2 }]}
@@ -487,6 +501,7 @@ export const ProgressRings: React.FC<ProgressRingsProps> = ({
               baseColor={ringColors[config.key]}
               trackOpacity={1}
               shadowColor={shadowColor}
+              isDark={isDark}
             />
           ))}
         </Group>
@@ -562,7 +577,11 @@ export const ProgressRingsStatic: React.FC<ProgressRingsStaticProps> = ({
       }}
       pointerEvents="none"
     >
-      <Canvas style={{ width: size, height: size }} pointerEvents="none">
+      <Canvas
+        style={{ width: size, height: size }}
+        pointerEvents="none"
+        key={isDark ? "dark" : "light"}
+      >
         <Group
           origin={vec(center, center)}
           transform={[{ rotate: -Math.PI / 2 }]}
@@ -578,6 +597,7 @@ export const ProgressRingsStatic: React.FC<ProgressRingsStaticProps> = ({
               baseColor={ringColors[config.key]}
               trackOpacity={1}
               shadowColor={shadowColor}
+              isDark={isDark}
             />
           ))}
         </Group>

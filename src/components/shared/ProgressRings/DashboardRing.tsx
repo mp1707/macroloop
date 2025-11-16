@@ -448,7 +448,11 @@ export const DashboardRing: React.FC<DashboardRingProps> = ({
   return (
     <View style={styles.wrapper} testID={testID}>
       <View style={styles.canvasContainer} pointerEvents="none">
-        <Canvas style={{ width: size, height: size }} pointerEvents="none">
+        <Canvas
+          style={{ width: size, height: size }}
+          pointerEvents="none"
+          key={isDark ? "dark" : "light"}
+        >
           <Group
             origin={vec(center, center)}
             transform={[{ rotate: -Math.PI / 2 }]}

@@ -4,15 +4,15 @@ import { Calculator, Edit2 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Card } from "@/components";
-import { useTheme, Theme } from "@/theme";
+import { useTheme, Theme, Colors } from "@/theme";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { SettingRow } from "../SettingRow";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 
 export const GoalsSection = () => {
   const { t } = useTranslation();
-  const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const { colors, theme } = useTheme();
+  const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const { safeNavigate } = useNavigationGuard();
   const { setInputMethod } = useOnboardingStore();
 
@@ -41,12 +41,12 @@ export const GoalsSection = () => {
           onPress={handleCalculatedTargets}
           accessory="chevron"
         />
+        <View style={styles.separator} />
+
         <SettingRow
           icon={Edit2}
           title={t("settings.sections.tracking.rows.manualTargets.title")}
-          subtitle={t(
-            "settings.sections.tracking.rows.manualTargets.subtitle"
-          )}
+          subtitle={t("settings.sections.tracking.rows.manualTargets.subtitle")}
           onPress={handleManualTargets}
           accessory="chevron"
         />
@@ -55,7 +55,7 @@ export const GoalsSection = () => {
   );
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (colors: Colors, theme: Theme) =>
   StyleSheet.create({
     section: {
       marginBottom: theme.spacing.lg,
@@ -64,5 +64,11 @@ const createStyles = (theme: Theme) =>
       marginBottom: theme.spacing.sm,
       marginLeft: theme.spacing.lg,
       letterSpacing: 0.5,
+    },
+    separator: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.subtleBorder,
+      marginLeft: theme.spacing.lg + 24 + theme.spacing.md,
+      marginRight: theme.spacing.lg,
     },
   });
