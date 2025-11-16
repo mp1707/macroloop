@@ -263,7 +263,7 @@
       "badge": "{{days}} days free",
       "eligible": {
         "duration": "Free for {{days}} days",
-        "then": "Then {{price}}/month"
+        "then": "After free trial"
       },
       "loading": "Checking eligibility…"
     },

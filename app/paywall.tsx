@@ -262,9 +262,7 @@ export default function PaywallScreen() {
                         <>
                           <View style={styles.priceMetaDivider} />
                           <AppText role="Caption" style={styles.priceMetaLabel}>
-                            {t("paywall.trial.eligible.then", {
-                              price: option.price,
-                            })}
+                            {t("paywall.trial.eligible.then")}
                           </AppText>
                         </>
                       )}
@@ -524,10 +522,10 @@ const createStyles = (theme: Theme, colors: Colors) =>
       opacity: 0.7,
     },
     priceMetaDivider: {
-      width: 4,
-      height: 4,
+      width: 2,
+      height: 2,
       borderRadius: 2,
-      backgroundColor: colors.subtleBorder,
+      backgroundColor: colors.primaryText,
       marginHorizontal: theme.spacing.xs,
     },
     bulletList: {

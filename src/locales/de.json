@@ -263,7 +263,7 @@
       "badge": "{{days}} Tage kostenlos",
       "eligible": {
         "duration": "{{days}} Tage kostenlos",
-        "then": "Danach {{price}}/Monat"
+        "then": "Nach kostenlosem Test"
       },
       "loading": "Berechtigung wird geprüft…"
     },
