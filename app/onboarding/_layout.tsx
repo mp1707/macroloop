@@ -5,9 +5,7 @@ import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { View } from "react-native";
 import React, { useMemo } from "react";
 import { useNavigationTransition } from "@/context/NavigationTransitionContext";
-import { HeaderButton } from "../../src/components/shared/HeaderButton";
-import { ProgressBar } from "../../src/components/onboarding/ProgressBar";
-import { isLiquidGlassAvailable } from "expo-glass-effect";
+import { OnboardingHeader } from "../../src/components/onboarding/OnboardingHeader";
 
 // Manual flow step mapping
 const MANUAL_STEP_MAP: Record<string, number> = {
@@ -60,61 +58,51 @@ export default function OnboardingLayout() {
     safeBack();
   };
 
-  const hasLiquidGlass = isLiquidGlassAvailable();
+  // Show header for all screens except index, target-method, and summary screens
+  const shouldShowHeader =
+    !pathname.includes("/index") &&
+    !isTargetMethod &&
+    !isSummary;
 
-  // Header configuration
-  const getHeaderConfig = () => ({
-    headerShown: true,
-    headerTransparent: true,
-    headerTitle: "",
-    headerLeft: () => (
-      <HeaderButton
-        imageProps={{
-          systemName: "chevron.left",
-        }}
-        buttonProps={{
-          onPress: handleBack,
-          color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
-        }}
-      />
-    ),
-    headerRight: () => (
-      <HeaderButton
-        imageProps={{
-          systemName: "xmark",
-        }}
-        buttonProps={{
-          onPress: handleSkip,
-          color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
-        }}
-      />
-    ),
-  });
+  // Hide back button only on target-method screen
+  const hideBackButton = isTargetMethod;
 
   return (
-    <Stack
-      screenOptions={{
-        animation: "slide_from_right",
-        contentStyle: { backgroundColor: colors.primaryBackground },
-        ...getHeaderConfig(),
-      }}
-      screenListeners={{
-        transitionStart: () => setTransitioning(true),
-        transitionEnd: () => setTransitioning(false),
-      }}
-    >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="target-method" options={{ headerShown: false }} />
-      <Stack.Screen name="age" />
-      <Stack.Screen name="sex" />
-      <Stack.Screen name="height" />
-      <Stack.Screen name="weight" />
-      <Stack.Screen name="activity-level" />
-      <Stack.Screen name="calorie-goal" />
-      <Stack.Screen name="protein-goal" />
-      <Stack.Screen name="manual-input" />
-      <Stack.Screen name="manual-summary" options={{ headerShown: false }} />
-      <Stack.Screen name="calculator-summary" options={{ headerShown: false }} />
-    </Stack>
+    <View style={{ flex: 1, backgroundColor: colors.primaryBackground }}>
+      {shouldShowHeader && (
+        <OnboardingHeader
+          onBack={handleBack}
+          onSkip={handleSkip}
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          showProgressBar={showProgressBar}
+          hideBackButton={hideBackButton}
+        />
+      )}
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "slide_from_right",
+          contentStyle: { backgroundColor: colors.primaryBackground },
+        }}
+        screenListeners={{
+          transitionStart: () => setTransitioning(true),
+          transitionEnd: () => setTransitioning(false),
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="target-method" />
+        <Stack.Screen name="age" />
+        <Stack.Screen name="sex" />
+        <Stack.Screen name="height" />
+        <Stack.Screen name="weight" />
+        <Stack.Screen name="activity-level" />
+        <Stack.Screen name="calorie-goal" />
+        <Stack.Screen name="protein-goal" />
+        <Stack.Screen name="manual-input" />
+        <Stack.Screen name="manual-summary" />
+        <Stack.Screen name="calculator-summary" />
+      </Stack>
+    </View>
   );
 }

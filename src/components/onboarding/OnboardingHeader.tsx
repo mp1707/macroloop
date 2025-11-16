@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { ChevronLeft, X } from "lucide-react-native";
-import { RoundButton } from "@/components/shared/RoundButton";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme";
+import { HeaderButton } from "@/components/shared/HeaderButton";
 import { ProgressBar } from "./ProgressBar";
-import { useTranslation } from "react-i18next";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
+import type { Colors, Theme } from "@/theme";
 
 interface OnboardingHeaderProps {
   onBack: () => void;
@@ -12,6 +13,7 @@ interface OnboardingHeaderProps {
   currentStep?: number;
   totalSteps?: number;
   showProgressBar?: boolean;
+  hideBackButton?: boolean;
 }
 
 export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
@@ -20,36 +22,47 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
   currentStep = 0,
   totalSteps = 7,
   showProgressBar = false,
+  hideBackButton = false,
 }) => {
   const { colors, theme } = useTheme();
-  const styles = createStyles(colors, theme);
-  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const hasLiquidGlass = isLiquidGlassAvailable();
+  const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
   return (
-    <View style={styles.container}>
-      {/* Navigation buttons */}
+    <View
+      style={[
+        styles.headerContainer,
+        { paddingTop: insets.top + theme.spacing.sm },
+      ]}
+    >
       <View style={styles.navigationContainer}>
         <View style={styles.backButton}>
-          <RoundButton
-            onPress={onBack}
-            Icon={ChevronLeft}
-            variant="tertiary"
-            accessibilityLabel={t("onboarding.header.backLabel")}
-            accessibilityHint={t("onboarding.header.backHint")}
-          />
+          {!hideBackButton && (
+            <HeaderButton
+              imageProps={{
+                systemName: "chevron.left",
+              }}
+              buttonProps={{
+                onPress: onBack,
+                color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
+              }}
+            />
+          )}
         </View>
         <View style={styles.skipButton}>
-          <RoundButton
-            onPress={onSkip}
-            Icon={X}
-            variant="tertiary"
-            accessibilityLabel={t("onboarding.header.skipLabel")}
-            accessibilityHint={t("onboarding.header.skipHint")}
+          <HeaderButton
+            imageProps={{
+              systemName: "xmark",
+            }}
+            buttonProps={{
+              onPress: onSkip,
+              color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
+            }}
           />
         </View>
       </View>
 
-      {/* Progress bar */}
       {showProgressBar && (
         <View style={styles.progressBarContainer}>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
@@ -59,14 +72,10 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
   );
 };
 
-type Colors = ReturnType<typeof useTheme>["colors"];
-type Theme = ReturnType<typeof useTheme>["theme"];
-
 const createStyles = (colors: Colors, theme: Theme) => {
   return StyleSheet.create({
-    container: {
+    headerContainer: {
       backgroundColor: colors.primaryBackground,
-      paddingTop: theme.spacing.md,
       paddingBottom: theme.spacing.md,
     },
     navigationContainer: {
@@ -74,13 +83,19 @@ const createStyles = (colors: Colors, theme: Theme) => {
       justifyContent: "space-between",
       alignItems: "center",
       paddingHorizontal: theme.spacing.md,
-      height: 48,
+      minHeight: 44,
     },
     backButton: {
-      // Navigation buttons are positioned within this container
+      width: 44,
+      height: 44,
+      justifyContent: "center",
+      alignItems: "flex-start",
     },
     skipButton: {
-      // Navigation buttons are positioned within this container
+      width: 44,
+      height: 44,
+      justifyContent: "center",
+      alignItems: "flex-end",
     },
     progressBarContainer: {
       marginTop: theme.spacing.md,

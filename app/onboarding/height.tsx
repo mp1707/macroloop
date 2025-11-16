@@ -1,20 +1,23 @@
-import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Info } from "lucide-react-native";
 import { useTheme } from "@/theme";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { Button } from "@/components/index";
-import { OnboardingScreen } from "../../src/components/onboarding/OnboardingScreen";
 import { AppText } from "@/components/shared/AppText";
 import { Tooltip } from "@/components/shared/Tooltip";
 import { RulerPicker } from "@/components/shared/RulerPicker";
 import { useTranslation } from "react-i18next";
+import type { Colors, Theme } from "@/theme";
 
 const HeightSelectionScreen = () => {
   const { colors, theme: themeObj } = useTheme();
-  const styles = createStyles(colors, themeObj);
+  const styles = useMemo(
+    () => createStyles(colors, themeObj),
+    [colors, themeObj]
+  );
   const { height, setHeight } = useOnboardingStore();
   const { safePush } = useNavigationGuard();
   const [currentHeight, setCurrentHeight] = useState(height || 175);
@@ -31,45 +34,79 @@ const HeightSelectionScreen = () => {
   };
 
   return (
-    <OnboardingScreen
-      scrollEnabled={false}
-      title={<AppText role="Title2">{t("onboarding.height.title")}</AppText>}
-      subtitle={
-        <View style={styles.infoRow}>
-          <AppText role="Body" color="secondary" style={styles.infoText}>
-            {t("onboarding.height.subtitle")}
-          </AppText>
-          <Tooltip text={t("onboarding.height.tooltip")}>
-            <Info size={18} color={colors.secondaryText} />
-          </Tooltip>
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={false}
+      >
+        <View style={styles.headerSection}>
+          <AppText role="Title2">{t("onboarding.height.title")}</AppText>
+          <View style={styles.infoRow}>
+            <AppText role="Body" color="secondary" style={styles.infoText}>
+              {t("onboarding.height.subtitle")}
+            </AppText>
+            <Tooltip text={t("onboarding.height.tooltip")}>
+              <Info size={18} color={colors.secondaryText} />
+            </Tooltip>
+          </View>
         </View>
-      }
-      actionButton={
-        <Button
-          variant="primary"
-          label={t("onboarding.common.continue")}
-          onPress={handleContinue}
-        />
-      }
-    >
-      <View style={styles.pickerSection}>
-        <RulerPicker
-          min={100}
-          max={250}
-          value={currentHeight}
-          onChange={handleHeightChange}
-          unit={t("onboarding.height.unit")}
-        />
-      </View>
-    </OnboardingScreen>
+
+        <View style={styles.centeredContent}>
+          <View style={styles.pickerSection}>
+            <RulerPicker
+              min={100}
+              max={250}
+              value={currentHeight}
+              onChange={handleHeightChange}
+              unit={t("onboarding.height.unit")}
+            />
+          </View>
+        </View>
+
+        <View style={styles.actionButtonContainer}>
+          <Button
+            variant="primary"
+            label={t("onboarding.common.continue")}
+            onPress={handleContinue}
+          />
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 export default HeightSelectionScreen;
 
-const createStyles = (colors: any, themeObj: any) => {
-  const { spacing } = themeObj;
+const createStyles = (colors: Colors, theme: Theme) => {
+  const { spacing } = theme;
   return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.primaryBackground,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: spacing.lg,
+      gap: spacing.lg,
+    },
+    headerSection: {
+      paddingTop: spacing.lg,
+      paddingHorizontal: spacing.pageMargins.horizontal,
+      alignItems: "center",
+      gap: spacing.sm,
+    },
+    centeredContent: {
+      flex: 1,
+      justifyContent: "center",
+    },
+    actionButtonContainer: {
+      paddingHorizontal: spacing.md,
+    },
     pickerSection: {
       alignItems: "center",
       width: "100%",
