@@ -29,14 +29,31 @@ interface ImageDisplayProps {
   deleteImage?: () => void;
   onExpand?: (isExpanded: boolean) => void;
   collapsedHeight?: number;
+  /**
+   * Accessibility label for the image (WCAG 1.1.1)
+   * Describes what the image shows
+   * Example: "Photo of grilled chicken salad" or "Food item photo"
+   */
+  imageAccessibilityLabel?: string;
 }
 
+/**
+ * ImageDisplay - Displays food/meal images with expand/collapse functionality
+ *
+ * ACCESSIBILITY:
+ * - Respects reduced motion preferences (WCAG 2.3.3)
+ * - Provides text alternatives for images (WCAG 1.1.1)
+ * - Images ignore color inversion for accessibility modes
+ * - Loading states announced to screen readers
+ * - Interactive elements have proper labels and hints
+ */
 export const ImageDisplay: React.FC<ImageDisplayProps> = ({
   imageUrl,
   isUploading,
   deleteImage,
   onExpand,
   collapsedHeight: collapsedHeightOverride,
+  imageAccessibilityLabel,
 }) => {
   const { colors, theme, colorScheme } = useTheme();
   const styles = useMemo(
@@ -219,13 +236,25 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
   const content = (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
       <Animated.View style={styles.rowContainer}>
-        <View style={styles.imageContainer}>
+        <View
+          style={styles.imageContainer}
+          // ACCESSIBILITY: Announce loading state (WCAG 4.1.3)
+          accessible={isUploading}
+          accessibilityRole={isUploading ? "progressbar" : undefined}
+          accessibilityLabel={isUploading ? "Uploading image" : undefined}
+          accessibilityValue={
+            isUploading ? { text: "Loading", now: 0, min: 0, max: 100 } : undefined
+          }
+        >
           <Card padding={0} style={styles.imageCard}>
             {isUploading || !imageUrl ? (
               <ActivityIndicator
                 size="large"
                 color={colors.white}
                 style={styles.image}
+                // ACCESSIBILITY: Hide ActivityIndicator from screen readers
+                // (parent View announces loading state)
+                importantForAccessibility="no-hide-descendants"
               />
             ) : (
               <AnimatedImage
@@ -235,6 +264,14 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
                 cachePolicy="memory-disk"
                 recyclingKey={imageUrl}
                 priority="low"
+                // ACCESSIBILITY: Text alternative for image (WCAG 1.1.1)
+                accessible={true}
+                accessibilityLabel={
+                  imageAccessibilityLabel || "Food or meal photo"
+                }
+                accessibilityRole="image"
+                // ACCESSIBILITY: Don't invert colors for photos (iOS)
+                accessibilityIgnoresInvertColors={true}
               />
             )}
           </Card>
@@ -250,6 +287,10 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
                 onPress: deleteImage,
                 color: colors.errorBackground,
                 variant: "glassProminent",
+                // ACCESSIBILITY: Label for delete button (WCAG 4.1.2)
+                accessibilityLabel: "Delete image",
+                accessibilityHint: "Double tap to remove this image",
+                accessibilityRole: "button",
               }}
               imageProps={{
                 systemName: "trash",
