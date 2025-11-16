@@ -201,10 +201,10 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
       <Animated.View style={styles.rowContainer}>
         {isUploading && (
-          <Animated.View style={[styles.imageContainer, skeletonAnimatedStyle]}>
+          <Animated.View style={styles.imageContainer}>
             <Card padding={0} style={styles.imageCard}>
-              <Animated.View style={[styles.skeleton, styles.skeletonContent]}>
-                <ActivityIndicator size="large" color={colors.accent} />
+              <Animated.View style={[styles.skeleton, styles.skeletonContent, skeletonAnimatedStyle]}>
+                <ActivityIndicator size="large" color={colors.white} />
               </Animated.View>
             </Card>
           </Animated.View>

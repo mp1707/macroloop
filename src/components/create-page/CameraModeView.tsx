@@ -97,7 +97,7 @@ export const CameraModeView = ({ onImageSelected }: CameraModeViewProps) => {
           }}
           imageProps={{
             systemName: "circle.fill",
-            color: colors.accent,
+            color: colors.white,
           }}
         />
       </View>
