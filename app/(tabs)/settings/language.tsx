@@ -4,8 +4,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import type { LucideIcon, LucideProps } from "lucide-react-native";
 
-import { SelectionCard } from "@/components/settings/SelectionCard/SelectionCard";
-import { useTheme, Colors, Theme } from "@/theme";
+import { RadioCard } from "@/components/shared/RadioCard/RadioCard";
+import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
 import {
   useLocalization,
   LanguagePreference,
@@ -13,8 +13,7 @@ import {
 
 const createEmojiIcon = (emoji: string): LucideIcon =>
   forwardRef<any, LucideProps>(({ size = 24 }, _ref) => {
-    const resolvedSize =
-      typeof size === "number" ? size : Number(size) || 24;
+    const resolvedSize = typeof size === "number" ? size : Number(size) || 24;
 
     return (
       <Text
@@ -35,8 +34,8 @@ const GermanIcon = createEmojiIcon("🇩🇪");
 
 export default function LanguageScreen() {
   const { t } = useTranslation();
-  const { colors, theme } = useTheme();
   const { languagePreference, setLanguagePreference } = useLocalization();
+  const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
   const languageOptions = useMemo(
@@ -76,11 +75,11 @@ export default function LanguageScreen() {
       <View style={styles.content}>
         {languageOptions.map((option, index) => (
           <View key={option.value} style={index > 0 && styles.cardSpacing}>
-            <SelectionCard
+            <RadioCard
               title={option.label}
               description={option.subtitle}
-              icon={option.icon}
-              iconColor={colors.secondaryText}
+              titleIcon={option.icon}
+              titleIconColor={colors.secondaryText}
               isSelected={languagePreference === option.value}
               onSelect={() => handleSelectLanguage(option.value)}
               accessibilityLabel={t(

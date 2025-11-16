@@ -32,7 +32,8 @@
     "done": "Fertig",
     "close": "Schließen",
     "confirm": "Bestätigen",
-    "recommended": "Empfohlen"
+    "recommended": "Empfohlen",
+    "ok": "OK"
   },
   "dates": {
     "labels": {
@@ -202,6 +203,10 @@
       "recalculate": "Makros neu berechnen",
       "saveAnyway": "Trotzdem speichern"
     },
+    "error": {
+      "title": "Neuberechnung fehlgeschlagen",
+      "reestimationFailed": "Wir konnten deine Makros nicht neu berechnen. Bitte überprüfe deine Verbindung und versuche es erneut."
+    },
     "paywall": {
       "title": "Mit Pro neu berechnen",
       "body": "Erhalte aktualisierte Makros, wenn du Zutaten anpasst.",
@@ -266,7 +271,7 @@
       "badge": "{{days}} Tage kostenlos",
       "eligible": {
         "duration": "{{days}} Tage kostenlos",
-        "then": "Danach {{price}}/Monat"
+        "then": "Nach kostenlosem Test"
       },
       "loading": "Berechtigung wird geprüft…"
     },

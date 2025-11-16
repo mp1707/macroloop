@@ -82,20 +82,6 @@ export default function TabsLayout() {
           {t("tabs.calendar")}
         </Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="settings">
-        <Icon
-          src={{
-            default: (
-              <VectorIcon family={MaterialCommunityIcons} name="cog-outline" />
-            ),
-            selected: <VectorIcon family={MaterialCommunityIcons} name="cog" />,
-          }}
-          selectedColor={colors.accent}
-        />
-        <Label selectedStyle={{ color: colors.accent }}>
-          {t("tabs.settings")}
-        </Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="favorites">
         <Icon
           src={{
@@ -109,6 +95,20 @@ export default function TabsLayout() {
           selectedColor={colors.accent}
         />
         <Label>{t("tabs.favorites")}</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="settings">
+        <Icon
+          src={{
+            default: (
+              <VectorIcon family={MaterialCommunityIcons} name="cog-outline" />
+            ),
+            selected: <VectorIcon family={MaterialCommunityIcons} name="cog" />,
+          }}
+          selectedColor={colors.accent}
+        />
+        <Label selectedStyle={{ color: colors.accent }}>
+          {t("tabs.settings")}
+        </Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

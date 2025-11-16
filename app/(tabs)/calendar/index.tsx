@@ -9,7 +9,7 @@ import { View, Dimensions, StyleSheet, ViewToken } from "react-native";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
 import { useNavigation } from "expo-router";
-import { Colors, Theme, useTheme } from "@/theme";
+import { Colors, ColorScheme, Theme, useTheme } from "@/theme";
 import { useAppStore } from "@/store/useAppStore";
 import { CalendarGrid } from "@/components/shared/DatePicker/components/CalendarGrid";
 import { AnimatedPressable } from "@/components/shared/AnimatedPressable";
@@ -41,8 +41,11 @@ const getMonthKeyFromDateKey = (dateKey: string) => {
 };
 
 export default function CalendarTabScreen() {
-  const { colors, theme } = useTheme();
-  const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
+  const { colors, theme, colorScheme } = useTheme();
+  const styles = useMemo(
+    () => createStyles(colors, theme, colorScheme),
+    [colors, theme, colorScheme]
+  );
   const { t, i18n } = useTranslation();
   const { selectedDate, setSelectedDate, foodLogs, dailyTargets } =
     useAppStore();
@@ -347,7 +350,6 @@ export default function CalendarTabScreen() {
             offset: screenWidth * index,
             index,
           })}
-          recyclingKey="calendar-months"
           removeClippedSubviews
         />
       </View>
@@ -368,11 +370,14 @@ export default function CalendarTabScreen() {
   );
 }
 
-const createStyles = (colors: Colors, theme: Theme) =>
+const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.primaryBackground,
+      backgroundColor:
+        colorScheme === "dark"
+          ? colors.primaryBackground
+          : colors.tertiaryBackground,
     },
     calendarContainer: {
       flex: 1,

@@ -12,6 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/theme";
+import { Card } from "@/components/Card";
 import { HeaderButton } from "@/components/shared/HeaderButton";
 import { createStyles } from "./ImageDisplay.styles";
 
@@ -205,15 +206,17 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
 
         {imageUrl && !isUploading && (
           <Animated.View style={[styles.imageContainer, imageAnimatedStyle]}>
-            <Image
-              source={{ uri: imageUrl }}
-              style={styles.image}
-              contentFit="cover"
-              cachePolicy="memory-disk"
-              recyclingKey={imageUrl}
-              priority="low"
-              transition={200}
-            />
+            <Card padding={0} style={styles.imageCard}>
+              <Image
+                source={{ uri: imageUrl }}
+                style={styles.image}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                recyclingKey={imageUrl}
+                priority="low"
+                transition={200}
+              />
+            </Card>
           </Animated.View>
         )}
 

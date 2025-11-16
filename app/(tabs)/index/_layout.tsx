@@ -30,12 +30,7 @@ export default function IndexLayout() {
   );
 
   return (
-    <Stack
-      screenOptions={{
-        contentStyle: { backgroundColor: colors.primaryBackground },
-      }}
-      initialRouteName="index"
-    >
+    <Stack initialRouteName="index">
       <Stack.Screen
         name="index"
         options={{

@@ -15,6 +15,7 @@ import { useRevenueCat } from "@/hooks/useRevenueCat";
 import "@/lib/i18n";
 import { LocalizationProvider } from "@/context/LocalizationContext";
 import { Image } from "expo-image";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function ThemedStack() {
   const { colors, isThemeLoaded } = useTheme();
@@ -121,19 +122,38 @@ function RootLayoutContent() {
     // but we clear on start to ensure no stale images from crashed sessions
     Image.clearMemoryCache();
     Image.clearDiskCache();
+
+    // Global error handlers to prevent silent crashes (React Native)
+    const ErrorUtils = (global as any).ErrorUtils;
+    if (ErrorUtils) {
+      const originalHandler = ErrorUtils.getGlobalHandler();
+
+      ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+        console.error("Global error:", error, "isFatal:", isFatal);
+        // Call original handler to maintain default behavior
+        originalHandler?.(error, isFatal);
+      });
+
+      return () => {
+        // Restore original handler
+        if (originalHandler) {
+          ErrorUtils.setGlobalHandler(originalHandler);
+        }
+      };
+    }
   }, [cleanupIncompleteEstimations]);
 
   return (
-    <GestureHandlerRootView
-      style={{ flex: 1, backgroundColor: colors.primaryBackground }}
-    >
-      <KeyboardProvider>
-        <NavigationTransitionProvider>
-          <ThemedStack />
-        </NavigationTransitionProvider>
-        <HudNotification />
-      </KeyboardProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <KeyboardProvider>
+          <NavigationTransitionProvider>
+            <ThemedStack />
+          </NavigationTransitionProvider>
+          <HudNotification />
+        </KeyboardProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 

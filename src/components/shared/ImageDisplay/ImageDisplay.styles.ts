@@ -10,9 +10,7 @@ export const createStyles = (
   const componentStyles = themeObj.getComponentStyles(colorScheme);
 
   return StyleSheet.create({
-    container: {
-      borderRadius: componentStyles.cards.cornerRadius,
-    },
+    container: {},
     rowContainer: {
       flex: 1,
       flexDirection: "row",
@@ -26,8 +24,9 @@ export const createStyles = (
     },
     imageContainer: {
       flex: 1,
-      borderRadius: componentStyles.cards.cornerRadius,
-      ...componentStyles.cards,
+    },
+    imageCard: {
+      flex: 1,
     },
     image: {
       flex: 1,

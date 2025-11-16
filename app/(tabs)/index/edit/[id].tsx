@@ -163,25 +163,48 @@ export default function Edit() {
       return;
     }
 
+    // Debounce rapid clicks (prevent multiple simultaneous requests)
+    if (isEditEstimating) {
+      if (__DEV__) {
+        console.log("⏳ Re-estimation already in progress, ignoring click");
+      }
+      return;
+    }
+
     scrollRef.current?.scrollToEnd({ animated: true });
 
     try {
-      await runEditEstimation(editedLog, (log) => {
+      const result = await runEditEstimation(editedLog, (log) => {
         replaceEditedLog(log);
       });
-      markReestimated();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setRevealKey((key) => key + 1);
+
+      // Only update UI if we got a result (not cancelled)
+      if (result) {
+        markReestimated();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setRevealKey((key) => key + 1);
+      }
     } catch (error) {
-      // Optional: silence for now; toasts handled elsewhere
+      // Improved error handling
+      console.error("Re-estimation error:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
+      // Show user-friendly error
+      Alert.alert(
+        t("editLog.error.title"),
+        t("editLog.error.reestimationFailed"),
+        [{ text: t("common.ok"), style: "default" }]
+      );
     }
   }, [
     editedLog,
     isPro,
+    isEditEstimating,
     handleShowPaywall,
     runEditEstimation,
     replaceEditedLog,
     markReestimated,
+    t,
   ]);
 
   const commitTitleBeforeSave = useCallback(() => {
@@ -496,6 +519,8 @@ const createStyles = (colors: Colors, theme: Theme) =>
     },
     imageSection: {
       gap: theme.spacing.sm,
+      overflow: "visible",
+      marginVertical: -theme.spacing.xl,
     },
     sectionHeader: {
       letterSpacing: 0.6,

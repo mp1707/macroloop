@@ -13,7 +13,6 @@ export const createStyles = (colors: Colors, theme: Theme) => {
       width: "100%",
     },
     card: {
-      borderWidth: 0,
       position: "relative",
     },
     container: {

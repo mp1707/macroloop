@@ -141,6 +141,9 @@ export const usePaywall = () => {
     try {
       const fetchedPackages = await fetchCurrentPackages();
       setPackages(fetchedPackages);
+      // Set loading to false immediately after successful package fetch
+      // Trial info will update options asynchronously without blocking the UI
+      setIsLoading(false);
     } catch (error) {
       setLoadError(toErrorMessage(error, t));
       setPackages([]);
@@ -153,7 +156,6 @@ export const usePaywall = () => {
   useEffect(() => {
     if (packages.length === 0) {
       setOptions([]);
-      setIsLoading(false);
       return;
     }
 
@@ -169,7 +171,6 @@ export const usePaywall = () => {
         ? current
         : mapped[0]?.id ?? null
     );
-    setIsLoading(false);
   }, [packages, trialEligibilityMap, t]);
 
   useEffect(() => {
