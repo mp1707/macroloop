@@ -108,16 +108,25 @@ export default function Edit() {
   const scrollRef = useRef<RNScrollView | null>(null);
   const [revealKey, setRevealKey] = useState(0);
   const previousLoadingRef = useRef<boolean>(isEditEstimating);
+  const [sliderValue, setSliderValue] = useState(editedLog?.percentageEaten ?? 100);
 
   useEffect(() => {
     previousLoadingRef.current = isEditEstimating;
   }, [isEditEstimating]);
 
-  const percentageEaten = editedLog?.percentageEaten ?? 100;
+  // Sync slider value when editedLog changes from external sources
+  useEffect(() => {
+    if (editedLog?.percentageEaten !== undefined && editedLog.percentageEaten !== sliderValue) {
+      setSliderValue(editedLog.percentageEaten);
+    }
+  }, [editedLog?.percentageEaten]);
+
+  const percentageEaten = sliderValue;
 
   const updatePercentageEaten = useCallback(
     (newPercentage: number) => {
       if (!editedLog) return;
+      setSliderValue(newPercentage);
       replaceEditedLog({ ...editedLog, percentageEaten: newPercentage });
     },
     [editedLog, replaceEditedLog]

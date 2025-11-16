@@ -104,16 +104,25 @@ export default function EditFavorite() {
   const scrollRef = useRef<RNScrollView | null>(null);
   const [revealKey, setRevealKey] = useState(0);
   const previousLoadingRef = useRef<boolean>(isEditEstimating);
+  const [sliderValue, setSliderValue] = useState(editedFavorite?.percentageEaten ?? 100);
 
   useEffect(() => {
     previousLoadingRef.current = isEditEstimating;
   }, [isEditEstimating]);
 
-  const percentageEaten = editedFavorite?.percentageEaten ?? 100;
+  // Sync slider value when editedFavorite changes from external sources
+  useEffect(() => {
+    if (editedFavorite?.percentageEaten !== undefined && editedFavorite.percentageEaten !== sliderValue) {
+      setSliderValue(editedFavorite.percentageEaten);
+    }
+  }, [editedFavorite?.percentageEaten]);
+
+  const percentageEaten = sliderValue;
 
   const updatePercentageEaten = useCallback(
     (newPercentage: number) => {
       if (!editedFavorite) return;
+      setSliderValue(newPercentage);
       replaceEditedFavorite({ ...editedFavorite, percentageEaten: newPercentage });
     },
     [editedFavorite, replaceEditedFavorite]
