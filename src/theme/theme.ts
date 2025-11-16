@@ -432,6 +432,81 @@ const components = {
   },
 } as const;
 
+// Accessibility configurations (WCAG 2.2 compliance)
+const accessibility = {
+  // Minimum touch target sizes (WCAG 2.5.8 - Level AA)
+  // Target size must be at least 24x24 CSS pixels, but 44x44 is iOS/Android best practice
+  touchTargets: {
+    minimum: 44, // iOS HIG & Material Design minimum
+    recommended: 48, // Material Design recommended
+    compact: 24, // WCAG 2.2 absolute minimum (use sparingly)
+  },
+
+  // Focus indicators (WCAG 2.4.7 - Level AA)
+  focus: {
+    lightMode: {
+      outlineColor: lightColors.accent,
+      outlineWidth: 3,
+      outlineOffset: 2,
+      backgroundColor: "rgba(30, 200, 182, 0.08)", // Subtle highlight
+    },
+    darkMode: {
+      outlineColor: darkColors.accent,
+      outlineWidth: 3,
+      outlineOffset: 2,
+      backgroundColor: "rgba(68, 235, 212, 0.08)",
+    },
+  },
+
+  // Contrast ratios for WCAG AA compliance
+  // Text: 4.5:1 for normal text, 3:1 for large text (18pt+ or 14pt+ bold)
+  // UI Components: 3:1 for interactive elements
+  contrast: {
+    textMinimum: 4.5, // WCAG AA for normal text
+    textLarge: 3.0, // WCAG AA for large text (18pt+/14pt+ bold)
+    uiComponents: 3.0, // WCAG AA for UI components
+    textEnhanced: 7.0, // WCAG AAA (aspirational)
+  },
+
+  // Animation durations with reduced motion support
+  // When reduce motion is enabled, use reducedDuration
+  motion: {
+    normalDuration: 300,
+    reducedDuration: 0, // Instant for reduced motion
+    springNormal: {
+      stiffness: 350,
+      damping: 25,
+    },
+    springReduced: {
+      stiffness: 1000, // Very stiff = instant
+      damping: 500, // Heavy damping = no bounce
+    },
+  },
+
+  // Screen reader specific configurations
+  screenReader: {
+    // Delay before announcing changes (allows UI to settle)
+    announcementDelay: 100,
+    // Hide decorative elements from screen readers
+    hideDecorative: true,
+  },
+
+  // Text scaling limits (WCAG 1.4.4 - Level AA)
+  // Text must be resizable up to 200% without loss of content or functionality
+  textScaling: {
+    minimum: 1.0,
+    maximum: 2.0, // 200% as per WCAG
+    default: 1.0,
+  },
+
+  // High contrast mode support (future enhancement)
+  highContrast: {
+    enabled: false, // Feature flag for high contrast mode
+    borderWidth: 2, // Thicker borders in high contrast
+    minimumContrast: 7.0, // Enhanced contrast ratios
+  },
+} as const;
+
 // Animation configurations
 const animations = {
   defaultTransition: {
@@ -557,6 +632,70 @@ const getComponentStyles = (scheme?: "light" | "dark") => {
   };
 };
 
+// Helper function to calculate relative luminance (WCAG formula)
+// Used for contrast ratio calculation
+const getLuminance = (hexColor: string): number => {
+  // Remove # if present
+  const hex = hexColor.replace("#", "");
+
+  // Convert to RGB
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+  // Apply gamma correction
+  const toLinear = (c: number) => {
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+
+  const rLinear = toLinear(r);
+  const gLinear = toLinear(g);
+  const bLinear = toLinear(b);
+
+  // Calculate luminance
+  return 0.2126 * rLinear + 0.7152 * gLinear + 0.0722 * bLinear;
+};
+
+// Helper function to calculate contrast ratio between two colors
+// Returns ratio (e.g., 4.5 means 4.5:1 contrast)
+export const getContrastRatio = (foreground: string, background: string): number => {
+  const l1 = getLuminance(foreground);
+  const l2 = getLuminance(background);
+
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+
+  return (lighter + 0.05) / (darker + 0.05);
+};
+
+// Helper function to check if contrast meets WCAG AA standards
+export const meetsContrastRequirement = (
+  foreground: string,
+  background: string,
+  level: "normal" | "large" | "ui" = "normal"
+): boolean => {
+  const ratio = getContrastRatio(foreground, background);
+
+  switch (level) {
+    case "normal":
+      return ratio >= accessibility.contrast.textMinimum; // 4.5:1
+    case "large":
+      return ratio >= accessibility.contrast.textLarge; // 3:1
+    case "ui":
+      return ratio >= accessibility.contrast.uiComponents; // 3:1
+    default:
+      return false;
+  }
+};
+
+// Helper to get focus styles based on color scheme
+const getFocusStyles = (scheme?: "light" | "dark") => {
+  const currentScheme = scheme || getColorScheme();
+  return currentScheme === "dark"
+    ? accessibility.focus.darkMode
+    : accessibility.focus.lightMode;
+};
+
 // Main theme object
 export const theme = {
   colors: {
@@ -569,9 +708,13 @@ export const theme = {
   components,
   animations,
   interactions,
+  accessibility, // New accessibility configuration
   // Helper functions
   getColors,
   getComponentStyles,
+  getFocusStyles,
+  getContrastRatio,
+  meetsContrastRequirement,
 } as const;
 
 export type Theme = typeof theme;
@@ -581,3 +724,4 @@ export type Colors = typeof lightColors | typeof darkColors;
 export type Typography = typeof typography;
 export type Spacing = typeof spacing;
 export type Layout = typeof layout;
+export type Accessibility = typeof accessibility;
