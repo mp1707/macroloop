@@ -225,7 +225,6 @@
     "paywall": {
       "title": "AI logging is a Pro feature",
       "body": "Log meals effortlessly from a photo, text, or voice.",
-      "bodyWithTrial": "Log meals effortlessly from a photo, text, or voice. Free for {{days}} days.",
       "cta": "Get Pro now",
       "ctaWithTrial": "Start {{days}}-day free trial"
     },
@@ -917,26 +916,6 @@
       },
       "accessibility": {
         "optionLabel": "{{option}} language"
-      }
-    },
-    "darkMode": {
-      "header": "Dark Mode",
-      "options": {
-        "system": {
-          "label": "System",
-          "subtitle": "Follow system setting"
-        },
-        "light": {
-          "label": "Light",
-          "subtitle": "Always use light mode"
-        },
-        "dark": {
-          "label": "Dark",
-          "subtitle": "Always use dark mode"
-        }
-      },
-      "accessibility": {
-        "optionLabel": "{{option}} theme"
       }
     },
     "design": {

@@ -171,7 +171,6 @@
       "paywall": {
         "title": "Mit Pro neu berechnen",
         "body": "Erhalte aktualisierte Makros, wenn du Zutaten anpasst.",
-        "bodyWithTrial": "Erhalte aktualisierte Makros, wenn du Zutaten anpasst. {{days}} Tage kostenlos testen.",
         "cta": "Zum Neuberechnen freischalten",
         "ctaWithTrial": "Kostenlos testen"
       }
@@ -915,26 +914,6 @@
       },
       "accessibility": {
         "optionLabel": "{{option}}-Sprache"
-      }
-    },
-    "darkMode": {
-      "header": "Dunkelmodus",
-      "options": {
-        "system": {
-          "label": "System",
-          "subtitle": "Systemdarstellung übernehmen"
-        },
-        "light": {
-          "label": "Hell",
-          "subtitle": "Immer den hellen Modus verwenden"
-        },
-        "dark": {
-          "label": "Dunkel",
-          "subtitle": "Immer den dunklen Modus verwenden"
-        }
-      },
-      "accessibility": {
-        "optionLabel": "{{option}}-Theme"
       }
     },
     "design": {

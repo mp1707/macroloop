@@ -35,14 +35,6 @@ export default function SettingsLayout() {
         }}
       />
       <Stack.Screen
-        name="dark-mode"
-        options={{
-          title: t("settings.darkMode.header"),
-          headerLargeTitle: isIOS,
-          headerLargeTitleShadowVisible: false,
-        }}
-      />
-      <Stack.Screen
         name="design"
         options={{
           title: t("settings.design.header"),

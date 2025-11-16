@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { Moon, Palette, Languages } from "lucide-react-native";
+import { Palette, Languages } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Card } from "@/components";
@@ -32,14 +32,6 @@ export const AppearanceSection = () => {
         {t("settings.sections.appearance.label")}
       </AppText>
       <Card padding={0}>
-        <SettingRow
-          icon={Moon}
-          title={t("settings.sections.appearance.rows.darkMode.title")}
-          subtitle={t("settings.sections.appearance.rows.darkMode.subtitle")}
-          accessory="chevron"
-          onPress={() => router.push("/settings/dark-mode")}
-        />
-        <View style={styles.separator} />
         <SettingRow
           icon={Languages}
           title={t("settings.sections.appearance.rows.language.title")}

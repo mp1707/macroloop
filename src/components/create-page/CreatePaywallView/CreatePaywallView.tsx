@@ -21,10 +21,6 @@ export const CreatePaywallView = ({
   const trialDays = options[0]?.trialInfo?.days;
   const hasTrial = typeof trialDays === "number";
 
-  const body = hasTrial
-    ? t("createLog.paywall.bodyWithTrial", { days: trialDays })
-    : t("createLog.paywall.body");
-
   const ctaLabel = hasTrial
     ? t("createLog.paywall.ctaWithTrial", { days: trialDays })
     : t("createLog.paywall.cta");
@@ -34,7 +30,7 @@ export const CreatePaywallView = ({
       <InlinePaywallCard
         Icon={BrainCircuit}
         title={t("createLog.paywall.title")}
-        body={body}
+        body={t("createLog.paywall.body")}
         ctaLabel={ctaLabel}
         onPress={onShowPaywall}
         testID="create-inline-paywall"
