@@ -6,7 +6,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   withTiming,
-  runOnJS,
+  scheduleOnRN,
   Easing,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -92,8 +92,8 @@ export const HudNotification: React.FC = () => {
 
   // Tap gesture to dismiss
   const tapGesture = Gesture.Tap().onStart(() => {
-    runOnJS(handleHapticFeedback)();
-    runOnJS(handleDismiss)();
+    scheduleOnRN(handleHapticFeedback)();
+    scheduleOnRN(handleDismiss)();
   });
 
   // Pan gesture for swipe to dismiss - only upward swipes
@@ -118,7 +118,7 @@ export const HudNotification: React.FC = () => {
         opacity.value = withTiming(0, { duration: 100 });
 
         // Dismiss after animation
-        runOnJS(handleDismissWithDelay)();
+        scheduleOnRN(handleDismissWithDelay)();
       } else {
         // Spring back to position
         translateY.value = withSpring(0, SPRING_CONFIG);
