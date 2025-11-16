@@ -8,7 +8,6 @@ interface ImageSectionProps {
   imageUrl: string | undefined;
   isProcessing: boolean;
   onRemoveImage: () => void;
-  isVisible: boolean;
   collapsedHeight?: number;
 }
 
@@ -16,13 +15,10 @@ export const ImageSection = ({
   imageUrl,
   isProcessing,
   onRemoveImage,
-  isVisible,
   collapsedHeight,
 }: ImageSectionProps) => {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-
-  if (!isVisible) return null;
 
   return (
     <View style={styles.imageSection}>

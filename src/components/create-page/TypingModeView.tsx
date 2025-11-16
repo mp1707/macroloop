@@ -145,7 +145,6 @@ export const TypingModeView = ({
                 imageUrl={draft.localImagePath}
                 isProcessing={isProcessingImage}
                 onRemoveImage={onRemoveImage}
-                isVisible={showImageSection}
                 collapsedHeight={CREATE_ACCESSORY_HEIGHT}
               />
             )}
