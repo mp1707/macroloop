@@ -124,7 +124,7 @@ export const useEstimation = () => {
         );
         updateFoodLog(incompleteLog.id, completedLog);
       } catch (error) {
-        deleteFoodLog(incompleteLog.id);
+        await deleteFoodLog(incompleteLog.id);
       }
     },
     [addFoodLog, updateFoodLog, deleteFoodLog, isPro, language]

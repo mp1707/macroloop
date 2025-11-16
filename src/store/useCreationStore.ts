@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { FoodLog } from "@/types/models";
 import { generateFoodLogId } from "@/utils/idGenerator";
+import { File } from "expo-file-system";
 
 type DraftsById = Record<string, FoodLog>;
 
@@ -13,7 +14,7 @@ interface CreationState {
   // Update a draft by id
   updateDraft: (id: string, update: Partial<FoodLog>) => void;
   // Remove a draft by id (on unmount/dismiss)
-  clearDraft: (id: string) => void;
+  clearDraft: (id: string) => Promise<void>;
 }
 
 export const useCreationStore = create<CreationState>((set, get) => ({
@@ -56,7 +57,21 @@ export const useCreationStore = create<CreationState>((set, get) => ({
     });
   },
 
-  clearDraft: (id) => {
+  clearDraft: async (id) => {
+    // Get the draft to check for image file
+    const draft = get().draftsById[id];
+
+    // Delete the image file if it exists
+    if (draft?.localImagePath) {
+      try {
+        const file = new File(draft.localImagePath);
+        await file.delete();
+      } catch (error) {
+        // File doesn't exist or can't be deleted - safe to ignore
+      }
+    }
+
+    // Remove draft from state
     set((state) => {
       const { [id]: _, ...rest } = state.draftsById;
       return { draftsById: rest };
