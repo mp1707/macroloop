@@ -24,7 +24,7 @@ const lightColors = {
 
   // Subtle UI
   subtleBackground: "rgba(0, 0, 0, 0.03)",
-  subtleBorder: "rgba(18, 20, 23, 0.06)",
+  subtleBorder: "rgba(18, 20, 23, 0.32)",
 
   // Accent & system
   accent: "#1EC8B6",
@@ -658,7 +658,10 @@ const getLuminance = (hexColor: string): number => {
 
 // Helper function to calculate contrast ratio between two colors
 // Returns ratio (e.g., 4.5 means 4.5:1 contrast)
-export const getContrastRatio = (foreground: string, background: string): number => {
+export const getContrastRatio = (
+  foreground: string,
+  background: string
+): number => {
   const l1 = getLuminance(foreground);
   const l2 = getLuminance(background);
 
