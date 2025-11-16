@@ -20,6 +20,6 @@ export const createStyles = (colors: Colors, theme: Theme) =>
     buttonText: {
       fontSize: theme.typography.Headline.fontSize,
       fontWeight: "600",
-      color: colors.accent === "#44EBD4" ? colors.black : colors.white,
+      color: colors.primaryText,
     },
   });
