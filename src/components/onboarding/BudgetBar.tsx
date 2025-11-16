@@ -70,11 +70,16 @@ export const BudgetBar = ({
 
   const remainingCalories = totalCalories - proteinCalories - fatCalories - carbCalories;
 
+  // ACCESSIBILITY: Clamp percentages to [0, 100] to prevent impossible values
+  // When macros exceed target, remainingPct goes negative
+  const clampedRemainingPct = Math.max(0, Math.min(100, remainingPct));
+  const clampedNowValue = Math.max(0, Math.min(100, 100 - remainingPct));
+
   // ACCESSIBILITY: Provide text alternative for visual budget bar (WCAG 1.1.1)
   const accessibilityLabel = `Calorie budget bar. Protein: ${Math.round(
     proteinPct
   )}%, Fat: ${Math.round(fatPct)}%, Carbs: ${Math.round(carbPct)}%${
-    remainingPct > 0 ? `, Unallocated: ${Math.round(remainingPct)}%` : ""
+    clampedRemainingPct > 0 ? `, Unallocated: ${Math.round(clampedRemainingPct)}%` : ""
   }`;
 
   return (
@@ -88,7 +93,7 @@ export const BudgetBar = ({
         accessibilityValue={{
           min: 0,
           max: 100,
-          now: 100 - remainingPct,
+          now: clampedNowValue,
         }}
       >
         <View style={styles.barTrack}>

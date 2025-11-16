@@ -92,15 +92,15 @@ export const TextInput = forwardRef<RNTextInput, CustomTextInputProps>(
           style={[styles.textInput, style]}
           placeholderTextColor={colors.secondaryText}
           // Accessibility props (WCAG 4.1.2, 3.3.1, 3.3.2)
+          // Use accessibilityLabel/Hint for text fields, NOT accessibilityValue
+          // accessibilityValue is for adjustable controls (sliders/progress)
           accessibilityLabel={accessibilityLabel}
-          accessibilityHint={accessibilityHint}
-          accessibilityRequired={required}
-          accessibilityInvalid={hasError}
-          accessibilityValue={
-            hasError
-              ? { text: props.value?.toString() || "", now: 0, min: 0, max: 0 }
-              : undefined
+          accessibilityHint={
+            hasError && errorMessage
+              ? `${accessibilityHint ? accessibilityHint + ". " : ""}Error: ${errorMessage}`
+              : accessibilityHint
           }
+          accessibilityState={{ disabled: props.editable === false }}
           // Font scaling (WCAG 1.4.4)
           allowFontScaling={true}
           maxFontSizeMultiplier={theme.accessibility.textScaling.maximum}

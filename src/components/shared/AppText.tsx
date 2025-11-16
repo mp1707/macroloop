@@ -1,12 +1,6 @@
 import { useTheme } from "@/theme/ThemeProvider";
 import React from "react";
-import {
-  Text,
-  TextProps,
-  TextStyle,
-  AccessibilityRole,
-  PixelRatio,
-} from "react-native";
+import { Text, TextProps, TextStyle, AccessibilityRole } from "react-native";
 
 export type TypographyRole =
   | "Title1"
@@ -113,25 +107,9 @@ export const AppText: React.FC<AppTextProps> = ({
     }
   };
 
-  // Calculate scaled font size for accessibility (WCAG 1.4.4)
-  // Respects user's text size preferences
-  const getScaledFontSize = (): number => {
-    if (!allowFontScaling) return typographyStyle.fontSize;
-
-    const fontScale = PixelRatio.getFontScale();
-    const scaledSize = typographyStyle.fontSize * fontScale;
-
-    // Cap at maximum multiplier to prevent layout breakage
-    const maxSize =
-      typographyStyle.fontSize *
-      (maxFontSizeMultiplier ?? theme.accessibility.textScaling.maximum);
-
-    return Math.min(scaledSize, maxSize);
-  };
-
   const textStyle: TextStyle = {
     fontFamily: typographyStyle.fontFamily,
-    fontSize: getScaledFontSize(),
+    fontSize: typographyStyle.fontSize, // Let React Native handle scaling via allowFontScaling
     fontWeight: typographyStyle.fontWeight,
     color: textColor,
   };
@@ -141,6 +119,8 @@ export const AppText: React.FC<AppTextProps> = ({
       style={[textStyle, style]}
       accessibilityRole={getAccessibilityRole()}
       accessibilityLabel={accessibilityLabel}
+      // ACCESSIBILITY: Let React Native handle font scaling natively (WCAG 1.4.4)
+      // Don't manually multiply fontSize - that causes double-scaling (fontSize * scale²)
       allowFontScaling={allowFontScaling}
       maxFontSizeMultiplier={
         maxFontSizeMultiplier ?? theme.accessibility.textScaling.maximum

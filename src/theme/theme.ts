@@ -632,65 +632,6 @@ const getComponentStyles = (scheme?: "light" | "dark") => {
   };
 };
 
-// Helper function to calculate relative luminance (WCAG formula)
-// Used for contrast ratio calculation
-const getLuminance = (hexColor: string): number => {
-  // Remove # if present
-  const hex = hexColor.replace("#", "");
-
-  // Convert to RGB
-  const r = parseInt(hex.substr(0, 2), 16) / 255;
-  const g = parseInt(hex.substr(2, 2), 16) / 255;
-  const b = parseInt(hex.substr(4, 2), 16) / 255;
-
-  // Apply gamma correction
-  const toLinear = (c: number) => {
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  };
-
-  const rLinear = toLinear(r);
-  const gLinear = toLinear(g);
-  const bLinear = toLinear(b);
-
-  // Calculate luminance
-  return 0.2126 * rLinear + 0.7152 * gLinear + 0.0722 * bLinear;
-};
-
-// Helper function to calculate contrast ratio between two colors
-// Returns ratio (e.g., 4.5 means 4.5:1 contrast)
-export const getContrastRatio = (
-  foreground: string,
-  background: string
-): number => {
-  const l1 = getLuminance(foreground);
-  const l2 = getLuminance(background);
-
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-
-  return (lighter + 0.05) / (darker + 0.05);
-};
-
-// Helper function to check if contrast meets WCAG AA standards
-export const meetsContrastRequirement = (
-  foreground: string,
-  background: string,
-  level: "normal" | "large" | "ui" = "normal"
-): boolean => {
-  const ratio = getContrastRatio(foreground, background);
-
-  switch (level) {
-    case "normal":
-      return ratio >= accessibility.contrast.textMinimum; // 4.5:1
-    case "large":
-      return ratio >= accessibility.contrast.textLarge; // 3:1
-    case "ui":
-      return ratio >= accessibility.contrast.uiComponents; // 3:1
-    default:
-      return false;
-  }
-};
-
 // Helper to get focus styles based on color scheme
 const getFocusStyles = (scheme?: "light" | "dark") => {
   const currentScheme = scheme || getColorScheme();
@@ -716,8 +657,6 @@ export const theme = {
   getColors,
   getComponentStyles,
   getFocusStyles,
-  getContrastRatio,
-  meetsContrastRequirement,
 } as const;
 
 export type Theme = typeof theme;

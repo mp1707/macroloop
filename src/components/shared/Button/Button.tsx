@@ -5,7 +5,6 @@ import {
   PressableProps,
   Text,
   View,
-  PixelRatio,
 } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -60,12 +59,10 @@ export const Button = React.memo<ButtonProps>(
     ...pressableProps
   }) => {
     const { colors, theme } = useTheme();
-    const fontScale = PixelRatio.getFontScale();
-    const styles = createStyles(colors, theme, fontScale);
+    const styles = createStyles(colors, theme);
     const reduceMotion = useReducedMotion();
 
     const scale = useSharedValue(1);
-    const adjustedIconSize = iconSize * fontScale;
 
     const isDisabled = disabled || isLoading;
 
@@ -168,7 +165,7 @@ export const Button = React.memo<ButtonProps>(
 
       return (
         <View style={styles.iconContainer}>
-          <Icon size={adjustedIconSize} color={getTextColor()} />
+          <Icon size={iconSize} color={getTextColor()} />
         </View>
       );
     };
