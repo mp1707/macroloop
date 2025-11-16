@@ -4,8 +4,10 @@ import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { View } from "react-native";
 import React, { useMemo } from "react";
-import { OnboardingHeader } from "../../src/components/onboarding/OnboardingHeader";
 import { useNavigationTransition } from "@/context/NavigationTransitionContext";
+import { HeaderButton } from "../../src/components/shared/HeaderButton";
+import { ProgressBar } from "../../src/components/onboarding/ProgressBar";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 // Manual flow step mapping
 const MANUAL_STEP_MAP: Record<string, number> = {
@@ -58,39 +60,61 @@ export default function OnboardingLayout() {
     safeBack();
   };
 
-  return (
-    <View style={{ flex: 1, backgroundColor: colors.primaryBackground }}>
-      <OnboardingHeader
-        onBack={handleBack}
-        onSkip={handleSkip}
-        currentStep={currentStep}
-        totalSteps={totalSteps}
-        showProgressBar={showProgressBar}
+  const hasLiquidGlass = isLiquidGlassAvailable();
+
+  // Header configuration
+  const getHeaderConfig = () => ({
+    headerShown: true,
+    headerTransparent: true,
+    headerTitle: "",
+    headerLeft: () => (
+      <HeaderButton
+        imageProps={{
+          systemName: "chevron.left",
+        }}
+        buttonProps={{
+          onPress: handleBack,
+          color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
+        }}
       />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: "slide_from_right",
-          contentStyle: { backgroundColor: colors.primaryBackground },
+    ),
+    headerRight: () => (
+      <HeaderButton
+        imageProps={{
+          systemName: "xmark",
         }}
-        screenListeners={{
-          transitionStart: () => setTransitioning(true),
-          transitionEnd: () => setTransitioning(false),
+        buttonProps={{
+          onPress: handleSkip,
+          color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
         }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="target-method" />
-        <Stack.Screen name="age" />
-        <Stack.Screen name="sex" />
-        <Stack.Screen name="height" />
-        <Stack.Screen name="weight" />
-        <Stack.Screen name="activity-level" />
-        <Stack.Screen name="calorie-goal" />
-        <Stack.Screen name="protein-goal" />
-        <Stack.Screen name="manual-input" />
-        <Stack.Screen name="manual-summary" />
-        <Stack.Screen name="calculator-summary" />
-      </Stack>
-    </View>
+      />
+    ),
+  });
+
+  return (
+    <Stack
+      screenOptions={{
+        animation: "slide_from_right",
+        contentStyle: { backgroundColor: colors.primaryBackground },
+        ...getHeaderConfig(),
+      }}
+      screenListeners={{
+        transitionStart: () => setTransitioning(true),
+        transitionEnd: () => setTransitioning(false),
+      }}
+    >
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="target-method" options={{ headerShown: false }} />
+      <Stack.Screen name="age" />
+      <Stack.Screen name="sex" />
+      <Stack.Screen name="height" />
+      <Stack.Screen name="weight" />
+      <Stack.Screen name="activity-level" />
+      <Stack.Screen name="calorie-goal" />
+      <Stack.Screen name="protein-goal" />
+      <Stack.Screen name="manual-input" />
+      <Stack.Screen name="manual-summary" options={{ headerShown: false }} />
+      <Stack.Screen name="calculator-summary" options={{ headerShown: false }} />
+    </Stack>
   );
 }

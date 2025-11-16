@@ -7,10 +7,9 @@ import {
   ViewToken,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
-import { RoundButton } from "@/components/shared/RoundButton";
+import { HeaderButton } from "@/components/shared/HeaderButton";
 import { DotProgressIndicator } from "@/components/explainer-macros/DotProgressIndicator";
 import { MacrosOverview } from "@/components/explainer-macros/MacrosOverview";
 import { CaloriesExplainer } from "@/components/explainer-macros/CaloriesExplainer";
@@ -19,6 +18,7 @@ import { FatExplainer } from "@/components/explainer-macros/FatExplainer";
 import { CarbsExplainer } from "@/components/explainer-macros/CarbsExplainer";
 import { Colors, Theme, useTheme } from "@/theme";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -40,6 +40,7 @@ export default function ExplainerMacrosScreen() {
   const styles = useMemo(() => createStyles(theme, colors), [theme, colors]);
   const router = useSafeRouter();
   const { t } = useTranslation();
+  const hasLiquidGlass = isLiquidGlassAvailable();
   const params = useLocalSearchParams<{
     // Calories params
     calories_total?: string;
@@ -156,11 +157,14 @@ export default function ExplainerMacrosScreen() {
           />
         </View>
         <View style={styles.closeButton}>
-          <RoundButton
-            onPress={handleClose}
-            Icon={X}
-            variant="tertiary"
-            accessibilityLabel={t("explainer.common.close")}
+          <HeaderButton
+            imageProps={{
+              systemName: "xmark",
+            }}
+            buttonProps={{
+              onPress: handleClose,
+              color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
+            }}
           />
         </View>
       </View>

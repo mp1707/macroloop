@@ -72,7 +72,7 @@ function ThemedStack() {
       <Stack.Screen
         name="onboarding"
         options={{
-          presentation: "modal",
+          presentation: "fullScreenModal",
           headerShown: false,
           gestureEnabled: true,
         }}

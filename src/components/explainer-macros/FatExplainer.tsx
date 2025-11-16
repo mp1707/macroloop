@@ -4,9 +4,10 @@ import { Droplet } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText } from "@/components/shared/AppText";
-import { Button } from "@/components/shared/Button/Button";
 import { Theme, useTheme } from "@/theme";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
+import { Host, Button } from "@expo/ui/swift-ui";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 interface FatExplainerProps {
   total?: number;
@@ -19,10 +20,11 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
   target = 60,
   percentage,
 }) => {
-  const { colors, theme } = useTheme();
+  const { colors, theme, colorScheme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
   const { t } = useTranslation();
+  const hasLiquidGlass = isLiquidGlassAvailable();
 
   const semanticColor = colors.semantic.fat;
   const computedPercentage = target > 0 ? Math.round((total / target) * 100) : 0;
@@ -140,11 +142,15 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button
-          label={t("explainer.common.adjustTargets")}
-          variant="secondary"
-          onPress={handleChangeTargets}
-        />
+        <Host colorScheme={colorScheme} matchContents>
+          <Button
+            variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
+            color={colors.accent}
+            onPress={handleChangeTargets}
+          >
+            {t("explainer.common.adjustTargets")}
+          </Button>
+        </Host>
       </View>
     </View>
   );
