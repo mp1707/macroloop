@@ -285,11 +285,95 @@ This document tracks the comprehensive accessibility audit and remediation of Ma
 
 ---
 
-### Phase 2: Interactive Components
+### Phase 2: Interactive Components ⏳ IN PROGRESS
 
-#### 2.1 Button Components
+#### 2.1 Animation System ✅ COMPLETED
+**File:** `/src/hooks/usePressAnimation.ts`
+
+**Completed:**
+- [x] Integrated `useReducedMotion` hook
+- [x] Press animations respect reduce motion preference
+- [x] Instant animations when reduce motion is enabled
+- [x] Haptic feedback preserved (not visual motion)
+- [x] Updated dependency arrays with reduceMotion
+
+**Impact:**
+- All components using `usePressAnimation` now accessible
+- Includes: Button, AnimatedPressable, and many other interactive components
+- WCAG 2.3.3 compliance for press interactions
+
+**Status:** ✅ Complete
+
+#### 2.2 Button Component ✅ COMPLETED
+**File:** `/src/components/shared/Button/Button.tsx`
+
+**Already Had:**
+- ✅ `accessibilityRole="button"`
+- ✅ `accessibilityLabel={label}`
+- ✅ `accessibilityState={{ disabled, busy }}`
+- ✅ Font scaling with `PixelRatio.getFontScale()`
+- ✅ Icon size scaling
+
+**Enhancements Added:**
+- [x] Integrated `useReducedMotion` hook
+- [x] Press animations respect reduce motion (instant when enabled)
+- [x] Added `accessibilityHint` prop for additional context
+- [x] Documented accessibility features in JSDoc
+- [x] Updated animation handlers to check reduceMotion
+
+**WCAG Compliance:**
+- ✅ 2.3.3 Animation from interactions (reduce motion)
+- ✅ 4.1.2 Name, role, value (proper role and state)
+- ✅ 1.4.4 Resize text (font scaling)
+- ✅ 2.5.8 Target size (meets 44pt minimum)
+
+**Status:** ✅ Complete
+
+#### 2.3 TextInput Component ✅ COMPLETED
+**File:** `/src/components/shared/TextInput/TextInput.tsx`
+
+**Enhancements Added:**
+- [x] Added `accessibilityLabel` prop (WCAG 4.1.2)
+- [x] Added `accessibilityHint` prop (WCAG 4.1.2)
+- [x] Added `required` prop → maps to `accessibilityRequired` (WCAG 3.3.2)
+- [x] Added `errorMessage` prop → maps to `accessibilityInvalid` (WCAG 3.3.1)
+- [x] Error state handling with accessibility
+- [x] Font scaling with `allowFontScaling` and `maxFontSizeMultiplier` (WCAG 1.4.4)
+- [x] Comprehensive JSDoc documentation
+- [x] Container Pressable set to `accessible={false}` (lets TextInput handle it)
+
+**WCAG Compliance:**
+- ✅ 3.3.1 Error identification (errorMessage + accessibilityInvalid)
+- ✅ 3.3.2 Labels or instructions (accessibilityLabel + accessibilityHint)
+- ✅ 4.1.2 Name, role, value (all accessibility props)
+- ✅ 1.4.4 Resize text (font scaling up to 200%)
+
+**Status:** ✅ Complete
+
+#### 2.4 AnimatedPressable Component ✅ COMPLETED
+**File:** `/src/components/shared/AnimatedPressable/AnimatedPressable.tsx`
+
+**Already Had:**
+- ✅ `accessibilityLabel` prop
+- ✅ `accessibilityRole` prop (default: "button")
+- ✅ `accessibilityHint` prop
+- ✅ `hitSlop={22}` for larger touch target
+- ✅ Uses `usePressAnimation` (already updated for reduce motion)
+
+**Enhancements Added:**
+- [x] Added `accessibilityState={{ disabled }}` (WCAG 4.1.2)
+- [x] Added accessibility comment to hitSlop (WCAG 2.5.8)
+- [x] Inherits reduce motion support from usePressAnimation
+
+**WCAG Compliance:**
+- ✅ 2.3.3 Animation from interactions (via usePressAnimation)
+- ✅ 2.5.8 Target size (hitSlop provides larger touch area)
+- ✅ 4.1.2 Name, role, value (comprehensive props)
+
+**Status:** ✅ Complete
+
+#### 2.5 Other Button Components
 **Files:**
-- [ ] `/src/components/shared/Button/Button.tsx` - Already has good accessibility ✅
 - [ ] `/src/components/shared/RoundButton/RoundButton.tsx`
 - [ ] `/src/components/shared/RestorePurchasesButton/RestorePurchasesButton.tsx`
 - [ ] `/src/components/shared/HeaderButton/` directory
@@ -301,7 +385,7 @@ This document tracks the comprehensive accessibility audit and remediation of Ma
 - [ ] Test focus visibility
 - [ ] Test with VoiceOver/TalkBack
 
-**Status:** Not started
+**Status:** Pending
 
 #### 2.2 Input Components
 **Files:**
@@ -625,6 +709,69 @@ This document tracks the comprehensive accessibility audit and remediation of Ma
 - 🟡 **1.4.3** Contrast minimum (validation tools ready, need to apply)
 - 🟡 **2.4.7** Focus visible (styles defined, need to apply to components)
 - 🟡 **2.5.8** Target size (sizes defined, need to validate components)
+
+---
+
+### Session 2 - 2025-11-16
+**Focus:** Phase 2 - Interactive Components accessibility
+
+**Completed:**
+- ✅ Updated press animation system to respect reduced motion
+- ✅ Enhanced Button component with reduce motion and accessibilityHint
+- ✅ Enhanced TextInput with comprehensive accessibility props
+- ✅ Enhanced AnimatedPressable with accessibilityState
+- ✅ **PHASE 2 PARTIALLY COMPLETE**: Core interactive components now accessible
+
+**Files Modified:**
+1. `/home/user/macroloop/src/hooks/usePressAnimation.ts`
+   - Integrated `useReducedMotion` hook
+   - Press animations instant when reduce motion enabled
+   - Haptic feedback preserved (not visual motion)
+   - Updated callback dependencies
+
+2. `/home/user/macroloop/src/components/shared/Button/Button.tsx`
+   - Integrated `useReducedMotion` hook
+   - Press animations respect reduce motion preference
+   - Added `accessibilityHint` prop for additional context
+   - Updated animation handlers to check reduceMotion
+   - Documented accessibility features
+
+3. `/home/user/macroloop/src/components/shared/TextInput/TextInput.tsx`
+   - Added `accessibilityLabel` prop (WCAG 4.1.2)
+   - Added `accessibilityHint` prop (WCAG 4.1.2)
+   - Added `required` prop → `accessibilityRequired` (WCAG 3.3.2)
+   - Added `errorMessage` prop → `accessibilityInvalid` (WCAG 3.3.1)
+   - Added font scaling support (WCAG 1.4.4)
+   - Comprehensive JSDoc documentation
+
+4. `/home/user/macroloop/src/components/shared/AnimatedPressable/AnimatedPressable.tsx`
+   - Added `accessibilityState={{ disabled }}` (WCAG 4.1.2)
+   - Added accessibility documentation
+   - Inherits reduce motion from usePressAnimation
+
+**Impact:**
+- ✅ All press interactions now respect reduce motion (WCAG 2.3.3)
+- ✅ Form inputs now have proper labels, hints, and error handling
+- ✅ Button and AnimatedPressable have comprehensive accessibility
+- ✅ Text inputs support dynamic font scaling
+- ✅ Error states properly announced to screen readers
+
+**Next Steps for Session 3:**
+1. Continue Phase 2: RoundButton, SearchBar, other button variants
+2. Begin Phase 3: Visual components (ProgressRings, NutrientStat, etc.)
+3. Add reduce motion to remaining animated components
+4. Validate color contrast ratios
+5. Test with VoiceOver and TalkBack
+
+**WCAG Success Criteria Now Addressed:**
+- 🟢 **1.4.4** Resize text (AppText + TextInput scaling)
+- 🟢 **2.3.3** Animation from interactions (reduce motion in all press animations)
+- 🟢 **3.3.1** Error identification (TextInput errorMessage)
+- 🟢 **3.3.2** Labels or instructions (TextInput accessibilityLabel/Hint)
+- 🟢 **4.1.2** Name, role, value (Button, TextInput, AnimatedPressable)
+- 🟡 **2.5.8** Target size (hitSlop in AnimatedPressable, need to verify others)
+- 🟡 **1.4.3** Contrast minimum (validation tools ready, need to apply)
+- 🟡 **2.4.7** Focus visible (styles defined, need to apply to components)
 
 ---
 

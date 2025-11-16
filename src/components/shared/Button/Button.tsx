@@ -17,6 +17,7 @@ import * as Haptics from "expo-haptics";
 import { LucideIcon } from "lucide-react-native";
 import { useTheme } from "@/theme";
 import { createStyles } from "./Button.styles";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export type ButtonVariant = "primary" | "secondary" | "tertiary";
 export type IconPlacement = "left" | "right";
@@ -31,6 +32,12 @@ export interface ButtonProps extends Omit<PressableProps, "children"> {
   // Optional: customize press-in haptic intensity (default: Light)
   hapticImpact?: Haptics.ImpactFeedbackStyle;
   isLoading?: boolean;
+  /**
+   * Accessibility hint for screen readers (WCAG 4.1.2)
+   * Provides additional context beyond the label
+   * Example: "Double tap to add item to cart"
+   */
+  accessibilityHint?: string;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -45,6 +52,7 @@ export const Button = React.memo<ButtonProps>(
     isLoading = false,
     iconPlacement = "left",
     hapticImpact,
+    accessibilityHint,
     onPress,
     onPressIn,
     onPressOut,
@@ -54,6 +62,7 @@ export const Button = React.memo<ButtonProps>(
     const { colors, theme } = useTheme();
     const fontScale = PixelRatio.getFontScale();
     const styles = createStyles(colors, theme, fontScale);
+    const reduceMotion = useReducedMotion();
 
     const scale = useSharedValue(1);
     const adjustedIconSize = iconSize * fontScale;
@@ -104,30 +113,41 @@ export const Button = React.memo<ButtonProps>(
     const handlePressIn = useCallback(
       (event: any) => {
         if (!isDisabled) {
-          scale.value = withTiming(theme.interactions.press.scale, {
-            duration: theme.interactions.press.timing.duration,
-            easing: theme.interactions.press.timing.easing,
-          });
+          // ACCESSIBILITY: Respect reduce motion preference (WCAG 2.3.3)
+          if (reduceMotion) {
+            scale.value = theme.interactions.press.scale; // Instant
+          } else {
+            scale.value = withTiming(theme.interactions.press.scale, {
+              duration: theme.interactions.press.timing.duration,
+              easing: theme.interactions.press.timing.easing,
+            });
+          }
           // Trigger configurable haptic on press-in for immediate feedback
+          // Haptics preserved - they're not visual motion
           const style = hapticImpact ?? theme.interactions.haptics.light;
           Haptics.impactAsync(style);
         }
         onPressIn?.(event);
       },
-      [isDisabled, onPressIn, scale, hapticImpact]
+      [isDisabled, onPressIn, scale, hapticImpact, reduceMotion]
     );
 
     const handlePressOut = useCallback(
       (event: any) => {
         if (!isDisabled) {
-          scale.value = withSpring(1, {
-            damping: theme.interactions.press.spring.damping,
-            stiffness: theme.interactions.press.spring.stiffness,
-          });
+          // ACCESSIBILITY: Respect reduce motion preference (WCAG 2.3.3)
+          if (reduceMotion) {
+            scale.value = 1; // Instant
+          } else {
+            scale.value = withSpring(1, {
+              damping: theme.interactions.press.spring.damping,
+              stiffness: theme.interactions.press.spring.stiffness,
+            });
+          }
         }
         onPressOut?.(event);
       },
-      [isDisabled, onPressOut, scale]
+      [isDisabled, onPressOut, scale, reduceMotion]
     );
 
     const handlePress = useCallback(
@@ -227,6 +247,7 @@ export const Button = React.memo<ButtonProps>(
         accessible={true}
         accessibilityRole="button"
         accessibilityLabel={label}
+        accessibilityHint={accessibilityHint}
         accessibilityState={{ disabled: isDisabled, busy: isLoading || undefined }}
         {...pressableProps}
       >
