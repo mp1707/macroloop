@@ -191,6 +191,10 @@ const StaticNutritionList: React.FC<StaticNutritionListProps> = memo(
       [colors]
     );
 
+    const carbsLabel = t("logCard.nutritionLabels.carbs", {
+      defaultValue: t("nutrients.carbs.label"),
+    });
+
     const items = [
       {
         key: "calories",
@@ -216,7 +220,7 @@ const StaticNutritionList: React.FC<StaticNutritionListProps> = memo(
         value: Math.round(nutrition.carbs),
         label: t("logCard.nutrition.carbs", {
           unit: t("nutrients.carbs.unitShort"),
-          label: t("nutrients.carbs.label"),
+          label: carbsLabel,
         }),
         color: colors.semantic.carbs,
       },

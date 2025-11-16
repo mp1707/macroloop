@@ -155,11 +155,19 @@ export const NutritionList: React.FC<NutritionListProps> = ({
 
   const nutritionItems: NutritionItemConfig[] = useMemo(
     () => {
-      const macroLabel = (nutrientKey: MacroNutrientKey) =>
-        t("dailyFoodLogs.nutritionList.macroLabel", {
+      const macroLabel = (nutrientKey: MacroNutrientKey) => {
+        const nutrientLabel =
+          nutrientKey === "carbs"
+            ? t("logCard.nutritionLabels.carbs", {
+                defaultValue: t(`nutrients.${nutrientKey}.label`),
+              })
+            : t(`nutrients.${nutrientKey}.label`);
+
+        return t("dailyFoodLogs.nutritionList.macroLabel", {
           unit: t(`nutrients.${nutrientKey}.unitShort`),
-          nutrient: t(`nutrients.${nutrientKey}.label`),
+          nutrient: nutrientLabel,
         });
+      };
 
       return [
         {

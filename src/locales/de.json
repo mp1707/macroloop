@@ -698,6 +698,9 @@
       "protein": "{{unit}} {{label}}",
       "carbs": "{{unit}} {{label}}",
       "fat": "{{unit}} {{label}}"
+    },
+    "nutritionLabels": {
+      "carbs": "Kohlenh."
     }
   },
   "macrosCard": {
