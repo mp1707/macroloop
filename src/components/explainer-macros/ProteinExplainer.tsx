@@ -20,7 +20,7 @@ export const ProteinExplainer: React.FC<ProteinExplainerProps> = ({
   target = 160,
   percentage = 91,
 }) => {
-  const { colors, theme, colorScheme } = useTheme();
+  const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
   const { t } = useTranslation();
@@ -140,17 +140,16 @@ export const ProteinExplainer: React.FC<ProteinExplainerProps> = ({
         </View>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Host colorScheme={colorScheme} matchContents>
-          <Button
-            variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
-            color={colors.accent}
-            onPress={handleChangeTargets}
-          >
-            {t("explainer.common.adjustTargets")}
-          </Button>
-        </Host>
-      </View>
+      <Host matchContents style={{ width: "100%", alignSelf: "center" }}>
+        <Button
+          variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
+          color={colors.secondaryBackground}
+          onPress={handleChangeTargets}
+          controlSize="large"
+        >
+          {t("explainer.common.adjustTargets")}
+        </Button>
+      </Host>
     </View>
   );
 };
@@ -200,9 +199,5 @@ const createStyles = (theme: Theme) =>
     },
     inlineIcon: {
       marginBottom: -2,
-    },
-    buttonContainer: {
-      alignItems: "center",
-      paddingTop: theme.spacing.lg,
     },
   });

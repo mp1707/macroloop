@@ -3,11 +3,11 @@ import { View, StyleSheet } from "react-native";
 import { Flame } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { AppText } from "@/components/shared/AppText";
-import { Button } from "@/components/shared/Button/Button";
 import { Theme, useTheme } from "@/theme";
 import { DashboardRing } from "@/components/shared/ProgressRings";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
-
+import { Host, Button } from "@expo/ui/swift-ui";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 interface CaloriesExplainerProps {
   total?: number;
   target?: number;
@@ -23,6 +23,7 @@ export const CaloriesExplainer: React.FC<CaloriesExplainerProps> = ({
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
   const { t } = useTranslation();
+  const hasLiquidGlass = isLiquidGlassAvailable();
 
   const semanticColor = colors.semantic.calories;
   const detailValue =
@@ -129,13 +130,16 @@ export const CaloriesExplainer: React.FC<CaloriesExplainerProps> = ({
         </View>
       </View>
 
-      <View style={styles.buttonContainer}>
+      <Host matchContents style={{ width: "100%", alignSelf: "center" }}>
         <Button
-          label={t("explainer.common.adjustTargets")}
-          variant="secondary"
+          variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
+          color={colors.secondaryBackground}
           onPress={handleChangeTargets}
-        />
-      </View>
+          controlSize="large"
+        >
+          {t("explainer.common.adjustTargets")}
+        </Button>
+      </Host>
     </View>
   );
 };
@@ -188,9 +192,5 @@ const createStyles = (theme: Theme) =>
     },
     footnote: {
       marginTop: theme.spacing.xs,
-    },
-    buttonContainer: {
-      alignItems: "center",
-      paddingTop: theme.spacing.lg,
     },
   });

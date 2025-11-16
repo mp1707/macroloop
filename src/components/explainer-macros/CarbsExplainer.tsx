@@ -13,8 +13,10 @@ interface CarbsExplainerProps {
   total?: number;
 }
 
-export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) => {
-  const { colors, theme, colorScheme } = useTheme();
+export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({
+  total = 218,
+}) => {
+  const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
   const { t } = useTranslation();
@@ -58,7 +60,11 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) =
           </View>
         </View>
 
-        <AppText role="Headline" color="primary" style={[styles.sectionHeading, { color: semanticColor }]}>
+        <AppText
+          role="Headline"
+          color="primary"
+          style={[styles.sectionHeading, { color: semanticColor }]}
+        >
           {t("explainer.macros.carbs.sections.total.title")}
         </AppText>
         <AppText role="Body" color="secondary" style={styles.contentText}>
@@ -68,7 +74,10 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) =
         <AppText
           role="Headline"
           color="primary"
-          style={[styles.sectionHeading, { color: semanticColor, marginTop: theme.spacing.md }]}
+          style={[
+            styles.sectionHeading,
+            { color: semanticColor, marginTop: theme.spacing.md },
+          ]}
         >
           {t("explainer.macros.carbs.sections.fuel.title")}
         </AppText>
@@ -92,7 +101,10 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) =
         <AppText
           role="Headline"
           color="primary"
-          style={[styles.sectionHeading, { color: semanticColor, marginTop: theme.spacing.md }]}
+          style={[
+            styles.sectionHeading,
+            { color: semanticColor, marginTop: theme.spacing.md },
+          ]}
         >
           {t("explainer.macros.carbs.sections.sources.title")}
         </AppText>
@@ -114,17 +126,16 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) =
         </View>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Host colorScheme={colorScheme} matchContents>
-          <Button
-            variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
-            color={colors.accent}
-            onPress={handleChangeTargets}
-          >
-            {t("explainer.common.adjustTargets")}
-          </Button>
-        </Host>
-      </View>
+      <Host matchContents style={{ width: "100%", alignSelf: "center" }}>
+        <Button
+          variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
+          color={colors.secondaryBackground}
+          onPress={handleChangeTargets}
+          controlSize="large"
+        >
+          {t("explainer.common.adjustTargets")}
+        </Button>
+      </Host>
     </View>
   );
 };
@@ -189,9 +200,5 @@ const createStyles = (theme: Theme) =>
     bulletText: {
       flex: 1,
       lineHeight: 22,
-    },
-    buttonContainer: {
-      alignItems: "center",
-      paddingTop: theme.spacing.lg,
     },
   });

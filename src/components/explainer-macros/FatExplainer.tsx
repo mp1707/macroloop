@@ -20,14 +20,15 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
   target = 60,
   percentage,
 }) => {
-  const { colors, theme, colorScheme } = useTheme();
+  const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
   const { t } = useTranslation();
   const hasLiquidGlass = isLiquidGlassAvailable();
 
   const semanticColor = colors.semantic.fat;
-  const computedPercentage = target > 0 ? Math.round((total / target) * 100) : 0;
+  const computedPercentage =
+    target > 0 ? Math.round((total / target) * 100) : 0;
   const progressPercentage = percentage ?? computedPercentage;
 
   const handleChangeTargets = () => {
@@ -90,7 +91,11 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
           </View>
         </View>
 
-        <AppText role="Headline" color="primary" style={[styles.sectionHeading, { color: semanticColor }]}>
+        <AppText
+          role="Headline"
+          color="primary"
+          style={[styles.sectionHeading, { color: semanticColor }]}
+        >
           {t("explainer.macros.fat.sections.hitTarget.title")}
         </AppText>
         <AppText role="Body" color="secondary" style={styles.contentText}>
@@ -100,7 +105,10 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
         <AppText
           role="Headline"
           color="primary"
-          style={[styles.sectionHeading, { color: semanticColor, marginTop: theme.spacing.md }]}
+          style={[
+            styles.sectionHeading,
+            { color: semanticColor, marginTop: theme.spacing.md },
+          ]}
         >
           {t("explainer.macros.fat.sections.why.title")}
         </AppText>
@@ -111,7 +119,10 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
         <AppText
           role="Headline"
           color="primary"
-          style={[styles.sectionHeading, { color: semanticColor, marginTop: theme.spacing.md }]}
+          style={[
+            styles.sectionHeading,
+            { color: semanticColor, marginTop: theme.spacing.md },
+          ]}
         >
           {t("explainer.macros.fat.sections.sources.title")}
         </AppText>
@@ -141,17 +152,16 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
         </View>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Host colorScheme={colorScheme} matchContents>
-          <Button
-            variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
-            color={colors.accent}
-            onPress={handleChangeTargets}
-          >
-            {t("explainer.common.adjustTargets")}
-          </Button>
-        </Host>
-      </View>
+      <Host matchContents style={{ width: "100%", alignSelf: "center" }}>
+        <Button
+          variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
+          color={colors.secondaryBackground}
+          onPress={handleChangeTargets}
+          controlSize="large"
+        >
+          {t("explainer.common.adjustTargets")}
+        </Button>
+      </Host>
     </View>
   );
 };
@@ -227,9 +237,5 @@ const createStyles = (theme: Theme) =>
     },
     contentText: {
       lineHeight: 20,
-    },
-    buttonContainer: {
-      alignItems: "center",
-      paddingTop: theme.spacing.lg,
     },
   });
