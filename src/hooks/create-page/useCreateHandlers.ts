@@ -85,6 +85,7 @@ export const useCreateHandlers = ({
         createdAt: new Date().toISOString(),
         isEstimating: false,
         id: generateFoodLogId(),
+        percentageEaten: favorite.percentageEaten ?? 100,
       });
       router.back();
     },

@@ -34,7 +34,7 @@ import { Colors, Theme, useTheme } from "@/theme";
 import { useEditableTitle } from "@/components/refine-page/hooks/useEditableTitle";
 import { useEditChangeTracker } from "@/components/refine-page/hooks/useEditChangeTracker";
 import { useEditedFavorite } from "@/components/refine-page/hooks/useEditedFavorite";
-import { Host, Image } from "@expo/ui/swift-ui";
+import { Host, Image, Slider } from "@expo/ui/swift-ui";
 
 const easeLayout = Layout.duration(220).easing(Easing.inOut(Easing.quad));
 
@@ -104,13 +104,23 @@ export default function EditFavorite() {
   const scrollRef = useRef<RNScrollView | null>(null);
   const [revealKey, setRevealKey] = useState(0);
   const previousLoadingRef = useRef<boolean>(isEditEstimating);
+  const [percentageEaten, setPercentageEaten] = useState(
+    editedFavorite?.percentageEaten ?? 100
+  );
 
   useEffect(() => {
     previousLoadingRef.current = isEditEstimating;
   }, [isEditEstimating]);
 
+  useEffect(() => {
+    if (editedFavorite?.percentageEaten !== undefined) {
+      setPercentageEaten(editedFavorite.percentageEaten);
+    }
+  }, [editedFavorite?.percentageEaten]);
+
   const titleChanged =
     draftTitle.trim() !== (originalFavorite?.title || "").trim();
+  const percentageChanged = percentageEaten !== (originalFavorite?.percentageEaten ?? 100);
 
   const handleOpenEditor = useCallback(
     (index: number, component: FoodComponent) => {
@@ -196,10 +206,11 @@ export default function EditFavorite() {
       fat: editedFavorite.fat,
       foodComponents: editedFavorite.foodComponents || [],
       macrosPerReferencePortion: editedFavorite.macrosPerReferencePortion,
+      percentageEaten,
     });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();
-  }, [draftTitle, editedFavorite, id, router, updateFavorite]);
+  }, [draftTitle, editedFavorite, id, router, updateFavorite, percentageEaten]);
 
   const handleDone = useCallback(() => {
     commitTitleBeforeSave();
@@ -247,6 +258,7 @@ export default function EditFavorite() {
     (!hasReestimated &&
       !isDirty &&
       !titleChanged &&
+      !percentageChanged &&
       !hasUnsavedChanges &&
       changesCount === 0);
 
@@ -385,10 +397,10 @@ export default function EditFavorite() {
 
             <Animated.View layout={easeLayout}>
               <MacrosCard
-                calories={editedFavorite.calories}
-                protein={editedFavorite.protein}
-                carbs={editedFavorite.carbs}
-                fat={editedFavorite.fat}
+                calories={editedFavorite.calories * (percentageEaten / 100)}
+                protein={editedFavorite.protein * (percentageEaten / 100)}
+                carbs={editedFavorite.carbs * (percentageEaten / 100)}
+                fat={editedFavorite.fat * (percentageEaten / 100)}
                 processing={isEditEstimating}
                 wasProcessing={previousLoadingRef.current}
                 revealKey={revealKey}
@@ -396,6 +408,30 @@ export default function EditFavorite() {
                 changesCount={changesCount}
                 foodComponentsCount={editedFavorite.foodComponents?.length || 0}
               />
+            </Animated.View>
+
+            <Animated.View layout={easeLayout} style={styles.percentageSection}>
+              <AppText role="Caption" style={styles.sectionHeader}>
+                Wieviel hab ich gegessen?
+              </AppText>
+              <View style={styles.sliderContainer}>
+                <Host matchContents>
+                  <Slider
+                    value={percentageEaten}
+                    min={0}
+                    max={100}
+                    step={10}
+                    color={colors.accent}
+                    onChange={(value) => {
+                      setPercentageEaten(Math.round(value));
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                  />
+                </Host>
+                <AppText role="Body" style={styles.percentageText}>
+                  {Math.round(percentageEaten)}%
+                </AppText>
+              </View>
             </Animated.View>
           </>
         )}
@@ -441,6 +477,23 @@ const createStyles = (colors: Colors, theme: Theme) =>
     },
     deleteFavoriteLabel: {
       fontSize: theme.typography.Body.fontSize,
+      fontWeight: "600",
+    },
+    sectionHeader: {
+      letterSpacing: 0.6,
+      color: colors.secondaryText,
+      textTransform: "uppercase",
+    },
+    percentageSection: {
+      gap: theme.spacing.sm,
+    },
+    sliderContainer: {
+      gap: theme.spacing.md,
+      paddingHorizontal: theme.spacing.sm,
+    },
+    percentageText: {
+      textAlign: "center",
+      color: colors.primaryText,
       fontWeight: "600",
     },
   });

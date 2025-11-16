@@ -34,7 +34,7 @@ import { Colors, Theme, useTheme } from "@/theme";
 import { useEditableTitle } from "@/components/refine-page/hooks/useEditableTitle";
 import { useEditChangeTracker } from "@/components/refine-page/hooks/useEditChangeTracker";
 import { useEditedLog } from "@/components/refine-page/hooks/useEditedLog";
-import { Host, Image } from "@expo/ui/swift-ui";
+import { Host, Image, Slider } from "@expo/ui/swift-ui";
 import { createToggleFavoriteHandler } from "@/utils/foodLogHandlers";
 import { useTranslation } from "react-i18next";
 
@@ -108,12 +108,22 @@ export default function Edit() {
   const scrollRef = useRef<RNScrollView | null>(null);
   const [revealKey, setRevealKey] = useState(0);
   const previousLoadingRef = useRef<boolean>(isEditEstimating);
+  const [percentageEaten, setPercentageEaten] = useState(
+    editedLog?.percentageEaten ?? 100
+  );
 
   useEffect(() => {
     previousLoadingRef.current = isEditEstimating;
   }, [isEditEstimating]);
 
+  useEffect(() => {
+    if (editedLog?.percentageEaten !== undefined) {
+      setPercentageEaten(editedLog.percentageEaten);
+    }
+  }, [editedLog?.percentageEaten]);
+
   const titleChanged = draftTitle.trim() !== (originalLog?.title || "").trim();
+  const percentageChanged = percentageEaten !== (originalLog?.percentageEaten ?? 100);
 
   const handleOpenEditor = useCallback(
     (index: number, component: FoodComponent) => {
@@ -189,10 +199,11 @@ export default function Edit() {
       fat: editedLog.fat,
       foodComponents: editedLog.foodComponents || [],
       macrosPerReferencePortion: editedLog.macrosPerReferencePortion,
+      percentageEaten,
     });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();
-  }, [draftTitle, editedLog, id, router, updateFoodLog]);
+  }, [draftTitle, editedLog, id, router, updateFoodLog, percentageEaten]);
 
   const handleDone = useCallback(() => {
     commitTitleBeforeSave();
@@ -237,6 +248,7 @@ export default function Edit() {
     (!hasReestimated &&
       !isDirty &&
       !titleChanged &&
+      !percentageChanged &&
       !hasUnsavedChanges &&
       changesCount === 0);
 
@@ -385,10 +397,10 @@ export default function Edit() {
 
             <Animated.View layout={easeLayout}>
               <MacrosCard
-                calories={editedLog.calories}
-                protein={editedLog.protein}
-                carbs={editedLog.carbs}
-                fat={editedLog.fat}
+                calories={editedLog.calories * (percentageEaten / 100)}
+                protein={editedLog.protein * (percentageEaten / 100)}
+                carbs={editedLog.carbs * (percentageEaten / 100)}
+                fat={editedLog.fat * (percentageEaten / 100)}
                 processing={isEditEstimating}
                 wasProcessing={previousLoadingRef.current}
                 revealKey={revealKey}
@@ -396,6 +408,30 @@ export default function Edit() {
                 changesCount={changesCount}
                 foodComponentsCount={editedLog.foodComponents?.length || 0}
               />
+            </Animated.View>
+
+            <Animated.View layout={easeLayout} style={styles.percentageSection}>
+              <AppText role="Caption" style={styles.sectionHeader}>
+                Wieviel hab ich gegessen?
+              </AppText>
+              <View style={styles.sliderContainer}>
+                <Host matchContents>
+                  <Slider
+                    value={percentageEaten}
+                    min={0}
+                    max={100}
+                    step={10}
+                    color={colors.accent}
+                    onChange={(value) => {
+                      setPercentageEaten(Math.round(value));
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                  />
+                </Host>
+                <AppText role="Body" style={styles.percentageText}>
+                  {Math.round(percentageEaten)}%
+                </AppText>
+              </View>
             </Animated.View>
 
             {editedLog.localImagePath && (
@@ -462,5 +498,17 @@ const createStyles = (colors: Colors, theme: Theme) =>
       letterSpacing: 0.6,
       color: colors.secondaryText,
       textTransform: "uppercase",
+    },
+    percentageSection: {
+      gap: theme.spacing.sm,
+    },
+    sliderContainer: {
+      gap: theme.spacing.md,
+      paddingHorizontal: theme.spacing.sm,
+    },
+    percentageText: {
+      textAlign: "center",
+      color: colors.primaryText,
+      fontWeight: "600",
     },
   });

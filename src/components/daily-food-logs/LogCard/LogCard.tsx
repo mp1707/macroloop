@@ -143,10 +143,10 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
           <View style={styles.rightSection}>
             <NutritionList
               nutrition={{
-                calories: foodLog.calories,
-                protein: foodLog.protein,
-                carbs: foodLog.carbs,
-                fat: foodLog.fat,
+                calories: foodLog.calories * ((foodLog.percentageEaten ?? 100) / 100),
+                protein: foodLog.protein * ((foodLog.percentageEaten ?? 100) / 100),
+                carbs: foodLog.carbs * ((foodLog.percentageEaten ?? 100) / 100),
+                fat: foodLog.fat * ((foodLog.percentageEaten ?? 100) / 100),
               }}
               isLoading={isLoading}
               wasLoading={previousLoadingRef.current}
@@ -273,10 +273,10 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
           <View style={styles.rightSection}>
             <StaticNutritionList
               nutrition={{
-                calories: foodLog.calories,
-                protein: foodLog.protein,
-                carbs: foodLog.carbs,
-                fat: foodLog.fat,
+                calories: foodLog.calories * ((foodLog.percentageEaten ?? 100) / 100),
+                protein: foodLog.protein * ((foodLog.percentageEaten ?? 100) / 100),
+                carbs: foodLog.carbs * ((foodLog.percentageEaten ?? 100) / 100),
+                fat: foodLog.fat * ((foodLog.percentageEaten ?? 100) / 100),
               }}
             />
           </View>
