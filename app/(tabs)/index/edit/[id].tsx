@@ -412,9 +412,14 @@ export default function Edit() {
             </Animated.View>
 
             <Animated.View layout={easeLayout} style={styles.percentageSection}>
-              <AppText role="Caption" style={styles.sectionHeader}>
-                Wieviel hab ich gegessen?
-              </AppText>
+              <View style={styles.percentageHeader}>
+                <AppText role="Caption" style={styles.sectionHeader}>
+                  Wieviel hab ich gegessen?
+                </AppText>
+                <AppText role="Body" style={styles.percentageText}>
+                  {Math.round(percentageEaten)}%
+                </AppText>
+              </View>
               <View style={styles.sliderContainer}>
                 <Host matchContents>
                   <Slider
@@ -429,9 +434,6 @@ export default function Edit() {
                     }}
                   />
                 </Host>
-                <AppText role="Body" style={styles.percentageText}>
-                  {Math.round(percentageEaten)}%
-                </AppText>
               </View>
             </Animated.View>
 
@@ -503,12 +505,15 @@ const createStyles = (colors: Colors, theme: Theme) =>
     percentageSection: {
       gap: theme.spacing.sm,
     },
+    percentageHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
     sliderContainer: {
-      gap: theme.spacing.md,
       paddingHorizontal: theme.spacing.sm,
     },
     percentageText: {
-      textAlign: "center",
       color: colors.primaryText,
       fontWeight: "600",
     },
