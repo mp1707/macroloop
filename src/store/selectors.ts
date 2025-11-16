@@ -46,6 +46,7 @@ export const makeSelectFavoriteById = (id: string) =>
 
 /**
  * Calculates the total sum of calories, protein, carbs, and fat for a given day.
+ * Takes into account the percentageEaten for each log.
  * @param date - The date string in "YYYY-MM-DD" format.
  * @returns An object containing the summed totals.
  */
@@ -56,10 +57,11 @@ export const selectDailyTotals = (state: AppState, date: string) => {
   // Use reduce to sum up the values into a single object
   return logsForDay.reduce(
     (totals, log) => {
-      totals.calories += log.calories || 0;
-      totals.protein += log.protein || 0;
-      totals.carbs += log.carbs || 0;
-      totals.fat += log.fat || 0;
+      const percentage = (log.percentageEaten ?? 100) / 100;
+      totals.calories += (log.calories || 0) * percentage;
+      totals.protein += (log.protein || 0) * percentage;
+      totals.carbs += (log.carbs || 0) * percentage;
+      totals.fat += (log.fat || 0) * percentage;
       return totals;
     },
     // The starting value for our totals object
@@ -132,6 +134,7 @@ export interface DailyDataState {
 
 /**
  * Optimized selector that calculates logs, totals, and percentages in a single pass
+ * Takes into account the percentageEaten for each log when calculating totals.
  * @param state - State slice containing foodLogs and dailyTargets
  * @param date - The date string in "YYYY-MM-DD" format
  * @returns Combined data object with logs, totals, and percentages
@@ -146,10 +149,11 @@ export const selectDailyData = (state: DailyDataState, date: string): DailyData 
   for (const log of state.foodLogs) {
     if (log.logDate === date) {
       logs.push(log);
-      totals.calories += log.calories || 0;
-      totals.protein += log.protein || 0;
-      totals.carbs += log.carbs || 0;
-      totals.fat += log.fat || 0;
+      const percentage = (log.percentageEaten ?? 100) / 100;
+      totals.calories += (log.calories || 0) * percentage;
+      totals.protein += (log.protein || 0) * percentage;
+      totals.carbs += (log.carbs || 0) * percentage;
+      totals.fat += (log.fat || 0) * percentage;
     }
   }
 

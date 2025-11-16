@@ -18,6 +18,7 @@ export type FoodLog = {
   fat: number;
   isEstimating?: boolean;
   macrosPerReferencePortion?: MacrosPerReferencePortion;
+  percentageEaten?: number; // 0-100, defaults to 100
 };
 
 export type FoodComponent = {
@@ -41,6 +42,7 @@ export type Favorite = {
   fat: number;
   foodComponents: FoodComponent[];
   macrosPerReferencePortion?: MacrosPerReferencePortion;
+  percentageEaten?: number; // 0-100, defaults to 100
 };
 
 export type DailyTargets = {

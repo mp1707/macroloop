@@ -23,6 +23,7 @@ export const createLogAgainHandler = (
       carbs: log.carbs,
       fat: log.fat,
       isEstimating: false,
+      percentageEaten: log.percentageEaten ?? 100,
     });
   };
 };
@@ -51,6 +52,7 @@ export const createSaveToFavoritesHandler = (
         "macrosPerReferencePortion" in log
           ? log.macrosPerReferencePortion
           : undefined,
+      percentageEaten: log.percentageEaten ?? 100,
     });
 
     // Use HUD instead of toast
@@ -117,6 +119,7 @@ export const createToggleFavoriteHandler = (
         foodComponents: foodLog.foodComponents.map((component) => ({
           ...component,
         })),
+        percentageEaten: foodLog.percentageEaten ?? 100,
       });
 
       // Use HUD instead of toast
