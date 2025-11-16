@@ -18,7 +18,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 interface SwipeToFunctionsProps {
   children: ReactNode;
-  onDelete?: () => Promise<void>;
+  onDelete?: () => void | Promise<void>;
   confirmDelete?: boolean;
   onLeftFunction?: () => void;
   confirmLeftFunction?: boolean;
@@ -109,7 +109,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
     onTap();
   };
 
-  const executeDelete = async () => {
+  const executeDelete = () => {
     if (!onDelete) return;
 
     isDeleting.value = true;
@@ -117,10 +117,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
     isLeftSwiped.value = false;
     isRightSwiped.value = false;
 
-    // First delete the actual data (including file cleanup)
-    await onDelete();
-
-    // Then animate the UI removal
+    // Start the animation first to maintain UX
     translateX.value = withTiming(
       -SCREEN_WIDTH * 1.2, // Slide slightly further for full exit effect
       {
@@ -129,7 +126,15 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
       () => {
         // Then collapse height and fade out quickly
         opacity.value = withTiming(0, { duration: 150 });
-        height.value = withTiming(0, { duration: 200 });
+        height.value = withTiming(
+          0,
+          { duration: 200 }, // Quick collapse
+          () => {
+            // Call onDelete at the end of the animation
+            // This ensures cleanup happens but animation plays first
+            runOnJS(onDelete)();
+          }
+        );
       }
     );
   };
@@ -149,7 +154,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
     });
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (confirmDelete) {
       Alert.alert(
         deleteAlertTitle,
@@ -167,18 +172,18 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
           {
             text: deleteLabel,
             style: "destructive",
-            onPress: async () => {
+            onPress: () => {
               Haptics.notificationAsync(
                 Haptics.NotificationFeedbackType.Warning
               );
-              await executeDelete();
+              executeDelete();
             },
           },
         ]
       );
     } else {
       // Direct delete without confirmation
-      await executeDelete();
+      executeDelete();
     }
   };
 

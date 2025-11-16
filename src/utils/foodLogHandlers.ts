@@ -89,9 +89,9 @@ export const createEditHandler = (safeNavigate: (path: string) => void) => {
   };
 };
 
-export const createDeleteHandler = (deleteFoodLog: (id: string) => Promise<void>) => {
-  return async (log: FoodLog | Favorite) => {
-    await deleteFoodLog(log.id);
+export const createDeleteHandler = (deleteFoodLog: (id: string) => void | Promise<void>) => {
+  return (log: FoodLog | Favorite) => {
+    deleteFoodLog(log.id);
   };
 };
 
