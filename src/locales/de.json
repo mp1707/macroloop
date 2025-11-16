@@ -158,7 +158,7 @@
         "accessibilityLabel": "Favorit löschen"
       },
       "percentageEaten": {
-        "title": "Wieviel hab ich gegessen?",
+        "title": "Verzehrte Menge",
         "value": "{{percentage}}%"
       },
       "alerts": {
@@ -194,7 +194,7 @@
       "added": "Favorit"
     },
     "percentageEaten": {
-      "title": "Wieviel hab ich gegessen?",
+      "title": "Verzehrte Menge",
       "value": "{{percentage}}%"
     },
     "alert": {
@@ -686,7 +686,7 @@
   },
   "logCard": {
     "fallbackTitle": "Neuer Eintrag",
-    "percentageEaten": "{{percentage}}% gegessen",
+    "percentageEaten": "{{percentage}}% verzehrt",
     "contextMenu": {
       "createLog": "Eintrag erstellen",
       "logAgain": "Erneut protokollieren",

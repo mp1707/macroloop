@@ -158,7 +158,7 @@
         "accessibilityLabel": "Delete favorite"
       },
       "percentageEaten": {
-        "title": "How much have I eaten?",
+        "title": "Portion consumed",
         "value": "{{percentage}}%"
       },
       "alerts": {
@@ -195,7 +195,7 @@
       "added": "Favorited"
     },
     "percentageEaten": {
-      "title": "How much have I eaten?",
+      "title": "Portion consumed",
       "value": "{{percentage}}%"
     },
     "alert": {
@@ -688,7 +688,7 @@
   },
   "logCard": {
     "fallbackTitle": "New Log",
-    "percentageEaten": "{{percentage}}% eaten",
+    "percentageEaten": "{{percentage}}% consumed",
     "contextMenu": {
       "createLog": "Create Log",
       "logAgain": "Log Again",
