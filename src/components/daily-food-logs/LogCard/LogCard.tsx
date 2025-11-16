@@ -135,7 +135,9 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
             />
             {(foodLog.percentageEaten ?? 100) !== 100 && (
               <AppText style={styles.percentageText}>
-                {t("logCard.percentageEaten", { percentage: foodLog.percentageEaten })}
+                {t("logCard.percentageEaten", {
+                  percentage: foodLog.percentageEaten,
+                })}
               </AppText>
             )}
             <FoodComponentList
@@ -148,8 +150,10 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
           <View style={styles.rightSection}>
             <NutritionList
               nutrition={{
-                calories: foodLog.calories * ((foodLog.percentageEaten ?? 100) / 100),
-                protein: foodLog.protein * ((foodLog.percentageEaten ?? 100) / 100),
+                calories:
+                  foodLog.calories * ((foodLog.percentageEaten ?? 100) / 100),
+                protein:
+                  foodLog.protein * ((foodLog.percentageEaten ?? 100) / 100),
                 carbs: foodLog.carbs * ((foodLog.percentageEaten ?? 100) / 100),
                 fat: foodLog.fat * ((foodLog.percentageEaten ?? 100) / 100),
               }}
@@ -270,12 +274,14 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
             <LogCardTitle title={displayTitle} style={styles.title} />
             {(foodLog.percentageEaten ?? 100) !== 100 && (
               <AppText style={styles.percentageText}>
-                {t("logCard.percentageEaten", { percentage: foodLog.percentageEaten })}
+                {t("logCard.percentageEaten", {
+                  percentage: foodLog.percentageEaten,
+                })}
               </AppText>
             )}
             <FoodComponentList
               foodComponents={foodLog.foodComponents}
-              maxItems={3}
+              maxItems={2}
               style={styles.foodComponentList}
             />
           </View>
@@ -283,8 +289,10 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
           <View style={styles.rightSection}>
             <StaticNutritionList
               nutrition={{
-                calories: foodLog.calories * ((foodLog.percentageEaten ?? 100) / 100),
-                protein: foodLog.protein * ((foodLog.percentageEaten ?? 100) / 100),
+                calories:
+                  foodLog.calories * ((foodLog.percentageEaten ?? 100) / 100),
+                protein:
+                  foodLog.protein * ((foodLog.percentageEaten ?? 100) / 100),
                 carbs: foodLog.carbs * ((foodLog.percentageEaten ?? 100) / 100),
                 fat: foodLog.fat * ((foodLog.percentageEaten ?? 100) / 100),
               }}
