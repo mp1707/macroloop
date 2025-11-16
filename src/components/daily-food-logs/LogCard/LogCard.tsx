@@ -116,6 +116,8 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
     ],
   }));
 
+  const hasNotEatenEverything = (foodLog.percentageEaten ?? 100) !== 100;
+
   return (
     <Pressable
       style={styles.cardContainer}
@@ -133,7 +135,7 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
               animatedStyle={titleAnimatedStyle}
               style={styles.title}
             />
-            {(foodLog.percentageEaten ?? 100) !== 100 && (
+            {hasNotEatenEverything && (
               <AppText style={styles.percentageText}>
                 {t("logCard.percentageEaten", {
                   percentage: foodLog.percentageEaten,
@@ -142,7 +144,7 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
             )}
             <FoodComponentList
               foodComponents={foodLog.foodComponents}
-              maxItems={2}
+              maxItems={hasNotEatenEverything ? 2 : 3}
               style={styles.foodComponentList}
             />
           </View>
@@ -262,6 +264,8 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
 
   const displayTitle = foodLog.title || t("logCard.fallbackTitle");
 
+  const hasNotEatenEverything = (foodLog.percentageEaten ?? 100) !== 100;
+
   return (
     <Pressable
       style={styles.cardContainer}
@@ -272,7 +276,7 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
         <View style={styles.contentContainer}>
           <View style={styles.leftSection}>
             <LogCardTitle title={displayTitle} style={styles.title} />
-            {(foodLog.percentageEaten ?? 100) !== 100 && (
+            {hasNotEatenEverything && (
               <AppText style={styles.percentageText}>
                 {t("logCard.percentageEaten", {
                   percentage: foodLog.percentageEaten,
@@ -281,7 +285,7 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
             )}
             <FoodComponentList
               foodComponents={foodLog.foodComponents}
-              maxItems={2}
+              maxItems={hasNotEatenEverything ? 2 : 3}
               style={styles.foodComponentList}
             />
           </View>
