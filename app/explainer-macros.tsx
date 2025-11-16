@@ -193,7 +193,7 @@ const createStyles = (theme: Theme, colors: Colors) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.secondaryBackground,
+      backgroundColor: colors.primaryBackground,
     },
     header: {
       paddingTop: theme.spacing.xxl + theme.spacing.lg,

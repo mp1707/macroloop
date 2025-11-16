@@ -145,9 +145,7 @@ function RootLayoutContent() {
 
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView
-        style={{ flex: 1, backgroundColor: colors.primaryBackground }}
-      >
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <KeyboardProvider>
           <NavigationTransitionProvider>
             <ThemedStack />

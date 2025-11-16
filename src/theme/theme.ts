@@ -9,7 +9,7 @@ const SPACING_UNIT = 8;
 // Color palettes
 const lightColors = {
   // Core UI - "Paper" strategy for clean, crisp hierarchy
-  primaryBackground: "#FFFFFF",
+  primaryBackground: "#F6F8FA",
   secondaryBackground: "#FFFFFF",
   tertiaryBackground: "#F6F8FA", // for grouped areas (sheets, pickers)
   gradientFromBackground: "#FFFFFF",

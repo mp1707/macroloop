@@ -166,7 +166,7 @@ export const RadioCard: React.FC<RadioCardProps> = ({
               : `Select ${title}. ${description}`)
           }
         >
-          <Card elevated={false} padding={theme.spacing.md} style={styles.card}>
+          <Card elevated={true} padding={theme.spacing.md} style={styles.card}>
             <View style={styles.container}>
               <View style={styles.radioGutter} />
 
