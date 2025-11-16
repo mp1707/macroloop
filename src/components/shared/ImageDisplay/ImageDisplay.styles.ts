@@ -19,8 +19,6 @@ export const createStyles = (
     },
     skeleton: {
       flex: 1,
-      backgroundColor: colors.disabledBackground,
-      borderRadius: componentStyles.cards.cornerRadius,
     },
     skeletonContent: {
       justifyContent: "center",
@@ -33,6 +31,7 @@ export const createStyles = (
     },
     imageCard: {
       flex: 1,
+      backgroundColor: "transparent",
     },
     image: {
       flex: 1,

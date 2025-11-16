@@ -78,11 +78,11 @@ export function HeaderButton({
         <Image
           systemName={imageProps?.systemName || "xmark"}
           color={imageProps?.color || "primary"}
-          size={size === "large" && hasLiquidGlass ? 24 : 18}
+          size={size === "large" && hasLiquidGlass ? 66 : 18}
           modifiers={[
             frame(
               size === "large"
-                ? { height: 30, width: 20 }
+                ? { height: 50, width: 40 }
                 : { height: 34, width: 24 }
             ),
             padding({ all: 0 }),

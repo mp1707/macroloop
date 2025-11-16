@@ -1,5 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { AccessibilityInfo, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  AccessibilityInfo,
+  TouchableOpacity,
+  ActivityIndicator,
+  View,
+} from "react-native";
 import { Image } from "expo-image";
 import Animated, {
   useSharedValue,
@@ -15,6 +20,8 @@ import { useTheme } from "@/theme";
 import { Card } from "@/components/Card";
 import { HeaderButton } from "@/components/shared/HeaderButton";
 import { createStyles } from "./ImageDisplay.styles";
+
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 interface ImageDisplayProps {
   imageUrl?: string;
@@ -46,8 +53,8 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
   // Shared values for animations
   const skeletonOpacity = useSharedValue(0.3);
   const imageOpacity = useSharedValue(0);
-  const imageScale = useSharedValue(0.95);
   const pressScale = useSharedValue(1);
+  const trashButtonOpacity = useSharedValue(0);
   const collapsedHeight = collapsedHeightOverride ?? 100;
   const expandedHeight = Math.max(collapsedHeight * 2.4, collapsedHeight + 120);
   const containerHeight = useSharedValue(collapsedHeight);
@@ -74,16 +81,16 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
       // Cancel all animations on unmount to free resources
       cancelAnimation(skeletonOpacity);
       cancelAnimation(imageOpacity);
-      cancelAnimation(imageScale);
       cancelAnimation(pressScale);
+      cancelAnimation(trashButtonOpacity);
       cancelAnimation(containerHeight);
       cancelAnimation(imageWrapperWidth);
     };
   }, [
     skeletonOpacity,
     imageOpacity,
-    imageScale,
     pressScale,
+    trashButtonOpacity,
     containerHeight,
     imageWrapperWidth,
   ]);
@@ -109,12 +116,10 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
 
     if (imageUrl && !isUploading) {
       imageOpacity.value = withTiming(1, { duration });
-      imageScale.value = withTiming(1, { duration });
     } else {
       imageOpacity.value = withTiming(0, { duration: exitDuration });
-      imageScale.value = withTiming(0.95, { duration: exitDuration });
     }
-  }, [imageUrl, isUploading, isReducedMotionEnabled, imageOpacity, imageScale]);
+  }, [imageUrl, isUploading, isReducedMotionEnabled, imageOpacity]);
 
   // Height and width toggle animation
   useEffect(() => {
@@ -137,6 +142,21 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     isReducedMotionEnabled,
     containerHeight,
     imageWrapperWidth,
+  ]);
+
+  // Trash button visibility animation
+  useEffect(() => {
+    const shouldShow = deleteImage && imageUrl && !isUploading && !isExpanded;
+    const duration = isReducedMotionEnabled ? 0 : 200;
+
+    trashButtonOpacity.value = withTiming(shouldShow ? 1 : 0, { duration });
+  }, [
+    deleteImage,
+    imageUrl,
+    isUploading,
+    isExpanded,
+    isReducedMotionEnabled,
+    trashButtonOpacity,
   ]);
 
   // Press handlers
@@ -183,51 +203,47 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
 
   const imageAnimatedStyle = useAnimatedStyle(() => ({
     opacity: imageOpacity.value,
-    transform: [{ scale: imageScale.value }],
   }));
 
   const imageWrapperAnimatedStyle = useAnimatedStyle(() => ({
     width: `${imageWrapperWidth.value}%`,
   }));
 
-  // Don't render anything if no image and not uploading
-  if (!imageUrl && !isUploading) {
-    return null;
-  }
+  const trashButtonAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: trashButtonOpacity.value,
+  }));
 
   const canInteract = imageUrl && !isUploading;
+  const shouldShowTrash = deleteImage && imageUrl && !isUploading && !isExpanded;
 
   const content = (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
       <Animated.View style={styles.rowContainer}>
-        {isUploading && (
-          <Animated.View style={styles.imageContainer}>
-            <Card padding={0} style={styles.imageCard}>
-              <Animated.View style={[styles.skeleton, styles.skeletonContent, skeletonAnimatedStyle]}>
-                <ActivityIndicator size="large" color={colors.white} />
-              </Animated.View>
-            </Card>
-          </Animated.View>
-        )}
-
-        {imageUrl && !isUploading && (
-          <Animated.View style={[styles.imageContainer, imageAnimatedStyle]}>
-            <Card padding={0} style={styles.imageCard}>
-              <Image
-                source={{ uri: imageUrl }}
+        <View style={styles.imageContainer}>
+          <Card padding={0} style={styles.imageCard}>
+            {isUploading || !imageUrl ? (
+              <ActivityIndicator
+                size="large"
+                color={colors.white}
                 style={styles.image}
+              />
+            ) : (
+              <AnimatedImage
+                source={{ uri: imageUrl }}
+                style={[styles.image, imageAnimatedStyle]}
                 contentFit="cover"
                 cachePolicy="memory-disk"
                 recyclingKey={imageUrl}
                 priority="low"
-                transition={200}
               />
-            </Card>
-          </Animated.View>
-        )}
-
-        {deleteImage && imageUrl && !isUploading && !isExpanded && (
-          <Animated.View style={styles.deleteButtonContainer}>
+            )}
+          </Card>
+        </View>
+        {deleteImage && (
+          <Animated.View
+            style={[styles.deleteButtonContainer, trashButtonAnimatedStyle]}
+            pointerEvents={shouldShowTrash ? "auto" : "none"}
+          >
             <HeaderButton
               variant="colored"
               buttonProps={{
@@ -246,6 +262,7 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     </Animated.View>
   );
 
+  // Always wrap content with imageWrapperAnimatedStyle for consistent sizing
   if (canInteract) {
     return (
       <Animated.View style={imageWrapperAnimatedStyle}>
@@ -266,6 +283,7 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     );
   }
 
+  // Apply the same width wrapper to non-interactive states (loading)
   return (
     <Animated.View style={imageWrapperAnimatedStyle}>{content}</Animated.View>
   );
