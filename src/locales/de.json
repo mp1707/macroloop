@@ -594,7 +594,7 @@
       "missingData": "Berechnungsdaten fehlen. Bitte starte erneut.",
       "options": {
         "lose": {
-          "title": "Defizit",
+          "title": "Abnehmen",
           "description": "Schaffe ein Kaloriendefizit, um langsam abzunehmen",
           "accessibilityLabel": "Defizit-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um langsam abzunehmen"
@@ -606,7 +606,7 @@
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um dein aktuelles Gewicht zu halten"
         },
         "gain": {
-          "title": "Überschuss",
+          "title": "Muskeln aufbauen",
           "description": "Schaffe einen Kalorienüberschuss, um langsam zuzunehmen",
           "accessibilityLabel": "Überschuss-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um langsam zuzunehmen"

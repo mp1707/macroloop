@@ -596,7 +596,7 @@
       "missingData": "Missing calculation data. Please start again.",
       "options": {
         "lose": {
-          "title": "Deficit",
+          "title": "Lose weight",
           "description": "Create a calorie deficit to lose weight gradually.",
           "accessibilityLabel": "Deficit goal",
           "accessibilityHint": "Set {{calories}} calories per day to lose weight gradually"
@@ -608,7 +608,7 @@
           "accessibilityHint": "Set {{calories}} calories per day to maintain your current weight"
         },
         "gain": {
-          "title": "Surplus",
+          "title": "Gain muscle",
           "description": "Create a calorie surplus to gain weight gradually.",
           "accessibilityLabel": "Surplus goal",
           "accessibilityHint": "Set {{calories}} calories per day to gain weight gradually"
