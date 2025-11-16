@@ -174,9 +174,14 @@ export const useAppStore = create<AppState>()(
       pruneOldLogs: async (retentionDays: number | null) => {
         const allLogs = get().foodLogs;
 
-        // If retentionDays is null, keep all logs (no pruning)
+        // If retentionDays is null, delete everything (same as clearAll)
         if (retentionDays === null) {
-          return 0;
+          if (allLogs.length === 0) {
+            return 0;
+          }
+
+          await get().clearAllLogs();
+          return allLogs.length;
         }
 
         const today = new Date();
