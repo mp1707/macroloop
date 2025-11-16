@@ -20,6 +20,7 @@ import {
 } from "react-native-reanimated";
 import { useTheme } from "@/theme";
 import { hexToRgb, rgbToHex, adjustColor, interpolateColor } from "@/utils/colorUtils";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface NutrientValues {
   calories?: number;
@@ -61,6 +62,26 @@ const resolveRingConfigs = (nutrientKeys?: NutrientKey[]) => {
     .filter((config): config is (typeof ALL_RING_CONFIG)[number] =>
       Boolean(config)
     );
+};
+
+/**
+ * Creates accessibility label from nutrient percentages
+ * WCAG 1.1.1 - Text alternatives for non-text content
+ */
+const createAccessibilityLabel = (
+  percentages: NutrientValues,
+  ringConfigs: ReadonlyArray<{ key: NutrientKey; colorKey: NutrientKey; label: string }>
+): string => {
+  const parts = ringConfigs
+    .map((config) => {
+      const value = percentages[config.key];
+      if (value === undefined) return null;
+      return `${config.label} ${Math.round(value)}%`;
+    })
+    .filter(Boolean);
+
+  if (parts.length === 0) return "Progress rings";
+  return `Progress rings: ${parts.join(", ")}`;
 };
 
 type GradientStop = { position: number; color: string };
@@ -394,6 +415,7 @@ export const ProgressRings: React.FC<ProgressRingsProps> = ({
 }) => {
   const { colors, colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
+  const reduceMotion = useReducedMotion();
 
   const caloriesProgress = useSharedValue(0);
   const proteinProgress = useSharedValue(0);
@@ -419,17 +441,25 @@ export const ProgressRings: React.FC<ProgressRingsProps> = ({
     ringConfigs.forEach((config, index) => {
       const raw = percentages[config.key] ?? 0;
       const normalized = Math.max(0, raw / 100);
-      const delay = index * 120;
-      progressValues[config.key].value = withDelay(
-        delay,
-        withSpring(normalized, {
-          mass: 0.6,
-          damping: 15,
-          stiffness: 120,
-        })
-      );
+
+      // ACCESSIBILITY: Respect reduce motion preference (WCAG 2.3.3)
+      if (reduceMotion) {
+        // Instant, no animation
+        progressValues[config.key].value = normalized;
+      } else {
+        // Animated with spring and staggered delay
+        const delay = index * 120;
+        progressValues[config.key].value = withDelay(
+          delay,
+          withSpring(normalized, {
+            mass: 0.6,
+            damping: 15,
+            stiffness: 120,
+          })
+        );
+      }
     });
-  }, [percentages, progressValues, ringConfigs]);
+  }, [percentages, progressValues, ringConfigs, reduceMotion]);
 
   const normalizedValues = useMemo(
     () =>
@@ -469,6 +499,12 @@ export const ProgressRings: React.FC<ProgressRingsProps> = ({
   } satisfies Record<NutrientKey, string>;
   const shadowColor = isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.32)";
 
+  // WCAG 1.1.1 - Provide text alternative for visual progress rings
+  const accessibilityLabel = useMemo(
+    () => createAccessibilityLabel(percentages, ringConfigs),
+    [percentages, ringConfigs]
+  );
+
   return (
     <View
       style={{
@@ -478,6 +514,9 @@ export const ProgressRings: React.FC<ProgressRingsProps> = ({
         justifyContent: "center",
       }}
       pointerEvents="none"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="image"
+      accessible={true}
     >
       <Canvas
         style={{ width: size, height: size }}
@@ -567,6 +606,12 @@ export const ProgressRingsStatic: React.FC<ProgressRingsStaticProps> = ({
   } satisfies Record<NutrientKey, string>;
   const shadowColor = isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.32)";
 
+  // WCAG 1.1.1 - Provide text alternative for visual progress rings
+  const accessibilityLabelStatic = useMemo(
+    () => createAccessibilityLabel(percentages, ringConfigs),
+    [percentages, ringConfigs]
+  );
+
   return (
     <View
       style={{
@@ -576,6 +621,9 @@ export const ProgressRingsStatic: React.FC<ProgressRingsStaticProps> = ({
         justifyContent: "center",
       }}
       pointerEvents="none"
+      accessibilityLabel={accessibilityLabelStatic}
+      accessibilityRole="image"
+      accessible={true}
     >
       <Canvas
         style={{ width: size, height: size }}

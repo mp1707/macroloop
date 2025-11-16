@@ -8,12 +8,24 @@ interface SearchBarProps {
   value: string;
   onChange: (text: string) => void;
   placeholder?: string;
+  /**
+   * Accessibility label for screen readers (WCAG 4.1.2)
+   * Default: "Search"
+   */
+  accessibilityLabel?: string;
+  /**
+   * Accessibility hint for screen readers (WCAG 4.1.2)
+   * Default: "Enter text to filter the list"
+   */
+  accessibilityHint?: string;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChange,
   placeholder,
+  accessibilityLabel = "Search",
+  accessibilityHint = "Enter text to filter the list",
 }) => {
   const { colors, theme, colorScheme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -34,8 +46,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         borderColor: isFocused ? colors.accent : "transparent",
         backgroundColor: colors.secondaryBackground,
       }}
-      accessibilityRole="search"
-      accessible
+      accessible={false} // Let TextInput handle accessibility
     >
       <View
         style={{
@@ -61,14 +72,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           onChangeText={onChange}
           placeholder={placeholder || "Search"}
           placeholderTextColor={colors.secondaryText}
-          accessibilityLabel="Search"
-          accessibilityHint="Enter text to filter the list"
+          // Accessibility props (WCAG 4.1.2)
+          accessibilityLabel={accessibilityLabel}
+          accessibilityHint={accessibilityHint}
+          accessibilityRole="search"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           keyboardAppearance={colorScheme}
           returnKeyType="search"
           autoCapitalize="none"
           autoCorrect={false}
+          // Font scaling (WCAG 1.4.4)
+          allowFontScaling={true}
+          maxFontSizeMultiplier={theme.accessibility.textScaling.maximum}
           style={{
             paddingLeft: theme.spacing.lg + theme.spacing.sm,
             paddingRight: value
@@ -101,6 +117,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             }}
             accessibilityLabel="Clear search"
             accessibilityRole="button"
+            accessibilityHint="Clears the search text"
+            hitSlop={10} // Larger touch target for accessibility (WCAG 2.5.8)
           >
             <X size={14} color={colors.primaryText} strokeWidth={1.5} />
           </TouchableOpacity>
