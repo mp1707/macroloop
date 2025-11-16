@@ -4,8 +4,8 @@ import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { View } from "react-native";
 import React, { useMemo } from "react";
-import { OnboardingHeader } from "../../src/components/onboarding/OnboardingHeader";
 import { useNavigationTransition } from "@/context/NavigationTransitionContext";
+import { OnboardingHeader } from "../../src/components/onboarding/OnboardingHeader";
 
 // Manual flow step mapping
 const MANUAL_STEP_MAP: Record<string, number> = {
@@ -58,15 +58,27 @@ export default function OnboardingLayout() {
     safeBack();
   };
 
+  // Show header for all screens except index, target-method, and summary screens
+  const shouldShowHeader =
+    !pathname.includes("/index") &&
+    !isTargetMethod &&
+    !isSummary;
+
+  // Hide back button only on target-method screen
+  const hideBackButton = isTargetMethod;
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.primaryBackground }}>
-      <OnboardingHeader
-        onBack={handleBack}
-        onSkip={handleSkip}
-        currentStep={currentStep}
-        totalSteps={totalSteps}
-        showProgressBar={showProgressBar}
-      />
+      {shouldShowHeader && (
+        <OnboardingHeader
+          onBack={handleBack}
+          onSkip={handleSkip}
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          showProgressBar={showProgressBar}
+          hideBackButton={hideBackButton}
+        />
+      )}
       <Stack
         screenOptions={{
           headerShown: false,

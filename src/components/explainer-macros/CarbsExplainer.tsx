@@ -4,19 +4,23 @@ import { Zap } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText } from "@/components/shared/AppText";
-import { Button } from "@/components/shared/Button/Button";
 import { Theme, useTheme } from "@/theme";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
+import { Host, Button } from "@expo/ui/swift-ui";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 interface CarbsExplainerProps {
   total?: number;
 }
 
-export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) => {
+export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({
+  total = 218,
+}) => {
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
   const { t } = useTranslation();
+  const hasLiquidGlass = isLiquidGlassAvailable();
 
   const semanticColor = colors.semantic.carbs;
 
@@ -56,7 +60,11 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) =
           </View>
         </View>
 
-        <AppText role="Headline" color="primary" style={[styles.sectionHeading, { color: semanticColor }]}>
+        <AppText
+          role="Headline"
+          color="primary"
+          style={[styles.sectionHeading, { color: semanticColor }]}
+        >
           {t("explainer.macros.carbs.sections.total.title")}
         </AppText>
         <AppText role="Body" color="secondary" style={styles.contentText}>
@@ -66,7 +74,10 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) =
         <AppText
           role="Headline"
           color="primary"
-          style={[styles.sectionHeading, { color: semanticColor, marginTop: theme.spacing.md }]}
+          style={[
+            styles.sectionHeading,
+            { color: semanticColor, marginTop: theme.spacing.md },
+          ]}
         >
           {t("explainer.macros.carbs.sections.fuel.title")}
         </AppText>
@@ -90,7 +101,10 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) =
         <AppText
           role="Headline"
           color="primary"
-          style={[styles.sectionHeading, { color: semanticColor, marginTop: theme.spacing.md }]}
+          style={[
+            styles.sectionHeading,
+            { color: semanticColor, marginTop: theme.spacing.md },
+          ]}
         >
           {t("explainer.macros.carbs.sections.sources.title")}
         </AppText>
@@ -112,13 +126,16 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({ total = 218 }) =
         </View>
       </View>
 
-      <View style={styles.buttonContainer}>
+      <Host matchContents style={{ width: "100%", alignSelf: "center" }}>
         <Button
-          label={t("explainer.common.adjustTargets")}
-          variant="secondary"
+          variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
+          color={colors.secondaryBackground}
           onPress={handleChangeTargets}
-        />
-      </View>
+          controlSize="large"
+        >
+          {t("explainer.common.adjustTargets")}
+        </Button>
+      </Host>
     </View>
   );
 };
@@ -183,9 +200,5 @@ const createStyles = (theme: Theme) =>
     bulletText: {
       flex: 1,
       lineHeight: 22,
-    },
-    buttonContainer: {
-      alignItems: "center",
-      paddingTop: theme.spacing.lg,
     },
   });

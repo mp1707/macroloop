@@ -3,10 +3,11 @@ import { View, StyleSheet } from "react-native";
 import { BicepsFlexed } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { AppText } from "@/components/shared/AppText";
-import { Button } from "@/components/shared/Button/Button";
 import { Theme, useTheme } from "@/theme";
 import { DashboardRing } from "@/components/shared/ProgressRings";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
+import { Host, Button } from "@expo/ui/swift-ui";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 interface ProteinExplainerProps {
   total?: number;
@@ -23,6 +24,7 @@ export const ProteinExplainer: React.FC<ProteinExplainerProps> = ({
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
   const { t } = useTranslation();
+  const hasLiquidGlass = isLiquidGlassAvailable();
 
   const semanticColor = colors.semantic.protein;
   const detailValue =
@@ -138,13 +140,16 @@ export const ProteinExplainer: React.FC<ProteinExplainerProps> = ({
         </View>
       </View>
 
-      <View style={styles.buttonContainer}>
+      <Host matchContents style={{ width: "100%", alignSelf: "center" }}>
         <Button
-          label={t("explainer.common.adjustTargets")}
-          variant="secondary"
+          variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
+          color={colors.secondaryBackground}
           onPress={handleChangeTargets}
-        />
-      </View>
+          controlSize="large"
+        >
+          {t("explainer.common.adjustTargets")}
+        </Button>
+      </Host>
     </View>
   );
 };
@@ -194,9 +199,5 @@ const createStyles = (theme: Theme) =>
     },
     inlineIcon: {
       marginBottom: -2,
-    },
-    buttonContainer: {
-      alignItems: "center",
-      paddingTop: theme.spacing.lg,
     },
   });
