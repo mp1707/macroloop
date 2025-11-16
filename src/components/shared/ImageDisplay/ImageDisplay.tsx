@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { AccessibilityInfo, TouchableOpacity } from "react-native";
+import { AccessibilityInfo, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import Animated, {
   useSharedValue,
@@ -201,7 +201,13 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
       <Animated.View style={styles.rowContainer}>
         {isUploading && (
-          <Animated.View style={[styles.skeleton, skeletonAnimatedStyle]} />
+          <Animated.View style={[styles.imageContainer, skeletonAnimatedStyle]}>
+            <Card padding={0} style={styles.imageCard}>
+              <Animated.View style={[styles.skeleton, styles.skeletonContent]}>
+                <ActivityIndicator size="large" color={colors.accent} />
+              </Animated.View>
+            </Card>
+          </Animated.View>
         )}
 
         {imageUrl && !isUploading && (

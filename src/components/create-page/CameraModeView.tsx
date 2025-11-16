@@ -1,12 +1,19 @@
 import { useMemo, useRef, useState, useCallback, useEffect } from "react";
 import { View } from "react-native";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+} from "react-native-reanimated";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { CameraIcon } from "lucide-react-native";
 import { Image } from "expo-image";
+import * as Haptics from "expo-haptics";
 
 import { useTheme } from "@/theme/ThemeProvider";
-import { RoundButton } from "@/components/shared/RoundButton";
+import { HeaderButton } from "@/components/shared/HeaderButton";
 import { MediaLibraryPreview } from "@/components/camera/MediaLibraryPreview";
 import { createStyles } from "./CameraModeView.styles";
 
@@ -20,6 +27,9 @@ export const CameraModeView = ({ onImageSelected }: CameraModeViewProps) => {
   const cameraRef = useRef<CameraView>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
 
+  // Shutter animation
+  const shutterOpacity = useSharedValue(0);
+
   // Camera permissions
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -32,11 +42,19 @@ export const CameraModeView = ({ onImageSelected }: CameraModeViewProps) => {
 
   const takePicture = useCallback(async () => {
     if (!isCameraReady || !cameraRef.current) return;
+
+    // Play shutter animation and haptics
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    shutterOpacity.value = withSequence(
+      withTiming(0.9, { duration: 100 }),
+      withTiming(0, { duration: 100 })
+    );
+
     const image = await cameraRef.current.takePictureAsync();
     if (image?.uri) {
       onImageSelected(image.uri);
     }
-  }, [isCameraReady, onImageSelected]);
+  }, [isCameraReady, onImageSelected, shutterOpacity]);
 
   // Cleanup camera memory on unmount
   useEffect(() => {
@@ -45,6 +63,10 @@ export const CameraModeView = ({ onImageSelected }: CameraModeViewProps) => {
       Image.clearMemoryCache();
     };
   }, []);
+
+  const shutterStyle = useAnimatedStyle(() => ({
+    opacity: shutterOpacity.value,
+  }));
 
   return (
     <Animated.View
@@ -59,13 +81,24 @@ export const CameraModeView = ({ onImageSelected }: CameraModeViewProps) => {
         onCameraReady={() => setIsCameraReady(true)}
       />
 
+      {/* Shutter flash overlay */}
+      <Animated.View
+        style={[styles.shutterFlash, shutterStyle]}
+        pointerEvents="none"
+      />
+
       <View style={styles.contentContainer}>
-        <RoundButton
-          Icon={CameraIcon}
-          onPress={takePicture}
-          variant="primary"
-          iconSize={40}
-          style={styles.cameraButton}
+        <HeaderButton
+          size="large"
+          variant="regular"
+          buttonProps={{
+            onPress: takePicture,
+            color: colors.white,
+          }}
+          imageProps={{
+            systemName: "circle.fill",
+            color: colors.accent,
+          }}
         />
       </View>
 

@@ -86,13 +86,13 @@ export const MediaLibraryPreview: React.FC<MediaLibraryPreviewProps> = ({
       );
 
       setRecentImages(assetsWithLocalUri);
-      // Trigger animation when images are loaded
+      // Trigger animation immediately when images are loaded
       if (assetsWithLocalUri.length > 0) {
-        animationProgress.value = withDelay(300, withSpring(1, {
-          stiffness: 120,
-          damping: 20,
-          mass: 1,
-        }));
+        animationProgress.value = withSpring(1, {
+          stiffness: 200,
+          damping: 25,
+          mass: 0.8,
+        });
       }
     } catch (error) {
       console.error("Error fetching recent images:", error);
@@ -148,8 +148,10 @@ export const MediaLibraryPreview: React.FC<MediaLibraryPreviewProps> = ({
   });
 
   useEffect(() => {
+    // Only fetch once on mount
     fetchRecentImages();
-  }, [fetchRecentImages, hasMediaPermission]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Pressable

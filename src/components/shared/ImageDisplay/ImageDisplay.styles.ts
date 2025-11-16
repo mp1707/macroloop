@@ -22,6 +22,12 @@ export const createStyles = (
       backgroundColor: colors.disabledBackground,
       borderRadius: componentStyles.cards.cornerRadius,
     },
+    skeletonContent: {
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100%",
+      height: "100%",
+    },
     imageContainer: {
       flex: 1,
     },

@@ -10,6 +10,10 @@ export const createStyles = (colors: Colors, theme: Theme) =>
     camera: {
       ...StyleSheet.absoluteFillObject,
     },
+    shutterFlash: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: colors.white,
+    },
     contentContainer: {
       position: "absolute",
       bottom: theme.spacing.sm,
