@@ -104,19 +104,20 @@ export default function EditFavorite() {
   const scrollRef = useRef<RNScrollView | null>(null);
   const [revealKey, setRevealKey] = useState(0);
   const previousLoadingRef = useRef<boolean>(isEditEstimating);
-  const [percentageEaten, setPercentageEaten] = useState(
-    editedFavorite?.percentageEaten ?? 100
-  );
 
   useEffect(() => {
     previousLoadingRef.current = isEditEstimating;
   }, [isEditEstimating]);
 
-  useEffect(() => {
-    if (editedFavorite?.percentageEaten !== undefined) {
-      setPercentageEaten(editedFavorite.percentageEaten);
-    }
-  }, [editedFavorite?.percentageEaten]);
+  const percentageEaten = editedFavorite?.percentageEaten ?? 100;
+
+  const updatePercentageEaten = useCallback(
+    (newPercentage: number) => {
+      if (!editedFavorite) return;
+      replaceEditedFavorite({ ...editedFavorite, percentageEaten: newPercentage });
+    },
+    [editedFavorite, replaceEditedFavorite]
+  );
 
   const titleChanged =
     draftTitle.trim() !== (originalFavorite?.title || "").trim();
@@ -423,7 +424,7 @@ export default function EditFavorite() {
                     step={10}
                     color={colors.accent}
                     onChange={(value) => {
-                      setPercentageEaten(Math.round(value));
+                      updatePercentageEaten(Math.round(value));
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }}
                   />

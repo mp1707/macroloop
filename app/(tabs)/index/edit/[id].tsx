@@ -108,19 +108,20 @@ export default function Edit() {
   const scrollRef = useRef<RNScrollView | null>(null);
   const [revealKey, setRevealKey] = useState(0);
   const previousLoadingRef = useRef<boolean>(isEditEstimating);
-  const [percentageEaten, setPercentageEaten] = useState(
-    editedLog?.percentageEaten ?? 100
-  );
 
   useEffect(() => {
     previousLoadingRef.current = isEditEstimating;
   }, [isEditEstimating]);
 
-  useEffect(() => {
-    if (editedLog?.percentageEaten !== undefined) {
-      setPercentageEaten(editedLog.percentageEaten);
-    }
-  }, [editedLog?.percentageEaten]);
+  const percentageEaten = editedLog?.percentageEaten ?? 100;
+
+  const updatePercentageEaten = useCallback(
+    (newPercentage: number) => {
+      if (!editedLog) return;
+      replaceEditedLog({ ...editedLog, percentageEaten: newPercentage });
+    },
+    [editedLog, replaceEditedLog]
+  );
 
   const titleChanged = draftTitle.trim() !== (originalLog?.title || "").trim();
   const percentageChanged = percentageEaten !== (originalLog?.percentageEaten ?? 100);
@@ -423,7 +424,7 @@ export default function Edit() {
                     step={10}
                     color={colors.accent}
                     onChange={(value) => {
-                      setPercentageEaten(Math.round(value));
+                      updatePercentageEaten(Math.round(value));
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }}
                   />
