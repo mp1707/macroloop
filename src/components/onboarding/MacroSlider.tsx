@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
-import Slider from "@react-native-community/slider";
+import { Host, Slider } from "@expo/ui/swift-ui";
 import { AppText } from "@/components/shared/AppText";
 import { useTheme } from "@/theme";
 import { Plus, Minus } from "lucide-react-native";
@@ -17,9 +17,6 @@ interface MacroSliderProps {
   maxCalories: number;
   caloriesPerGram: number;
   step?: number;
-  isAnySliderDragging?: boolean;
-  onDragStart?: () => void;
-  onDragEnd?: () => void;
 }
 
 export const MacroSlider = ({
@@ -31,9 +28,6 @@ export const MacroSlider = ({
   maxCalories,
   caloriesPerGram,
   step = 5,
-  isAnySliderDragging = false,
-  onDragStart,
-  onDragEnd,
 }: MacroSliderProps) => {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(colors, themeObj);
@@ -41,38 +35,14 @@ export const MacroSlider = ({
 
   const maxGrams = Math.floor(maxCalories / caloriesPerGram);
   const calories = grams * caloriesPerGram;
+  const percentage =
+    maxCalories > 0 ? Math.round((calories / maxCalories) * 100) : 0;
 
-  // Track slider key to force re-mount when needed (but not during any drag)
-  const [sliderKey, setSliderKey] = useState(0);
-  const prevMaxGrams = useRef(maxGrams);
-
-  // Force remount on initial render to fix React Native Slider position bug
-  useEffect(() => {
-    setSliderKey(1);
-  }, []);
-
-  // Update slider key when maxGrams changes, but only when no slider is dragging
-  useEffect(() => {
-    if (!isAnySliderDragging && prevMaxGrams.current !== maxGrams) {
-      setSliderKey((k) => k + 1);
-    }
-    prevMaxGrams.current = maxGrams;
-  }, [maxGrams, isAnySliderDragging]);
-
-  // Calculate percentage based on total budget (passed as maxCalories for protein,
-  // or remaining for fat) but show it relative to the original total
-  const percentage = maxCalories > 0 ? Math.round((calories / maxCalories) * 100) : 0;
-
-  // Helper to clamp grams value to ensure we never exceed calorie budget
   const clampGrams = (value: number): number => {
-    // Ensure value is within 0 to maxGrams
     const clamped = Math.max(0, Math.min(value, maxGrams));
-
-    // Additional safety: ensure the calories don't exceed maxCalories
     if (clamped * caloriesPerGram > maxCalories) {
       return Math.floor(maxCalories / caloriesPerGram);
     }
-
     return clamped;
   };
 
@@ -92,15 +62,6 @@ export const MacroSlider = ({
     const roundedValue = Math.round(value / step) * step;
     const clampedValue = clampGrams(roundedValue);
     onChange(clampedValue);
-  };
-
-  const handleSliderStart = () => {
-    onDragStart?.();
-  };
-
-  const handleSliderComplete = async () => {
-    onDragEnd?.();
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   return (
@@ -153,20 +114,16 @@ export const MacroSlider = ({
 
       {/* Slider */}
       <View style={styles.sliderContainer}>
-        <Slider
-          key={sliderKey}
-          style={styles.slider}
-          minimumValue={0}
-          maximumValue={maxGrams}
-          value={grams}
-          onValueChange={handleSliderChange}
-          onSlidingStart={handleSliderStart}
-          onSlidingComplete={handleSliderComplete}
-          minimumTrackTintColor={iconColor}
-          maximumTrackTintColor={colors.subtleBackground}
-          thumbTintColor={iconColor}
-          step={step}
-        />
+        <Host matchContents>
+          <Slider
+            value={grams}
+            min={0}
+            max={maxGrams}
+            steps={maxGrams > 0 ? Math.floor(maxGrams / step) - 1 : 0}
+            color={iconColor}
+            onValueChange={handleSliderChange}
+          />
+        </Host>
       </View>
     </View>
   );
@@ -197,12 +154,12 @@ const createStyles = (colors: Colors, themeObj: Theme) => {
     },
     stepperRow: {
       flexDirection: "row",
-      gap: spacing.xs,
+      gap: spacing.md,
     },
     stepperButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
+      width: 44,
+      height: 44,
+      borderRadius: 99,
       backgroundColor: colors.primaryBackground,
       alignItems: "center",
       justifyContent: "center",
@@ -213,11 +170,7 @@ const createStyles = (colors: Colors, themeObj: Theme) => {
       gap: spacing.sm,
     },
     sliderContainer: {
-      //
-    },
-    slider: {
-      width: "100%",
-      height: 32,
+      paddingHorizontal: spacing.sm,
     },
   });
 };
