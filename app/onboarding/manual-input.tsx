@@ -35,9 +35,6 @@ const ManualInputScreen = () => {
   const [protein, setProtein] = useState(proteinGoal || 0);
   const [fat, setFat] = useState(fatGoal || 0);
 
-  // Track if any slider is currently being dragged to prevent visual flicker
-  const [isAnySliderDragging, setIsAnySliderDragging] = useState(false);
-
   // Ensure we're in manual mode
   useEffect(() => {
     setInputMethod("manual");
@@ -117,8 +114,6 @@ const ManualInputScreen = () => {
             <CalorieControl
               value={calories}
               onChange={setCalories}
-              onDragStart={() => setIsAnySliderDragging(true)}
-              onDragEnd={() => setIsAnySliderDragging(false)}
             />
           </View>
 
@@ -147,9 +142,6 @@ const ManualInputScreen = () => {
                 onChange={setProtein}
                 maxCalories={calories}
                 caloriesPerGram={4}
-                isAnySliderDragging={isAnySliderDragging}
-                onDragStart={() => setIsAnySliderDragging(true)}
-                onDragEnd={() => setIsAnySliderDragging(false)}
               />
 
               {/* Fat Slider */}
@@ -161,9 +153,6 @@ const ManualInputScreen = () => {
                 onChange={setFat}
                 maxCalories={calories - proteinCalories}
                 caloriesPerGram={9}
-                isAnySliderDragging={isAnySliderDragging}
-                onDragStart={() => setIsAnySliderDragging(true)}
-                onDragEnd={() => setIsAnySliderDragging(false)}
               />
 
               {/* Carbs Display (Auto-calculated) */}

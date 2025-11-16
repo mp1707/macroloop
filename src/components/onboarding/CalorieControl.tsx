@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
-import Slider from "@react-native-community/slider";
+import { Host, Slider } from "@expo/ui/swift-ui";
 import { AppText } from "@/components/shared/AppText";
 import { useTheme } from "@/theme";
 import { Flame, Plus, Minus } from "lucide-react-native";
@@ -13,8 +13,6 @@ interface CalorieControlProps {
   min?: number;
   max?: number;
   step?: number;
-  onDragStart?: () => void;
-  onDragEnd?: () => void;
 }
 
 export const CalorieControl = ({
@@ -23,19 +21,10 @@ export const CalorieControl = ({
   min = 1200,
   max = 4500,
   step = 50,
-  onDragStart,
-  onDragEnd,
 }: CalorieControlProps) => {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(colors, themeObj);
   const { t } = useTranslation();
-
-  // Force remount on initial render to fix React Native Slider position bug
-  const [sliderKey, setSliderKey] = useState(0);
-
-  useEffect(() => {
-    setSliderKey(1);
-  }, []);
 
   const handleIncrement = async () => {
     const newValue = Math.min(value + step, max);
@@ -52,15 +41,7 @@ export const CalorieControl = ({
   const handleSliderChange = (sliderValue: number) => {
     const roundedValue = Math.round(sliderValue / step) * step;
     onChange(roundedValue);
-  };
-
-  const handleSliderStart = () => {
-    onDragStart?.();
-  };
-
-  const handleSliderComplete = async () => {
-    onDragEnd?.();
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   return (
@@ -109,20 +90,16 @@ export const CalorieControl = ({
 
       {/* Slider */}
       <View style={styles.sliderContainer}>
-        <Slider
-          key={sliderKey}
-          style={styles.slider}
-          minimumValue={min}
-          maximumValue={max}
-          value={value}
-          onValueChange={handleSliderChange}
-          onSlidingStart={handleSliderStart}
-          onSlidingComplete={handleSliderComplete}
-          minimumTrackTintColor={colors.accent}
-          maximumTrackTintColor={colors.subtleBackground}
-          thumbTintColor={colors.accent}
-          step={step}
-        />
+        <Host matchContents>
+          <Slider
+            value={value}
+            min={min}
+            max={max}
+            steps={(max - min) / step - 1}
+            color={colors.accent}
+            onValueChange={handleSliderChange}
+          />
+        </Host>
         <View style={styles.sliderLabels}>
           <AppText role="Caption" color="secondary">
             {min}
@@ -175,10 +152,7 @@ const createStyles = (colors: Colors, themeObj: Theme) => {
     },
     sliderContainer: {
       gap: spacing.xs,
-    },
-    slider: {
-      width: "100%",
-      height: 40,
+      paddingHorizontal: spacing.sm,
     },
     sliderLabels: {
       flexDirection: "row",
