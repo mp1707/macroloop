@@ -1,40 +1,43 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet, Dimensions, Platform } from "react-native";
 import { BlurView } from "expo-blur";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
-  runOnJS,
   Easing,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Star, StarOff, AlertCircle } from "lucide-react-native";
 import { useTheme } from "@/theme";
 import { useHudStore } from "@/store/useHudStore";
+import { AppText } from "@/components/shared/AppText";
 import * as Haptics from "expo-haptics";
 
 const { width: screenWidth } = Dimensions.get("window");
 
+// iOS 26 liquid glass animation - snappier and more responsive
 const SPRING_CONFIG = {
-  damping: 30,
-  stiffness: 400,
-  mass: 1,
+  damping: 25,
+  stiffness: 350,
+  mass: 0.8,
 };
 
 const SWIPE_THRESHOLD = 50;
 const VELOCITY_THRESHOLD = 500;
 
 export const HudNotification: React.FC = () => {
-  const { colors, colorScheme } = useTheme();
+  const { colors, colorScheme, theme } = useTheme();
   const { isVisible, type, title, subtitle, hide } = useHudStore();
+  const insets = useSafeAreaInsets();
   const isMountedRef = useRef(true);
 
-  // Animation values
+  // Animation values - slide from top instead of scale
   const opacity = useSharedValue(0);
-  const scale = useSharedValue(0.8);
-  const translateY = useSharedValue(0);
+  const translateY = useSharedValue(-100);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -43,16 +46,21 @@ export const HudNotification: React.FC = () => {
     };
   }, []);
 
-  // Entry animation
+  // Entry animation - snappier iOS 26 style slide from top
   useEffect(() => {
     if (isVisible) {
-      opacity.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) });
-      scale.value = withSpring(1, SPRING_CONFIG);
-      translateY.value = 0;
+      opacity.value = withTiming(1, {
+        duration: 100,
+        easing: Easing.out(Easing.cubic),
+      });
+      translateY.value = withSpring(0, SPRING_CONFIG);
     } else {
-      // Exit animation
-      opacity.value = withTiming(0, { duration: 150 });
-      scale.value = withTiming(0.9, { duration: 150 });
+      // Exit animation - quick fade and slide up
+      opacity.value = withTiming(0, { duration: 100 });
+      translateY.value = withTiming(-100, {
+        duration: 120,
+        easing: Easing.in(Easing.cubic),
+      });
     }
   }, [isVisible]);
 
@@ -77,39 +85,42 @@ export const HudNotification: React.FC = () => {
         hide();
         // Reset animation values for next show
         opacity.value = 0;
-        scale.value = 0.8;
-        translateY.value = 0;
+        translateY.value = -100;
       }
-    }, 200);
+    }, 150);
   };
 
   // Tap gesture to dismiss
-  const tapGesture = Gesture.Tap()
-    .onStart(() => {
-      runOnJS(handleHapticFeedback)();
-      runOnJS(handleDismiss)();
-    });
+  const tapGesture = Gesture.Tap().onStart(() => {
+    scheduleOnRN(handleHapticFeedback);
+    scheduleOnRN(handleDismiss);
+  });
 
-  // Pan gesture for swipe to dismiss
+  // Pan gesture for swipe to dismiss - only upward swipes
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
-      translateY.value = event.translationY;
+      // Only allow upward swipes
+      if (event.translationY < 0) {
+        translateY.value = event.translationY;
+      }
     })
     .onEnd((event) => {
       const shouldDismiss =
-        Math.abs(event.translationY) > SWIPE_THRESHOLD ||
-        Math.abs(event.velocityY) > VELOCITY_THRESHOLD;
+        event.translationY < -SWIPE_THRESHOLD ||
+        event.velocityY < -VELOCITY_THRESHOLD;
 
       if (shouldDismiss) {
-        // Animate off screen
-        const direction = event.translationY > 0 ? 1 : -1;
-        translateY.value = withTiming(direction * 200, { duration: 200 });
-        opacity.value = withTiming(0, { duration: 200 });
+        // Animate off screen upward
+        translateY.value = withTiming(-200, {
+          duration: 120,
+          easing: Easing.in(Easing.cubic),
+        });
+        opacity.value = withTiming(0, { duration: 100 });
 
         // Dismiss after animation
-        runOnJS(handleDismissWithDelay)();
+        scheduleOnRN(handleDismissWithDelay);
       } else {
-        // Spring back to center
+        // Spring back to position
         translateY.value = withSpring(0, SPRING_CONFIG);
       }
     });
@@ -117,13 +128,10 @@ export const HudNotification: React.FC = () => {
   // Combined gesture - use Race instead of Simultaneous to prevent conflicts
   const combinedGesture = Gesture.Race(tapGesture, panGesture);
 
-  // Animated styles
+  // Animated styles - slide from top only
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [
-      { scale: scale.value },
-      { translateY: translateY.value },
-    ],
+    transform: [{ translateY: translateY.value }],
   }));
 
   // Get icon and colors based on type
@@ -133,7 +141,13 @@ export const HudNotification: React.FC = () => {
     switch (type) {
       case "success":
         return {
-          icon: <Star size={iconSize} color={colors.semantic.fat} fill={colors.semantic.fat} />,
+          icon: (
+            <Star
+              size={iconSize}
+              color={colors.semantic.fat}
+              fill={colors.semantic.fat}
+            />
+          ),
           iconColor: colors.semantic.fat,
         };
       case "info":
@@ -160,27 +174,35 @@ export const HudNotification: React.FC = () => {
 
   const { icon } = getIconConfig();
 
-  const styles = createStyles(colors, colorScheme);
+  const styles = createStyles(colors, colorScheme, insets, theme);
 
   return (
     <View style={styles.overlay}>
       <GestureDetector gesture={combinedGesture}>
         <Animated.View style={[styles.container, animatedStyle]}>
-          <BlurView intensity={100} tint="dark" style={styles.blurContainer}>
+          <BlurView
+            intensity={100}
+            tint={colorScheme}
+            style={styles.blurContainer}
+          >
             <View style={styles.content}>
-              <View style={styles.iconContainer}>
-                {icon}
+              <View style={styles.iconContainer}>{icon}</View>
+
+              <View style={styles.textContainer}>
+                <AppText role="Headline" color="white" style={styles.titleText}>
+                  {title}
+                </AppText>
+
+                {subtitle && (
+                  <AppText
+                    role="Caption"
+                    color="white"
+                    style={styles.subtitleText}
+                  >
+                    {subtitle}
+                  </AppText>
+                )}
               </View>
-
-              <Text style={styles.titleText} numberOfLines={1}>
-                {title}
-              </Text>
-
-              {subtitle && (
-                <Text style={styles.subtitleText} numberOfLines={type === "error" ? 4 : 2}>
-                  {subtitle}
-                </Text>
-              )}
             </View>
           </BlurView>
         </Animated.View>
@@ -189,56 +211,70 @@ export const HudNotification: React.FC = () => {
   );
 };
 
-const createStyles = (colors: any, colorScheme: string) =>
-  StyleSheet.create({
+const createStyles = (
+  colors: any,
+  colorScheme: string,
+  insets: any,
+  theme: any
+) => {
+  // iOS 26 style spacing - reasonable distance from status bar
+  const topSpacing = insets.top + theme.spacing.md; // Safe area top + 16pt
+
+  return StyleSheet.create({
     overlay: {
       position: "absolute",
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
-      justifyContent: "center",
+      justifyContent: "flex-start",
       alignItems: "center",
       zIndex: 999999,
       pointerEvents: "box-none",
+      paddingTop: topSpacing,
     },
     container: {
-      width: 160,
-      height: 160,
-      borderRadius: 24,
+      width: screenWidth - theme.spacing.xl, // Screen width minus horizontal margins
+      maxWidth: 400,
+      minHeight: 80,
+      borderRadius: 20,
       overflow: "hidden",
+      // iOS 26 liquid glass subtle shadow
+      shadowColor:
+        colorScheme === "dark" ? "rgba(0, 0, 0, 0.4)" : "rgba(0, 0, 0, 0.15)",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 1,
+      shadowRadius: 24,
+      elevation: 8,
     },
     blurContainer: {
-      width: 160,
-      height: 160,
-      borderRadius: 24,
+      width: "100%",
+      borderRadius: 20,
+      overflow: "hidden",
     },
     content: {
-      width: 160,
-      height: 160,
-      justifyContent: "center",
+      width: "100%",
+      flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 20,
-      paddingVertical: 24,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.md,
+      gap: theme.spacing.sm + 4, // 12pt spacing between icon and text
     },
     iconContainer: {
-      marginBottom: 12,
+      flexShrink: 0,
+    },
+    textContainer: {
+      flex: 1,
+      flexDirection: "column",
+      gap: 2,
     },
     titleText: {
-      color: colors.white,
-      fontFamily: "Nunito-SemiBold",
-      fontSize: 17,
-      fontWeight: "600",
-      textAlign: "center",
-      marginBottom: 4,
+      textAlign: "left",
     },
     subtitleText: {
-      color: colors.white,
-      fontFamily: "Nunito-Regular",
-      fontSize: 13,
-      fontWeight: "400",
-      textAlign: "center",
-      opacity: 0.8,
-      lineHeight: 16,
+      textAlign: "left",
+      opacity: 0.85,
+      lineHeight: 18,
     },
   });
+};
