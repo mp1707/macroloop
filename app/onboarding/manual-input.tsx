@@ -111,10 +111,7 @@ const ManualInputScreen = () => {
 
           {/* Calorie Control */}
           <View style={styles.section}>
-            <CalorieControl
-              value={calories}
-              onChange={setCalories}
-            />
+            <CalorieControl value={calories} onChange={setCalories} />
           </View>
 
           {/* Macro Distribution Section */}
@@ -179,15 +176,23 @@ const ManualInputScreen = () => {
                 <View style={styles.carbsValueRow}>
                   <AppText role="Title2">{carbGrams} g</AppText>
                   <AppText role="Caption" color="secondary">
-                    {carbCalories} kcal / {calories > 0 ? Math.round((carbCalories / calories) * 100) : 0}%
+                    {carbCalories} kcal /{" "}
+                    {calories > 0
+                      ? Math.round((carbCalories / calories) * 100)
+                      : 0}
+                    %
                   </AppText>
                 </View>
 
-                  <AppText role="Caption" color="secondary" style={styles.carbsHelper}>
-                    {t("onboarding.manualInput.carbsHelper")}
-                  </AppText>
-                </View>
-              </Animated.View>
+                <AppText
+                  role="Caption"
+                  color="secondary"
+                  style={styles.carbsHelper}
+                >
+                  {t("onboarding.manualInput.carbsHelper")}
+                </AppText>
+              </View>
+            </Animated.View>
           )}
         </View>
       </ScrollView>

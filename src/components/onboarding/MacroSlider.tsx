@@ -35,7 +35,8 @@ export const MacroSlider = ({
 
   const maxGrams = Math.floor(maxCalories / caloriesPerGram);
   const calories = grams * caloriesPerGram;
-  const percentage = maxCalories > 0 ? Math.round((calories / maxCalories) * 100) : 0;
+  const percentage =
+    maxCalories > 0 ? Math.round((calories / maxCalories) * 100) : 0;
 
   const clampGrams = (value: number): number => {
     const clamped = Math.max(0, Math.min(value, maxGrams));
@@ -61,7 +62,6 @@ export const MacroSlider = ({
     const roundedValue = Math.round(value / step) * step;
     const clampedValue = clampGrams(roundedValue);
     onChange(clampedValue);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   return (
@@ -154,12 +154,12 @@ const createStyles = (colors: Colors, themeObj: Theme) => {
     },
     stepperRow: {
       flexDirection: "row",
-      gap: spacing.xs,
+      gap: spacing.md,
     },
     stepperButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
+      width: 44,
+      height: 44,
+      borderRadius: 99,
       backgroundColor: colors.primaryBackground,
       alignItems: "center",
       justifyContent: "center",

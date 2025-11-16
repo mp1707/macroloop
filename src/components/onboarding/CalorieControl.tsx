@@ -41,7 +41,6 @@ export const CalorieControl = ({
   const handleSliderChange = (sliderValue: number) => {
     const roundedValue = Math.round(sliderValue / step) * step;
     onChange(roundedValue);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   return (
