@@ -22,6 +22,7 @@ export interface RefineRequest {
   foodComponents: string;
   macrosPerReferencePortion?: MacrosPerReferencePortion;
   language: Language;
+  signal?: AbortSignal;
 }
 
 export interface ImageEstimateRequest {
@@ -113,6 +114,7 @@ export const refineEstimation = async (
     console.log("Refine estimation request:", request);
   }
 
+  const { signal, ...requestData } = request;
   const response = await fetch(
     `${supabaseUrl}/functions/v1/refineEstimationDE`,
     {
@@ -122,7 +124,8 @@ export const refineEstimation = async (
         Authorization: `Bearer ${supabaseAnonKey}`,
         apikey: supabaseAnonKey,
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify(requestData),
+      signal,
     }
   );
 

@@ -123,30 +123,24 @@ function RootLayoutContent() {
     Image.clearMemoryCache();
     Image.clearDiskCache();
 
-    // Global error handlers to prevent silent crashes
-    const errorHandler = (error: ErrorEvent) => {
-      console.error("Global error:", error.error);
-      // Prevent default crash behavior
-      return true;
-    };
+    // Global error handlers to prevent silent crashes (React Native)
+    const ErrorUtils = (global as any).ErrorUtils;
+    if (ErrorUtils) {
+      const originalHandler = ErrorUtils.getGlobalHandler();
 
-    const rejectionHandler = (event: PromiseRejectionEvent) => {
-      console.error("Unhandled promise rejection:", event.reason);
-      // Prevent default crash behavior
-      event.preventDefault();
-    };
+      ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+        console.error("Global error:", error, "isFatal:", isFatal);
+        // Call original handler to maintain default behavior
+        originalHandler?.(error, isFatal);
+      });
 
-    // @ts-ignore - These exist in React Native environment
-    global.addEventListener?.("error", errorHandler);
-    // @ts-ignore
-    global.addEventListener?.("unhandledrejection", rejectionHandler);
-
-    return () => {
-      // @ts-ignore
-      global.removeEventListener?.("error", errorHandler);
-      // @ts-ignore
-      global.removeEventListener?.("unhandledrejection", rejectionHandler);
-    };
+      return () => {
+        // Restore original handler
+        if (originalHandler) {
+          ErrorUtils.setGlobalHandler(originalHandler);
+        }
+      };
+    }
   }, [cleanupIncompleteEstimations]);
 
   return (

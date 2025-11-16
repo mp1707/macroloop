@@ -174,6 +174,7 @@ export const useEstimation = () => {
           foodComponents: foodComponentsString,
           macrosPerReferencePortion: editedEntry.macrosPerReferencePortion,
           language,
+          signal: abortController.signal,
         });
 
         // Check if component is still mounted and request wasn't cancelled
@@ -201,8 +202,8 @@ export const useEstimation = () => {
         // Re-throw other errors to be handled by caller
         throw error;
       } finally {
-        // Only update state if still mounted
-        if (isMountedRef.current) {
+        // Only clear loading flag if this request is still the active one
+        if (isMountedRef.current && activeRequestRef.current === abortController) {
           setIsEditEstimating(false);
         }
         // Clear the active request ref if this was the active request

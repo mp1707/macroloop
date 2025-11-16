@@ -108,20 +108,10 @@ export default function Edit() {
   const scrollRef = useRef<RNScrollView | null>(null);
   const [revealKey, setRevealKey] = useState(0);
   const previousLoadingRef = useRef<boolean>(isEditEstimating);
-  const reestimateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     previousLoadingRef.current = isEditEstimating;
   }, [isEditEstimating]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (reestimateTimeoutRef.current) {
-        clearTimeout(reestimateTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const titleChanged = draftTitle.trim() !== (originalLog?.title || "").trim();
 
@@ -168,11 +158,6 @@ export default function Edit() {
         console.log("⏳ Re-estimation already in progress, ignoring click");
       }
       return;
-    }
-
-    // Clear any pending timeout
-    if (reestimateTimeoutRef.current) {
-      clearTimeout(reestimateTimeoutRef.current);
     }
 
     scrollRef.current?.scrollToEnd({ animated: true });
