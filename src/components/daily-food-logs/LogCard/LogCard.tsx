@@ -133,6 +133,11 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
               animatedStyle={titleAnimatedStyle}
               style={styles.title}
             />
+            {(foodLog.percentageEaten ?? 100) !== 100 && (
+              <AppText style={styles.percentageText}>
+                {foodLog.percentageEaten}% gegessen
+              </AppText>
+            )}
             <FoodComponentList
               foodComponents={foodLog.foodComponents}
               maxItems={2}
@@ -263,6 +268,11 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
         <View style={styles.contentContainer}>
           <View style={styles.leftSection}>
             <LogCardTitle title={displayTitle} style={styles.title} />
+            {(foodLog.percentageEaten ?? 100) !== 100 && (
+              <AppText style={styles.percentageText}>
+                {foodLog.percentageEaten}% gegessen
+              </AppText>
+            )}
             <FoodComponentList
               foodComponents={foodLog.foodComponents}
               maxItems={3}

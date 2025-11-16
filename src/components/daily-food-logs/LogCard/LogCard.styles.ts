@@ -43,6 +43,11 @@ export const createStyles = (colors: Colors) =>
       flex: 1,
     },
     title: {},
+    percentageText: {
+      color: colors.secondaryText,
+      fontSize: theme.typography.Caption.fontSize,
+      marginTop: theme.spacing.xs,
+    },
     description: {
       fontStyle: "italic",
       marginTop: theme.spacing.xs,
