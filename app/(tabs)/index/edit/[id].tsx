@@ -414,10 +414,10 @@ export default function Edit() {
             <Animated.View layout={easeLayout} style={styles.percentageSection}>
               <View style={styles.percentageHeader}>
                 <AppText role="Caption" style={styles.sectionHeader}>
-                  Wieviel hab ich gegessen?
+                  {t("editLog.percentageEaten.title")}
                 </AppText>
                 <AppText role="Body" style={styles.percentageText}>
-                  {Math.round(percentageEaten)}%
+                  {t("editLog.percentageEaten.value", { percentage: Math.round(percentageEaten) })}
                 </AppText>
               </View>
               <View style={styles.sliderContainer}>

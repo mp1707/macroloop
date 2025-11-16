@@ -156,6 +156,10 @@
         "label": "Delete Favorite",
         "accessibilityLabel": "Delete favorite"
       },
+      "percentageEaten": {
+        "title": "How much have I eaten?",
+        "value": "{{percentage}}%"
+      },
       "alerts": {
         "delete": {
           "title": "Delete Favorite",
@@ -188,6 +192,10 @@
     "favorites": {
       "add": "Add to Favorites",
       "added": "Favorited"
+    },
+    "percentageEaten": {
+      "title": "How much have I eaten?",
+      "value": "{{percentage}}%"
     },
     "alert": {
       "title": "Unsaved ingredient changes",
@@ -676,6 +684,7 @@
   },
   "logCard": {
     "fallbackTitle": "New Log",
+    "percentageEaten": "{{percentage}}% eaten",
     "contextMenu": {
       "createLog": "Create Log",
       "logAgain": "Log Again",

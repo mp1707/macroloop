@@ -135,7 +135,7 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
             />
             {(foodLog.percentageEaten ?? 100) !== 100 && (
               <AppText style={styles.percentageText}>
-                {foodLog.percentageEaten}% gegessen
+                {t("logCard.percentageEaten", { percentage: foodLog.percentageEaten })}
               </AppText>
             )}
             <FoodComponentList
@@ -270,7 +270,7 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
             <LogCardTitle title={displayTitle} style={styles.title} />
             {(foodLog.percentageEaten ?? 100) !== 100 && (
               <AppText style={styles.percentageText}>
-                {foodLog.percentageEaten}% gegessen
+                {t("logCard.percentageEaten", { percentage: foodLog.percentageEaten })}
               </AppText>
             )}
             <FoodComponentList

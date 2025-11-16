@@ -156,6 +156,10 @@
         "label": "Favorit löschen",
         "accessibilityLabel": "Favorit löschen"
       },
+      "percentageEaten": {
+        "title": "Wieviel hab ich gegessen?",
+        "value": "{{percentage}}%"
+      },
       "alerts": {
         "delete": {
           "title": "Favorit löschen",
@@ -187,6 +191,10 @@
     "favorites": {
       "add": "Zu Favoriten hinzufügen",
       "added": "Favorit"
+    },
+    "percentageEaten": {
+      "title": "Wieviel hab ich gegessen?",
+      "value": "{{percentage}}%"
     },
     "alert": {
       "title": "Ungespeicherte Änderungen an Zutaten",
@@ -674,6 +682,7 @@
   },
   "logCard": {
     "fallbackTitle": "Neuer Eintrag",
+    "percentageEaten": "{{percentage}}% gegessen",
     "contextMenu": {
       "createLog": "Eintrag erstellen",
       "logAgain": "Erneut protokollieren",
