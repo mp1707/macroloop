@@ -6,6 +6,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { AppText } from "@/components/shared/AppText";
 import { useTheme } from "@/theme";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTranslation } from "react-i18next";
 
 interface BudgetBarProps {
@@ -15,6 +16,13 @@ interface BudgetBarProps {
   carbCalories: number;
 }
 
+/**
+ * BudgetBar - Visualizes calorie allocation across macros
+ *
+ * ACCESSIBILITY:
+ * - Respects reduced motion preferences (WCAG 2.3.3)
+ * - Provides text alternatives for visual budget bar (WCAG 1.1.1)
+ */
 export const BudgetBar = ({
   totalCalories,
   proteinCalories,
@@ -23,6 +31,7 @@ export const BudgetBar = ({
 }: BudgetBarProps) => {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(colors, themeObj);
+  const reduceMotion = useReducedMotion();
   const { t } = useTranslation();
 
   const proteinPct = totalCalories > 0 ? (proteinCalories / totalCalories) * 100 : 0;
@@ -30,40 +39,58 @@ export const BudgetBar = ({
   const carbPct = totalCalories > 0 ? (carbCalories / totalCalories) * 100 : 0;
   const remainingPct = 100 - proteinPct - fatPct - carbPct;
 
+  // ACCESSIBILITY: Respect reduce motion preference (WCAG 2.3.3)
+  const animationConfig = reduceMotion
+    ? undefined // No animation
+    : { damping: 30, stiffness: 400 };
+
   const proteinAnimatedStyle = useAnimatedStyle(() => ({
-    width: withSpring(`${proteinPct}%`, {
-      damping: 30,
-      stiffness: 400,
-    }),
+    width: reduceMotion
+      ? `${proteinPct}%`
+      : withSpring(`${proteinPct}%`, animationConfig),
   }));
 
   const fatAnimatedStyle = useAnimatedStyle(() => ({
-    width: withSpring(`${fatPct}%`, {
-      damping: 30,
-      stiffness: 400,
-    }),
+    width: reduceMotion
+      ? `${fatPct}%`
+      : withSpring(`${fatPct}%`, animationConfig),
   }));
 
   const carbAnimatedStyle = useAnimatedStyle(() => ({
-    width: withSpring(`${carbPct}%`, {
-      damping: 30,
-      stiffness: 400,
-    }),
+    width: reduceMotion
+      ? `${carbPct}%`
+      : withSpring(`${carbPct}%`, animationConfig),
   }));
 
   const remainingAnimatedStyle = useAnimatedStyle(() => ({
-    width: withSpring(`${Math.max(0, remainingPct)}%`, {
-      damping: 30,
-      stiffness: 400,
-    }),
+    width: reduceMotion
+      ? `${Math.max(0, remainingPct)}%`
+      : withSpring(`${Math.max(0, remainingPct)}%`, animationConfig),
   }));
 
   const remainingCalories = totalCalories - proteinCalories - fatCalories - carbCalories;
 
+  // ACCESSIBILITY: Provide text alternative for visual budget bar (WCAG 1.1.1)
+  const accessibilityLabel = `Calorie budget bar. Protein: ${Math.round(
+    proteinPct
+  )}%, Fat: ${Math.round(fatPct)}%, Carbs: ${Math.round(carbPct)}%${
+    remainingPct > 0 ? `, Unallocated: ${Math.round(remainingPct)}%` : ""
+  }`;
+
   return (
     <View style={styles.container}>
       {/* Budget Bar */}
-      <View style={styles.barContainer}>
+      <View
+        style={styles.barContainer}
+        accessible={true}
+        accessibilityRole="progressbar"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityValue={{
+          min: 0,
+          max: 100,
+          now: 100 - remainingPct,
+        }}
+      >
         <View style={styles.barTrack}>
           {proteinPct > 0 && (
             <Animated.View
