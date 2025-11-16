@@ -62,10 +62,12 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     favoritesSection: {
       justifyContent: "center",
+      marginVertical: -theme.spacing.xl,
     },
     favoritesListContent: {
       paddingRight: theme.spacing.xl,
       paddingLeft: theme.spacing.sm,
+      paddingVertical: theme.spacing.xl,
     },
     favoriteSeparator: {
       width: theme.spacing.sm,

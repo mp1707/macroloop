@@ -42,5 +42,7 @@ const createStyles = (theme: Theme) =>
       paddingHorizontal: theme.spacing.lg,
       flex: 1,
       justifyContent: "center",
+      overflow: "visible",
+      marginVertical: -theme.spacing.xl,
     },
   });

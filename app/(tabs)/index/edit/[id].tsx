@@ -480,6 +480,8 @@ const createStyles = (colors: Colors, theme: Theme) =>
     },
     imageSection: {
       gap: theme.spacing.sm,
+      overflow: "visible",
+      marginVertical: -theme.spacing.xl,
     },
     sectionHeader: {
       letterSpacing: 0.6,
