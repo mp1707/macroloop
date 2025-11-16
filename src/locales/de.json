@@ -32,7 +32,8 @@
     "done": "Fertig",
     "close": "Schließen",
     "confirm": "Bestätigen",
-    "recommended": "Empfohlen"
+    "recommended": "Empfohlen",
+    "ok": "OK"
   },
   "dates": {
     "labels": {
@@ -193,6 +194,10 @@
       "message": "Du hast Zutaten geändert, ohne die Makros neu zu berechnen. Die Nährwerte können ungenau sein.",
       "recalculate": "Makros neu berechnen",
       "saveAnyway": "Trotzdem speichern"
+    },
+    "error": {
+      "title": "Neuberechnung fehlgeschlagen",
+      "reestimationFailed": "Wir konnten deine Makros nicht neu berechnen. Bitte überprüfe deine Verbindung und versuche es erneut."
     },
     "paywall": {
       "title": "Mit Pro neu berechnen",

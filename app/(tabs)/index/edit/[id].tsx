@@ -108,10 +108,20 @@ export default function Edit() {
   const scrollRef = useRef<RNScrollView | null>(null);
   const [revealKey, setRevealKey] = useState(0);
   const previousLoadingRef = useRef<boolean>(isEditEstimating);
+  const reestimateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     previousLoadingRef.current = isEditEstimating;
   }, [isEditEstimating]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (reestimateTimeoutRef.current) {
+        clearTimeout(reestimateTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const titleChanged = draftTitle.trim() !== (originalLog?.title || "").trim();
 
@@ -152,25 +162,53 @@ export default function Edit() {
       return;
     }
 
+    // Debounce rapid clicks (prevent multiple simultaneous requests)
+    if (isEditEstimating) {
+      if (__DEV__) {
+        console.log("⏳ Re-estimation already in progress, ignoring click");
+      }
+      return;
+    }
+
+    // Clear any pending timeout
+    if (reestimateTimeoutRef.current) {
+      clearTimeout(reestimateTimeoutRef.current);
+    }
+
     scrollRef.current?.scrollToEnd({ animated: true });
 
     try {
-      await runEditEstimation(editedLog, (log) => {
+      const result = await runEditEstimation(editedLog, (log) => {
         replaceEditedLog(log);
       });
-      markReestimated();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setRevealKey((key) => key + 1);
+
+      // Only update UI if we got a result (not cancelled)
+      if (result) {
+        markReestimated();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setRevealKey((key) => key + 1);
+      }
     } catch (error) {
-      // Optional: silence for now; toasts handled elsewhere
+      // Improved error handling
+      console.error("Re-estimation error:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
+      // Show user-friendly error
+      Alert.alert(
+        t("editLog.error.title"),
+        t("editLog.error.reestimationFailed"),
+        [{ text: t("common.ok"), style: "default" }]
+      );
     }
   }, [
     editedLog,
     isPro,
+    isEditEstimating,
     handleShowPaywall,
     runEditEstimation,
     replaceEditedLog,
     markReestimated,
+    t,
   ]);
 
   const commitTitleBeforeSave = useCallback(() => {

@@ -32,7 +32,8 @@
     "done": "Done",
     "close": "Close",
     "confirm": "Confirm",
-    "recommended": "Recommended"
+    "recommended": "Recommended",
+    "ok": "OK"
   },
   "dates": {
     "labels": {
@@ -194,6 +195,10 @@
       "message": "You changed ingredients without recalculating macros. Nutrition may be inaccurate.",
       "recalculate": "Recalculate macros",
       "saveAnyway": "Save anyway"
+    },
+    "error": {
+      "title": "Recalculation failed",
+      "reestimationFailed": "We couldn't recalculate your macros. Please check your connection and try again."
     },
     "paywall": {
       "title": "Recalculate with Pro",

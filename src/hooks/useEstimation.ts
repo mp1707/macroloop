@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useHudStore } from "@/store/useHudStore";
 import { EstimationInput, createEstimationLog } from "@/utils/estimation";
@@ -69,6 +69,21 @@ export const useEstimation = () => {
   const { currentLanguage } = useLocalization();
   const language = currentLanguage || "en";
 
+  // Track active requests to prevent race conditions
+  const activeRequestRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      // Cancel any ongoing requests
+      if (activeRequestRef.current) {
+        activeRequestRef.current.abort();
+      }
+    };
+  }, []);
+
   // Create page flow: add incomplete log, run initial estimation, update store
   const runCreateEstimation = useCallback(
     async (logData: EstimationInput) => {
@@ -131,6 +146,16 @@ export const useEstimation = () => {
         // Caller should prevent this; no-op for safety
         return;
       }
+
+      // Cancel any existing request before starting a new one
+      if (activeRequestRef.current) {
+        activeRequestRef.current.abort();
+      }
+
+      // Create new abort controller for this request
+      const abortController = new AbortController();
+      activeRequestRef.current = abortController;
+
       if (__DEV__) {
         console.log("🛠️ Components refinement");
       }
@@ -150,14 +175,40 @@ export const useEstimation = () => {
           macrosPerReferencePortion: editedEntry.macrosPerReferencePortion,
           language,
         });
+
+        // Check if component is still mounted and request wasn't cancelled
+        if (!isMountedRef.current || abortController.signal.aborted) {
+          if (__DEV__) {
+            console.log("🚫 Estimation cancelled or component unmounted");
+          }
+          return;
+        }
+
         const completedEntry = makeCompletedFromRefinement(
           editedEntry,
           refined
         );
         onComplete(completedEntry);
         return completedEntry;
+      } catch (error) {
+        // Only handle errors if not aborted
+        if (error instanceof Error && error.name === "AbortError") {
+          if (__DEV__) {
+            console.log("🚫 Request aborted");
+          }
+          return;
+        }
+        // Re-throw other errors to be handled by caller
+        throw error;
       } finally {
-        setIsEditEstimating(false);
+        // Only update state if still mounted
+        if (isMountedRef.current) {
+          setIsEditEstimating(false);
+        }
+        // Clear the active request ref if this was the active request
+        if (activeRequestRef.current === abortController) {
+          activeRequestRef.current = null;
+        }
       }
     },
     [isPro, language]

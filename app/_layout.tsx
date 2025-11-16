@@ -15,6 +15,7 @@ import { useRevenueCat } from "@/hooks/useRevenueCat";
 import "@/lib/i18n";
 import { LocalizationProvider } from "@/context/LocalizationContext";
 import { Image } from "expo-image";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function ThemedStack() {
   const { colors, isThemeLoaded } = useTheme();
@@ -121,19 +122,46 @@ function RootLayoutContent() {
     // but we clear on start to ensure no stale images from crashed sessions
     Image.clearMemoryCache();
     Image.clearDiskCache();
+
+    // Global error handlers to prevent silent crashes
+    const errorHandler = (error: ErrorEvent) => {
+      console.error("Global error:", error.error);
+      // Prevent default crash behavior
+      return true;
+    };
+
+    const rejectionHandler = (event: PromiseRejectionEvent) => {
+      console.error("Unhandled promise rejection:", event.reason);
+      // Prevent default crash behavior
+      event.preventDefault();
+    };
+
+    // @ts-ignore - These exist in React Native environment
+    global.addEventListener?.("error", errorHandler);
+    // @ts-ignore
+    global.addEventListener?.("unhandledrejection", rejectionHandler);
+
+    return () => {
+      // @ts-ignore
+      global.removeEventListener?.("error", errorHandler);
+      // @ts-ignore
+      global.removeEventListener?.("unhandledrejection", rejectionHandler);
+    };
   }, [cleanupIncompleteEstimations]);
 
   return (
-    <GestureHandlerRootView
-      style={{ flex: 1, backgroundColor: colors.primaryBackground }}
-    >
-      <KeyboardProvider>
-        <NavigationTransitionProvider>
-          <ThemedStack />
-        </NavigationTransitionProvider>
-        <HudNotification />
-      </KeyboardProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView
+        style={{ flex: 1, backgroundColor: colors.primaryBackground }}
+      >
+        <KeyboardProvider>
+          <NavigationTransitionProvider>
+            <ThemedStack />
+          </NavigationTransitionProvider>
+          <HudNotification />
+        </KeyboardProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 
