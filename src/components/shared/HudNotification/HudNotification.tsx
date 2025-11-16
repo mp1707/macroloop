@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, Dimensions, Platform } from "react-native";
 import { BlurView } from "expo-blur";
-import { GlassView, isLiquidglassAvailable } from "expo-glass-effect";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -35,7 +34,6 @@ export const HudNotification: React.FC = () => {
   const { isVisible, type, title, subtitle, hide } = useHudStore();
   const insets = useSafeAreaInsets();
   const isMountedRef = useRef(true);
-  const hasLiquidGlass = isLiquidglassAvailable();
 
   // Animation values - slide from top instead of scale
   const opacity = useSharedValue(0);
@@ -53,7 +51,7 @@ export const HudNotification: React.FC = () => {
     if (isVisible) {
       opacity.value = withTiming(1, {
         duration: 100,
-        easing: Easing.out(Easing.cubic)
+        easing: Easing.out(Easing.cubic),
       });
       translateY.value = withSpring(0, SPRING_CONFIG);
     } else {
@@ -61,7 +59,7 @@ export const HudNotification: React.FC = () => {
       opacity.value = withTiming(0, { duration: 100 });
       translateY.value = withTiming(-100, {
         duration: 120,
-        easing: Easing.in(Easing.cubic)
+        easing: Easing.in(Easing.cubic),
       });
     }
   }, [isVisible]);
@@ -93,11 +91,10 @@ export const HudNotification: React.FC = () => {
   };
 
   // Tap gesture to dismiss
-  const tapGesture = Gesture.Tap()
-    .onStart(() => {
-      runOnJS(handleHapticFeedback)();
-      runOnJS(handleDismiss)();
-    });
+  const tapGesture = Gesture.Tap().onStart(() => {
+    runOnJS(handleHapticFeedback)();
+    runOnJS(handleDismiss)();
+  });
 
   // Pan gesture for swipe to dismiss - only upward swipes
   const panGesture = Gesture.Pan()
@@ -116,7 +113,7 @@ export const HudNotification: React.FC = () => {
         // Animate off screen upward
         translateY.value = withTiming(-200, {
           duration: 120,
-          easing: Easing.in(Easing.cubic)
+          easing: Easing.in(Easing.cubic),
         });
         opacity.value = withTiming(0, { duration: 100 });
 
@@ -144,7 +141,13 @@ export const HudNotification: React.FC = () => {
     switch (type) {
       case "success":
         return {
-          icon: <Star size={iconSize} color={colors.semantic.fat} fill={colors.semantic.fat} />,
+          icon: (
+            <Star
+              size={iconSize}
+              color={colors.semantic.fat}
+              fill={colors.semantic.fat}
+            />
+          ),
           iconColor: colors.semantic.fat,
         };
       case "info":
@@ -173,65 +176,47 @@ export const HudNotification: React.FC = () => {
 
   const styles = createStyles(colors, colorScheme, insets, theme);
 
-  // iOS 26 liquid glass background with fallback
-  const BackgroundComponent = hasLiquidGlass ? (
-    <GlassView
-      style={styles.glassContainer}
-      tint={colorScheme === "dark" ? "dark" : "light"}
-      intensity={0.8}
-    >
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          {icon}
-        </View>
-
-        <View style={styles.textContainer}>
-          <AppText role="Headline" color="white" style={styles.titleText}>
-            {title}
-          </AppText>
-
-          {subtitle && (
-            <AppText role="Caption" color="white" style={styles.subtitleText}>
-              {subtitle}
-            </AppText>
-          )}
-        </View>
-      </View>
-    </GlassView>
-  ) : (
-    <BlurView intensity={100} tint={colorScheme} style={styles.blurContainer}>
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          {icon}
-        </View>
-
-        <View style={styles.textContainer}>
-          <AppText role="Headline" color="white" style={styles.titleText}>
-            {title}
-          </AppText>
-
-          {subtitle && (
-            <AppText role="Caption" color="white" style={styles.subtitleText}>
-              {subtitle}
-            </AppText>
-          )}
-        </View>
-      </View>
-    </BlurView>
-  );
-
   return (
     <View style={styles.overlay}>
       <GestureDetector gesture={combinedGesture}>
         <Animated.View style={[styles.container, animatedStyle]}>
-          {BackgroundComponent}
+          <BlurView
+            intensity={100}
+            tint={colorScheme}
+            style={styles.blurContainer}
+          >
+            <View style={styles.content}>
+              <View style={styles.iconContainer}>{icon}</View>
+
+              <View style={styles.textContainer}>
+                <AppText role="Headline" color="white" style={styles.titleText}>
+                  {title}
+                </AppText>
+
+                {subtitle && (
+                  <AppText
+                    role="Caption"
+                    color="white"
+                    style={styles.subtitleText}
+                  >
+                    {subtitle}
+                  </AppText>
+                )}
+              </View>
+            </View>
+          </BlurView>
         </Animated.View>
       </GestureDetector>
     </View>
   );
 };
 
-const createStyles = (colors: any, colorScheme: string, insets: any, theme: any) => {
+const createStyles = (
+  colors: any,
+  colorScheme: string,
+  insets: any,
+  theme: any
+) => {
   // iOS 26 style spacing - reasonable distance from status bar
   const topSpacing = insets.top + theme.spacing.md; // Safe area top + 16pt
 
@@ -255,18 +240,14 @@ const createStyles = (colors: any, colorScheme: string, insets: any, theme: any)
       borderRadius: 20,
       overflow: "hidden",
       // iOS 26 liquid glass subtle shadow
-      shadowColor: colorScheme === "dark" ? "rgba(0, 0, 0, 0.4)" : "rgba(0, 0, 0, 0.15)",
+      shadowColor:
+        colorScheme === "dark" ? "rgba(0, 0, 0, 0.4)" : "rgba(0, 0, 0, 0.15)",
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 1,
       shadowRadius: 24,
       elevation: 8,
     },
     blurContainer: {
-      width: "100%",
-      borderRadius: 20,
-      overflow: "hidden",
-    },
-    glassContainer: {
       width: "100%",
       borderRadius: 20,
       overflow: "hidden",
