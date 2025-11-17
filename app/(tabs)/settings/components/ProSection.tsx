@@ -19,8 +19,7 @@ export const ProSection = () => {
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const { safeNavigate } = useNavigationGuard();
-  const { isPro, isProCanceled, proExpirationDate, isVerifyingSubscription } =
-    useAppStore();
+  const { isPro, isProCanceled, proExpirationDate } = useAppStore();
   const [isRestoringPurchases, setRestoringPurchases] = useState(false);
 
   // Get trial info for paywall
@@ -106,11 +105,6 @@ export const ProSection = () => {
       setRestoringPurchases(false);
     }
   }, [t]);
-
-  // Don't render section if verifying subscription
-  if (isVerifyingSubscription) {
-    return null;
-  }
 
   return (
     <View style={styles.section}>
