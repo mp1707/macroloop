@@ -308,12 +308,14 @@ const AnimatedRingLayer: React.FC<AnimatedRingLayerProps> = ({
       const elapsed = now - lastUpdateTime.value;
       const deltaValue = Math.abs(value - lastSyncedValue.value);
 
+      // Bypass throttling for large jumps (instant updates/date changes)
+      const isLargeJump = deltaValue > 0.05;
       const hasSettled = Math.abs(value - (previous ?? value)) < 0.001;
       const shouldUpdateQuickly =
         deltaValue >= MIN_VALUE_DELTA && elapsed >= MIN_FRAME_MS;
       const shouldCatchUp = elapsed >= MAX_FRAME_MS;
 
-      if (hasSettled || shouldUpdateQuickly || shouldCatchUp) {
+      if (isLargeJump || hasSettled || shouldUpdateQuickly || shouldCatchUp) {
         lastUpdateTime.value = now;
         lastSyncedValue.value = value;
         runOnJS(updateFromRatio)(value);
