@@ -456,7 +456,7 @@
         "sections": {
           "hitTarget": {
             "title": "Triff dein Tagesziel",
-            "body": "Halte jeden Tag eine konstante Basis, damit Energie und Mahlzeiten sättigend bleiben."
+            "body": "Halte jeden Tag eine konstante Basis, damit Energie und Mahlzeiten sättigend bleiben. Dieser Wert dient nur als Basis und darf jederzeit überschritten werden solange die Gesamtkalorien eingehalten werden."
           },
           "why": {
             "title": "Darum ist es wichtig",
@@ -665,7 +665,7 @@
       "subtitle": "Hier sind deine Startwerte. Du kannst sie jederzeit anpassen.",
       "helper": "Hinweis: Durch Rundungen kann es zu kleinen Abweichungen kommen.",
       "proteinSubtitle": "{{factor}} g pro kg Körpergewicht",
-      "fatSubtitle": "{{percentage}} % der Gesamtkalorien",
+      "fatSubtitle": "{{percentage}} % der Gesamtkalorien\nDieser Wert dient nur als Basis und darf jederzeit überschritten werden solange die Gesamtkalorien eingehalten werden",
       "rows": {
         "calories": "Kalorien",
         "protein": "Protein - 4 kcal/g",
@@ -802,13 +802,15 @@
     "sections": {
       "subscription": {
         "label": "ABO",
-        "manageTitle": "Abo verwalten",
+        "activeTitle": "Abonnement aktiv",
         "upgradeTitle": "Auf Pro upgraden",
-        "manageDescription": "Abrechnung & Tarif.",
-        "canceledWithDate": "Automatische Verlängerung beendet. Zugriff bis {{date}}.",
-        "canceledWithoutDate": "Automatische Verlängerung beendet. Zugriff bis zum Ende des aktuellen Zeitraums.",
+        "canceledWithDate": "Automatische Verlängerung beendet. Zugriff bis {{date}}. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
+        "canceledWithoutDate": "Automatische Verlängerung beendet. Zugriff bis zum Ende des aktuellen Zeitraums. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
         "upgradeDescription": "Zutatenerkennung, Nährwertschätzung, müheloses Tracking.",
         "upgradeDescriptionWithTrial": "Zutatenerkennung, Nährwertschätzung, müheloses Tracking. Kostenloser Test verfügbar.",
+        "activeDescription": "Ein automatisch verlängerndes Abonnement ist aktiv. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
+        "verifyingTitle": "Abo wird überprüft",
+        "verifyingDescription": "Einen Moment, wir bestätigen deinen Kaufstatus.",
         "restore": {
           "title": "Bereits abonniert?",
           "subtitle": "Käufe nach Neuinstallation oder Gerätewechsel wiederherstellen.",
@@ -924,7 +926,7 @@
       "options": {
         "device": {
           "label": "Gerät",
-          "subtitle": "Folgt der Sprache deines iPhones."
+          "subtitle": "Folgt der Sprache deines iPhones. Aktuell werden nur Deutsch und Englisch unterstützt."
         },
         "en": {
           "label": "Englisch",

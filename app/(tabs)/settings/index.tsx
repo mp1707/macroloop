@@ -11,7 +11,6 @@ import { GoalsSection } from "./components/GoalsSection";
 import { DataManagementSection } from "./components/DataManagementSection";
 import { DeveloperSection } from "./components/DeveloperSection";
 import { AboutSection } from "./components/AboutSection";
-import { useAppStore } from "@/store/useAppStore";
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -20,8 +19,6 @@ export default function SettingsScreen() {
     () => createStyles(colors, theme, colorScheme),
     [colors, theme, colorScheme]
   );
-  const { isPro } = useAppStore();
-
   const version = Constants.expoConfig?.version ?? "1.0.0";
   const build =
     Constants.expoConfig?.ios?.buildNumber ??
@@ -41,7 +38,7 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {!isPro && <ProSection />}
+        <ProSection />
         <AppearanceSection />
         <GoalsSection />
         <DataManagementSection />
