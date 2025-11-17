@@ -107,22 +107,23 @@ function ThemedStack() {
 
 function RootLayoutContent() {
   const { colors } = useTheme();
-  const cleanupIncompleteEstimations = useAppStore(
-    (state) => state.cleanupIncompleteEstimations
-  );
 
   useRevenueCat();
 
+  // Run cleanup once on mount - no dependencies to prevent re-runs
   useEffect(() => {
     // Cleanup incomplete estimations from previous sessions
-    cleanupIncompleteEstimations();
+    useAppStore.getState().cleanupIncompleteEstimations();
 
     // Clear image caches on app start for fresh state
     // expo-image automatically manages memory cache size (default ~50MB)
     // but we clear on start to ensure no stale images from crashed sessions
     Image.clearMemoryCache();
     Image.clearDiskCache();
+  }, []);
 
+  // Global error handler setup - runs once on mount only
+  useEffect(() => {
     // Global error handlers to prevent silent crashes (React Native)
     const ErrorUtils = (global as any).ErrorUtils;
     if (ErrorUtils) {
@@ -141,7 +142,7 @@ function RootLayoutContent() {
         }
       };
     }
-  }, [cleanupIncompleteEstimations]);
+  }, []);
 
   return (
     <ErrorBoundary>

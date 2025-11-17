@@ -51,23 +51,30 @@ export const useImageProcessor = (
     [draftId, updateDraft, t]
   );
 
-  const handleRemoveImage = useCallback(() => {
+  const handleRemoveImage = useCallback(async () => {
     if (!draftId) return;
 
     // Get the draft to access the image path
     const draft = useCreationStore.getState().draftsById[draftId];
 
-    // Delete the image file if it exists (fire-and-forget)
-    if (draft?.localImagePath) {
-      const file = new File(draft.localImagePath);
-      file.delete();
-    }
-
-    // Update the draft to remove image references immediately
+    // Update the draft to remove image references first for immediate UI feedback
     updateDraft(draftId, {
       localImagePath: undefined,
       supabaseImagePath: undefined,
     });
+
+    // Delete the image file if it exists (await to ensure cleanup completes)
+    if (draft?.localImagePath) {
+      try {
+        const file = new File(draft.localImagePath);
+        await file.delete();
+      } catch (error) {
+        // File might not exist or already deleted - safe to ignore
+        if (__DEV__) {
+          console.warn("Failed to delete image file:", error);
+        }
+      }
+    }
   }, [draftId, updateDraft]);
 
   return {

@@ -73,37 +73,53 @@ export const estimateTextBased = async (
     console.log("Text estimation request:", request);
   }
 
-  const response = await fetch(`${supabaseUrl}/functions/v1/textEstimation`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${supabaseAnonKey}`,
-      apikey: supabaseAnonKey,
-    },
-    body: JSON.stringify(request),
-  });
+  // Add 30-second timeout to prevent hanging requests
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-  if (__DEV__) {
-    console.log("Text estimation response status:", response.status);
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/textEstimation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (__DEV__) {
+      console.log("Text estimation response status:", response.status);
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI estimation HTTP error:", response.status, errorText);
+      throw new Error("AI_ESTIMATION_FAILED");
+    }
+
+    const data = await response.json();
+    if (__DEV__) {
+      console.log("Text estimation response data:", data);
+    }
+
+    if (data.error) {
+      console.error("AI estimation error:", data.error);
+      throw new Error("AI_ESTIMATION_FAILED");
+    }
+
+    return data as FoodEstimateResponse;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error("Text estimation request timed out");
+      throw new Error("AI_ESTIMATION_TIMEOUT");
+    }
+    throw error;
   }
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("AI estimation HTTP error:", response.status, errorText);
-    throw new Error("AI_ESTIMATION_FAILED");
-  }
-
-  const data = await response.json();
-  if (__DEV__) {
-    console.log("Text estimation response data:", data);
-  }
-
-  if (data.error) {
-    console.error("AI estimation error:", data.error);
-    throw new Error("AI_ESTIMATION_FAILED");
-  }
-
-  return data as FoodEstimateResponse;
 };
 
 export const refineEstimation = async (
@@ -159,35 +175,51 @@ export const estimateNutritionImageBased = async (
     console.log("Image estimation request:", request);
   }
 
-  const response = await fetch(`${supabaseUrl}/functions/v1/imageEstimation`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${supabaseAnonKey}`,
-      apikey: supabaseAnonKey,
-    },
-    body: JSON.stringify(request),
-  });
+  // Add 30-second timeout to prevent hanging requests
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-  if (__DEV__) {
-    console.log("Image estimation response status:", response.status);
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/imageEstimation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (__DEV__) {
+      console.log("Image estimation response status:", response.status);
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Image estimation HTTP error:", response.status, errorText);
+      throw new Error("AI_ESTIMATION_FAILED");
+    }
+
+    const data = await response.json();
+    if (__DEV__) {
+      console.log("Image estimation response data:", data);
+    }
+
+    if (data.error) {
+      console.error("Image-based estimation error:", data.error);
+      throw new Error("AI_ESTIMATION_FAILED");
+    }
+
+    return data as FoodEstimateResponse;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error("Image estimation request timed out");
+      throw new Error("AI_ESTIMATION_TIMEOUT");
+    }
+    throw error;
   }
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Image estimation HTTP error:", response.status, errorText);
-    throw new Error("AI_ESTIMATION_FAILED");
-  }
-
-  const data = await response.json();
-  if (__DEV__) {
-    console.log("Image estimation response data:", data);
-  }
-
-  if (data.error) {
-    console.error("Image-based estimation error:", data.error);
-    throw new Error("AI_ESTIMATION_FAILED");
-  }
-
-  return data as FoodEstimateResponse;
 };

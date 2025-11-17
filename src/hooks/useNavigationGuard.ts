@@ -31,6 +31,9 @@ export function useNavigationGuard() {
   const { isTransitioning } = useNavigationTransition();
   const isTransitioningRef = useRef(isTransitioning);
 
+  // Track active navigation cleanup functions
+  const activeNavigationsRef = useRef<Set<() => void>>(new Set());
+
   const clearAllTimeouts = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -116,13 +119,21 @@ export function useNavigationGuard() {
       const CHECK_INTERVAL = 80;
       const startTs = Date.now();
 
+      // Track timeouts for cleanup
+      const timeoutsToClean: NodeJS.Timeout[] = [];
+      let isCancelled = false;
+
       const waitAndNavigate = () => {
+        if (isCancelled) return;
+
         const stillTransitioning = isTransitioningRef.current;
         const exceededWait = Date.now() - startTs > MAX_WAIT;
 
         if (stillTransitioning && !exceededWait) {
           InteractionManager.runAfterInteractions(() => {
-            setTimeout(waitAndNavigate, CHECK_INTERVAL);
+            if (isCancelled) return;
+            const timeout = setTimeout(waitAndNavigate, CHECK_INTERVAL);
+            timeoutsToClean.push(timeout);
           });
           return;
         }
@@ -131,42 +142,70 @@ export function useNavigationGuard() {
         const delay = elapsed < minDelay ? minDelay - elapsed + 50 : 0;
 
         InteractionManager.runAfterInteractions(() => {
-          setTimeout(() => executeNavigation(navigationFn), delay);
+          if (isCancelled) return;
+          const timeout = setTimeout(() => {
+            if (!isCancelled) {
+              executeNavigation(navigationFn);
+            }
+          }, delay);
+          timeoutsToClean.push(timeout);
         });
       };
 
       waitAndNavigate();
+
+      // Store cleanup function in a ref so it can be called on unmount
+      const cleanup = () => {
+        isCancelled = true;
+        timeoutsToClean.forEach(t => clearTimeout(t));
+        activeNavigationsRef.current.delete(cleanup);
+      };
+
+      activeNavigationsRef.current.add(cleanup);
+      return cleanup;
     },
     [executeNavigation]
   );
 
   const safeNavigate = useCallback(
-    (route: string) => maybeSchedule(() => router.navigate(route)),
+    (route: string) => {
+      maybeSchedule(() => router.navigate(route));
+    },
     [router, maybeSchedule]
   );
 
   const safeReplace = useCallback(
-    (route: string) => maybeSchedule(() => router.replace(route)),
+    (route: string) => {
+      maybeSchedule(() => router.replace(route));
+    },
     [router, maybeSchedule]
   );
 
   const safePush = useCallback(
-    (route: string) => maybeSchedule(() => router.push(route)),
+    (route: string) => {
+      maybeSchedule(() => router.push(route));
+    },
     [router, maybeSchedule]
   );
 
   const safeDismissTo = useCallback(
-    (route: string) => maybeSchedule(() => router.dismissTo(route)),
+    (route: string) => {
+      maybeSchedule(() => router.dismissTo(route));
+    },
     [router, maybeSchedule]
   );
 
   const safeDismiss = useCallback(
-    () => maybeSchedule(() => router.dismiss()),
+    () => {
+      maybeSchedule(() => router.dismiss());
+    },
     [router, maybeSchedule]
   );
 
   const safeBack = useCallback(
-    () => maybeSchedule(() => router.back()),
+    () => {
+      maybeSchedule(() => router.back());
+    },
     [router, maybeSchedule]
   );
 
@@ -207,6 +246,9 @@ export function useNavigationGuard() {
 
   useEffect(() => () => {
     clearAllTimeouts();
+    // Cancel all active navigations
+    activeNavigationsRef.current.forEach(cleanup => cleanup());
+    activeNavigationsRef.current.clear();
     lockedRef.current = false;
     transitionStartedRef.current = false;
     pendingNavigationRef.current = null;

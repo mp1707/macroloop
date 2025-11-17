@@ -61,7 +61,7 @@ export type AppState = {
   // Favorites
   addFavorite: (fav: Favorite) => void;
   updateFavorite: (id: string, update: Partial<Favorite>) => void;
-  deleteFavorite: (id: string) => void;
+  deleteFavorite: (id: string) => Promise<void>;
 
   // Settings
   setDailyTargets: (targets: DailyTargets) => void;
@@ -161,11 +161,14 @@ export const useAppStore = create<AppState>()(
         );
 
         if (uniqueImagePaths.length > 0) {
-          const deletionResults = await Promise.all(
+          // Use allSettled to continue deleting even if some fail
+          const deletionResults = await Promise.allSettled(
             uniqueImagePaths.map((uri) => deleteImageIfUnused(uri))
           );
 
-          const deletedCount = deletionResults.filter(Boolean).length;
+          const deletedCount = deletionResults.filter(
+            (result) => result.status === "fulfilled" && result.value === true
+          ).length;
           if (__DEV__ && deletedCount > 0) {
             console.log(`Deleted ${deletedCount} images.`);
           }
@@ -236,11 +239,14 @@ export const useAppStore = create<AppState>()(
         );
 
         if (uniqueImagePaths.length > 0) {
-          const deletionResults = await Promise.all(
+          // Use allSettled to continue deleting even if some fail
+          const deletionResults = await Promise.allSettled(
             uniqueImagePaths.map((uri) => deleteImageIfUnused(uri))
           );
 
-          const deletedCount = deletionResults.filter(Boolean).length;
+          const deletedCount = deletionResults.filter(
+            (result) => result.status === "fulfilled" && result.value === true
+          ).length;
           if (__DEV__ && deletedCount > 0) {
             console.log(
               `[Prune] Deleted ${deletedCount} images from ${logsToDelete.length} old logs`
@@ -270,7 +276,7 @@ export const useAppStore = create<AppState>()(
           );
         }),
 
-      deleteFavorite: (id) => {
+      deleteFavorite: async (id) => {
         const favoriteToDelete = get().favorites.find((f) => f.id === id);
 
         set((state) => {
@@ -278,7 +284,7 @@ export const useAppStore = create<AppState>()(
         });
 
         if (favoriteToDelete?.localImagePath) {
-          void deleteImageIfUnused(favoriteToDelete.localImagePath);
+          await deleteImageIfUnused(favoriteToDelete.localImagePath);
         }
       },
 
