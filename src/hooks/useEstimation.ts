@@ -1,9 +1,11 @@
 import { useCallback, useState, useRef, useEffect } from "react";
+import { Alert } from "react-native";
 import { useAppStore } from "@/store/useAppStore";
 import { useHudStore } from "@/store/useHudStore";
 import { EstimationInput, createEstimationLog } from "@/utils/estimation";
 import type { FoodComponent, FoodLog } from "@/types/models";
 import { useLocalization } from "@/context/LocalizationContext";
+import { useTranslation } from "react-i18next";
 import {
   estimateNutritionImageBased,
   estimateTextBased,
@@ -68,6 +70,7 @@ export const useEstimation = () => {
   const [isEditEstimating, setIsEditEstimating] = useState(false);
   const { currentLanguage } = useLocalization();
   const language = currentLanguage || "en";
+  const { t } = useTranslation();
 
   // Track active requests to prevent race conditions
   const activeRequestRef = useRef<AbortController | null>(null);
@@ -125,9 +128,13 @@ export const useEstimation = () => {
         updateFoodLog(incompleteLog.id, completedLog);
       } catch (error) {
         await deleteFoodLog(incompleteLog.id);
+        Alert.alert(
+          t("errors.network.title"),
+          t("errors.network.message")
+        );
       }
     },
-    [addFoodLog, updateFoodLog, deleteFoodLog, isPro, language]
+    [addFoodLog, updateFoodLog, deleteFoodLog, isPro, language, t]
   );
 
   // Edit page flow: refinement based solely on provided components

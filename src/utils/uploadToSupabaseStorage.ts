@@ -28,6 +28,7 @@ export const uploadToSupabaseStorage = async (
       .upload(filename, formData, { upsert: false });
 
     if (uploadError) {
+      console.error("Error uploading image to Supabase:", uploadError);
       throw uploadError;
     }
 

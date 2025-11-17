@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
-import { showErrorToast } from "./toast";
 import { FoodComponent } from "@/types/models";
 
 type Language = string;
@@ -177,9 +176,6 @@ export const estimateNutritionImageBased = async (
   if (!response.ok) {
     const errorText = await response.text();
     console.error("Image estimation HTTP error:", response.status, errorText);
-    if (response.status === 429) {
-      showErrorToast("Rate limit exceeded", "Please try again later.");
-    }
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
