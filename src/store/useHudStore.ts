@@ -22,7 +22,7 @@ interface HudActions {
 }
 
 type HudStore = HudState & HudActions & {
-  _activeTimerId: NodeJS.Timeout | null;
+  _activeTimerId: ReturnType<typeof setTimeout> | null;
 };
 
 const DEFAULT_DURATIONS = {
