@@ -6,7 +6,7 @@ export const useDelayedAutofocus = (
   inputRef: RefObject<TextInput | null>,
   delay: number = 600
 ): void => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useFocusEffect(
     useCallback(() => {

@@ -19,8 +19,12 @@ export function useNavigationGuard() {
   const lockedRef = useRef(false);
   const [isNavigating, setIsNavigating] = useState(false);
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const unlockAfterTransitionRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const unlockAfterTransitionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Track InteractionManager handles and recursive timeouts for cleanup
+  const activeInteractionHandlesRef = useRef<Set<{ cancel: () => void }>>(new Set());
+  const activeRecursiveTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   const lastFocusAtRef = useRef<number>(Date.now());
   const lastNavigationAtRef = useRef<number>(0);
@@ -40,6 +44,21 @@ export function useNavigationGuard() {
       clearTimeout(unlockAfterTransitionRef.current);
       unlockAfterTransitionRef.current = null;
     }
+    // Clear all active InteractionManager handles
+    activeInteractionHandlesRef.current.forEach((handle) => {
+      try {
+        handle.cancel();
+      } catch (e) {
+        // Ignore errors during cleanup
+      }
+    });
+    activeInteractionHandlesRef.current.clear();
+
+    // Clear all active recursive timeouts
+    activeRecursiveTimeoutsRef.current.forEach((timeoutId) => {
+      clearTimeout(timeoutId);
+    });
+    activeRecursiveTimeoutsRef.current.clear();
   }, []);
 
   useEffect(() => {
@@ -121,18 +140,42 @@ export function useNavigationGuard() {
         const exceededWait = Date.now() - startTs > MAX_WAIT;
 
         if (stillTransitioning && !exceededWait) {
-          InteractionManager.runAfterInteractions(() => {
-            setTimeout(waitAndNavigate, CHECK_INTERVAL);
+          const handle = InteractionManager.runAfterInteractions(() => {
+            // Remove this handle from tracking since it's about to complete
+            activeInteractionHandlesRef.current.delete(handle);
+
+            const timeoutId = setTimeout(() => {
+              // Remove this timeout from tracking since it's about to complete
+              activeRecursiveTimeoutsRef.current.delete(timeoutId);
+              waitAndNavigate();
+            }, CHECK_INTERVAL);
+
+            // Track the timeout so it can be cleaned up if component unmounts
+            activeRecursiveTimeoutsRef.current.add(timeoutId);
           });
+          // Track the InteractionManager handle so it can be cancelled if needed
+          activeInteractionHandlesRef.current.add(handle);
           return;
         }
 
         const elapsed = Date.now() - lastFocusAtRef.current;
         const delay = elapsed < minDelay ? minDelay - elapsed + 50 : 0;
 
-        InteractionManager.runAfterInteractions(() => {
-          setTimeout(() => executeNavigation(navigationFn), delay);
+        const handle = InteractionManager.runAfterInteractions(() => {
+          // Remove this handle from tracking since it's about to complete
+          activeInteractionHandlesRef.current.delete(handle);
+
+          const timeoutId = setTimeout(() => {
+            // Remove this timeout from tracking since it's about to complete
+            activeRecursiveTimeoutsRef.current.delete(timeoutId);
+            executeNavigation(navigationFn);
+          }, delay);
+
+          // Track the timeout so it can be cleaned up if component unmounts
+          activeRecursiveTimeoutsRef.current.add(timeoutId);
         });
+        // Track the InteractionManager handle so it can be cancelled if needed
+        activeInteractionHandlesRef.current.add(handle);
       };
 
       waitAndNavigate();
