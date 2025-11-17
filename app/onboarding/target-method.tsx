@@ -90,7 +90,7 @@ export const TargetMethodContent = () => {
 const TargetMethodScreen = () => {
   const { colors } = useTheme();
   const styles = useMemo(() => createScreenStyles(colors), [colors]);
-  const { safeDismissTo, safeBack } = useNavigationGuard();
+  const { safeDismissTo, safeBack, isNavigating } = useNavigationGuard();
   const { setUserSkippedOnboarding, reset } = useOnboardingStore();
 
   const handleSkip = () => {
@@ -113,6 +113,7 @@ const TargetMethodScreen = () => {
         onBack={handleBack}
         onSkip={handleSkip}
         hideBackButton={true}
+        isNavigating={isNavigating}
       />
       <TargetMethodContent />
     </View>
