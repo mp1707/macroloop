@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { Wrench, AlertTriangle, BadgeCheck } from "lucide-react-native";
+import { Wrench, AlertTriangle, BadgeCheck, Images, Trash2 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Card } from "@/components";
@@ -8,6 +8,8 @@ import { useTheme, Colors, Theme } from "@/theme";
 import { useAppStore } from "@/store/useAppStore";
 import { seedFoodLogs } from "@/utils/seed";
 import { SettingRow } from "../SettingRow";
+import * as FileSystem from "expo-file-system";
+import { Paths } from "expo-file-system";
 
 export const DeveloperSection = () => {
   const { t } = useTranslation();
@@ -53,6 +55,63 @@ export const DeveloperSection = () => {
     setPro(!isPro);
   }, [isPro, setPro]);
 
+  const getStoredImages = useCallback(() => {
+    const directory = Paths.document;
+    const entries = directory.list();
+    const imageFiles = entries.filter(
+      (entry): entry is FileSystem.File =>
+        entry instanceof FileSystem.File &&
+        /\.(jpg|jpeg|png|heic|heif|webp)$/i.test(entry.name)
+    );
+    return { directory, imageFiles };
+  }, []);
+
+  const handleLogStoredImages = useCallback(() => {
+    try {
+      const { directory, imageFiles } = getStoredImages();
+
+      if (imageFiles.length === 0) {
+        console.log("[Dev] No stored images", { directory: directory.uri });
+        return;
+      }
+
+      const totalSize = imageFiles.reduce((sum, file) => sum + (file.size ?? 0), 0);
+
+      console.log(
+        `[Dev] ${imageFiles.length} stored image${imageFiles.length === 1 ? "" : "s"} | ${(totalSize / 1024).toFixed(1)} KB`
+      );
+    } catch (error) {
+      console.error("[Dev] Failed to list stored images", error);
+    }
+  }, [getStoredImages]);
+
+  const handleDeleteStoredImages = useCallback(() => {
+    try {
+      const { directory, imageFiles } = getStoredImages();
+
+      if (imageFiles.length === 0) {
+        console.log("[Dev] No stored images to delete", {
+          directory: directory.uri,
+        });
+        return;
+      }
+
+      let deleted = 0;
+      imageFiles.forEach((file) => {
+        try {
+          file.delete();
+          deleted += 1;
+        } catch (error) {
+          console.error("[Dev] Failed to delete file", file.uri, error);
+        }
+      });
+
+      console.log(`[Dev] Deleted ${deleted}/${imageFiles.length} stored images`);
+    } catch (error) {
+      console.error("[Dev] Failed to delete stored images", error);
+    }
+  }, [getStoredImages]);
+
   // Only render in development mode
   if (!__DEV__) {
     return null;
@@ -93,6 +152,29 @@ export const DeveloperSection = () => {
           actionButton={{
             label: t("settings.sections.developer.rows.clearGoals.action"),
             onPress: handleClearNutritionGoals,
+            tone: "error",
+          }}
+          accessory="none"
+        />
+        <View style={styles.separator} />
+        <SettingRow
+          icon={Images}
+          title="Log stored images"
+          subtitle="Prints all files in the app documents directory"
+          actionButton={{
+            label: "Log in console",
+            onPress: handleLogStoredImages,
+          }}
+          accessory="none"
+        />
+        <View style={styles.separator} />
+        <SettingRow
+          icon={Trash2}
+          title="Delete stored images"
+          subtitle="Removes every cached image on device"
+          actionButton={{
+            label: "Delete all",
+            onPress: handleDeleteStoredImages,
             tone: "error",
           }}
           accessory="none"

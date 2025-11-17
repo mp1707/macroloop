@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { FoodLog } from "@/types/models";
 import { generateFoodLogId } from "@/utils/idGenerator";
 import { File } from "expo-file-system";
+import { useAppStore } from "@/store/useAppStore";
 
 type DraftsById = Record<string, FoodLog>;
 
@@ -61,11 +62,20 @@ export const useCreationStore = create<CreationState>((set, get) => ({
     // Get the draft to check for image file
     const draft = get().draftsById[id];
 
-    // Delete the image file if it exists
+    // Delete the image file if it exists and isn't used by a persisted log
     if (draft?.localImagePath) {
+      const { foodLogs, favorites } = useAppStore.getState();
+      const isImageStillReferenced =
+        foodLogs.some((log) => log.localImagePath === draft.localImagePath) ||
+        favorites.some(
+          (favorite) => favorite.localImagePath === draft.localImagePath
+        );
+
       try {
-        const file = new File(draft.localImagePath);
-        await file.delete();
+        if (!isImageStillReferenced) {
+          const file = new File(draft.localImagePath);
+          await file.delete();
+        }
       } catch (error) {
         // File doesn't exist or can't be deleted - safe to ignore
       }

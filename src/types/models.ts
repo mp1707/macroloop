@@ -36,6 +36,8 @@ export type Favorite = {
   title: string;
   description?: string;
   imageUrl?: string;
+  supabaseImagePath?: string;
+  localImagePath?: string;
   calories: number;
   protein: number;
   carbs: number;

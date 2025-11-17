@@ -76,7 +76,34 @@ export type AppState = {
 
 export const useAppStore = create<AppState>()(
   persist(
-    immer((set, get) => ({
+    immer((set, get) => {
+      const deleteImageIfUnused = async (
+        uri?: string | null
+      ): Promise<boolean> => {
+        if (!uri) {
+          return false;
+        }
+
+        const { foodLogs, favorites } = get();
+        const isReferenced =
+          foodLogs.some((log) => log.localImagePath === uri) ||
+          favorites.some((favorite) => favorite.localImagePath === uri);
+
+        if (isReferenced) {
+          return false;
+        }
+
+        try {
+          const file = new File(uri);
+          await file.delete();
+          return true;
+        } catch (error) {
+          // File doesn't exist or can't be deleted - safe to ignore
+          return false;
+        }
+      };
+
+      return {
       foodLogs: [],
       favorites: [],
       dailyTargets: undefined,
@@ -106,53 +133,43 @@ export const useAppStore = create<AppState>()(
         }),
 
       deleteFoodLog: async (id) => {
-        // First, find the log to get its on device image path
         const logToDelete = get().foodLogs.find((log) => log.id === id);
 
-        // If the log has a local image, delete it from the file system
-        if (logToDelete && logToDelete.localImagePath) {
-          try {
-            const file = new File(logToDelete.localImagePath);
-            await file.delete();
-          } catch (error) {
-            // File doesn't exist or can't be deleted - safe to ignore
-          }
-        }
         set((state) => {
           state.foodLogs = state.foodLogs.filter((log) => log.id !== id);
         });
+
+        if (logToDelete?.localImagePath) {
+          await deleteImageIfUnused(logToDelete.localImagePath);
+        }
       },
 
       // --- 4. PROACTIVELY ENHANCE `clearAllLogs` FOR COMPLETE CLEANUP ---
       clearAllLogs: async () => {
-        // Get all image paths that need to be deleted
-        const imagePathsToDelete = get()
-          .foodLogs.map((log) => log.localImagePath)
-          .filter((path): path is string => !!path); // Filter out any null/undefined paths
+        const logsToDelete = get().foodLogs;
 
-        if (imagePathsToDelete.length > 0) {
-          try {
-            // Use Promise.all to delete all files concurrently for better performance
-            await Promise.all(
-              imagePathsToDelete.map((uri) => {
-                const file = new File(uri);
-                return file.delete();
-              })
-            );
-            if (__DEV__) {
-              console.log(`Deleted ${imagePathsToDelete.length} images.`);
-            }
-          } catch (error) {
-            if (__DEV__) {
-              console.error("Error batch deleting images:", error);
-            }
-          }
-        }
-
-        // Finally, clear the logs from the state
         set((state) => {
           state.foodLogs = [];
         });
+
+        const uniqueImagePaths = Array.from(
+          new Set(
+            logsToDelete
+              .map((log) => log.localImagePath)
+              .filter((path): path is string => !!path)
+          )
+        );
+
+        if (uniqueImagePaths.length > 0) {
+          const deletionResults = await Promise.all(
+            uniqueImagePaths.map((uri) => deleteImageIfUnused(uri))
+          );
+
+          const deletedCount = deletionResults.filter(Boolean).length;
+          if (__DEV__ && deletedCount > 0) {
+            console.log(`Deleted ${deletedCount} images.`);
+          }
+        }
       },
 
       cleanupIncompleteEstimations: () =>
@@ -205,35 +222,31 @@ export const useAppStore = create<AppState>()(
           return 0; // Nothing to prune
         }
 
-        // Delete associated images
-        const imagesToDelete = logsToDelete
-          .map((log) => log.localImagePath)
-          .filter((path): path is string => !!path);
-
-        if (imagesToDelete.length > 0) {
-          try {
-            await Promise.all(
-              imagesToDelete.map((uri) => {
-                const file = new File(uri);
-                return file.delete();
-              })
-            );
-            if (__DEV__) {
-              console.log(
-                `[Prune] Deleted ${imagesToDelete.length} images from ${logsToDelete.length} old logs`
-              );
-            }
-          } catch (error) {
-            if (__DEV__) {
-              console.error("[Prune] Error deleting old images:", error);
-            }
-          }
-        }
-
-        // Update state with pruned logs
+        // Update state with pruned logs first so reference checks see the latest state
         set((state) => {
           state.foodLogs = logsToKeep;
         });
+
+        const uniqueImagePaths = Array.from(
+          new Set(
+            logsToDelete
+              .map((log) => log.localImagePath)
+              .filter((path): path is string => !!path)
+          )
+        );
+
+        if (uniqueImagePaths.length > 0) {
+          const deletionResults = await Promise.all(
+            uniqueImagePaths.map((uri) => deleteImageIfUnused(uri))
+          );
+
+          const deletedCount = deletionResults.filter(Boolean).length;
+          if (__DEV__ && deletedCount > 0) {
+            console.log(
+              `[Prune] Deleted ${deletedCount} images from ${logsToDelete.length} old logs`
+            );
+          }
+        }
 
         if (__DEV__) {
           console.log(
@@ -257,10 +270,17 @@ export const useAppStore = create<AppState>()(
           );
         }),
 
-      deleteFavorite: (id) =>
+      deleteFavorite: (id) => {
+        const favoriteToDelete = get().favorites.find((f) => f.id === id);
+
         set((state) => {
           state.favorites = state.favorites.filter((f) => f.id !== id);
-        }),
+        });
+
+        if (favoriteToDelete?.localImagePath) {
+          void deleteImageIfUnused(favoriteToDelete.localImagePath);
+        }
+      },
 
       // Settings
       setDailyTargets: (targets) =>
@@ -326,7 +346,8 @@ export const useAppStore = create<AppState>()(
         set((state) => {
           state.pendingComponentEdit = undefined;
         }),
-    })),
+    };
+    }),
     {
       name: "food-app",
       storage: createJSONStorage(() => AsyncStorage),
