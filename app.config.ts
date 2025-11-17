@@ -12,7 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: IS_DEV ? "MacroLoop D" : IS_PREVIEW ? "MacroLoop P" : "MacroLoop",
   slug: "gainslog",
-  version: "1.0.2",
+  version: "1.0.3",
   orientation: "portrait",
   newArchEnabled: true,
   scheme: SCHEME,
