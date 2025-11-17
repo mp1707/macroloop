@@ -523,12 +523,12 @@ const createStyles = (colors: Colors, theme: Theme) =>
     imageSection: {
       gap: theme.spacing.sm,
       overflow: "visible",
-      marginVertical: -theme.spacing.xl,
     },
     sectionHeader: {
       letterSpacing: 0.6,
       color: colors.secondaryText,
       textTransform: "uppercase",
+      marginBottom: theme.spacing.md,
     },
     percentageSection: {
       gap: theme.spacing.sm,
