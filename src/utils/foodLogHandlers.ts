@@ -115,10 +115,17 @@ export const createToggleFavoriteHandler = (
       });
     } else {
       addFavorite({
-        ...foodLog,
+        id: foodLog.id,
+        title: foodLog.title,
+        description: foodLog.description,
+        calories: foodLog.calories,
+        protein: foodLog.protein,
+        carbs: foodLog.carbs,
+        fat: foodLog.fat,
         foodComponents: foodLog.foodComponents.map((component) => ({
           ...component,
         })),
+        macrosPerReferencePortion: foodLog.macrosPerReferencePortion,
         percentageEaten: foodLog.percentageEaten ?? 100,
       });
 

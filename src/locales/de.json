@@ -49,7 +49,7 @@
     }
   },
   "tabs": {
-    "logging": "Protokoll",
+    "logging": "Tagebuch",
     "calendar": "Kalender",
     "settings": "Einstellungen",
     "favorites": "Favoriten"
@@ -213,6 +213,13 @@
       "bodyWithTrial": "Erhalte aktualisierte Makros, wenn du Zutaten anpasst. {{days}} Tage kostenlos testen.",
       "cta": "Zum Neuberechnen freischalten",
       "ctaWithTrial": "Kostenlos testen"
+    },
+    "delete": {
+      "label": "Eintrag löschen",
+      "alert": {
+        "title": "Eintrag löschen",
+        "message": "Möchtest du diesen Eintrag wirklich löschen?"
+      }
     }
   },
   "createLog": {

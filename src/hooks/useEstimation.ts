@@ -203,7 +203,10 @@ export const useEstimation = () => {
         throw error;
       } finally {
         // Only clear loading flag if this request is still the active one
-        if (isMountedRef.current && activeRequestRef.current === abortController) {
+        if (
+          isMountedRef.current &&
+          activeRequestRef.current === abortController
+        ) {
           setIsEditEstimating(false);
         }
         // Clear the active request ref if this was the active request

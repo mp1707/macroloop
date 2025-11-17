@@ -44,6 +44,7 @@ export default function Edit() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const originalLog = useAppStore(makeSelectLogById(id));
   const updateFoodLog = useAppStore((state) => state.updateFoodLog);
+  const deleteFoodLog = useAppStore((state) => state.deleteFoodLog);
   const isPro = useAppStore((state) => state.isPro);
   const favorites = useAppStore((state) => state.favorites);
   const addFavorite = useAppStore((state) => state.addFavorite);
@@ -315,6 +316,31 @@ export default function Edit() {
     toggleFavorite(editedLog);
   }, [editedLog, toggleFavorite]);
 
+  const handleDelete = useCallback(() => {
+    if (!id) return;
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    Alert.alert(
+      t("editLog.delete.alert.title"),
+      t("editLog.delete.alert.message"),
+      [
+        {
+          text: t("common.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("common.delete"),
+          style: "destructive",
+          onPress: async () => {
+            await deleteFoodLog(id);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            router.back();
+          },
+        },
+      ]
+    );
+  }, [id, deleteFoodLog, router, t]);
+
   return (
     <ScrollView style={styles.container}>
       <RNScrollView
@@ -474,6 +500,22 @@ export default function Edit() {
                 />
               </Animated.View>
             )}
+
+            <View style={styles.deleteSection}>
+              <TouchableOpacity
+                onPress={handleDelete}
+                style={styles.deleteButton}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t("editLog.delete.label")}
+              >
+                <AppText
+                  style={[styles.deleteButtonText, { color: colors.error }]}
+                >
+                  {t("editLog.delete.label")}
+                </AppText>
+              </TouchableOpacity>
+            </View>
           </>
         )}
       </RNScrollView>
@@ -544,5 +586,16 @@ const createStyles = (colors: Colors, theme: Theme) =>
     percentageText: {
       color: colors.primaryText,
       fontWeight: "600",
+    },
+    deleteSection: {
+      paddingTop: theme.spacing.lg,
+      alignItems: "center",
+    },
+    deleteButton: {
+      padding: theme.spacing.sm,
+    },
+    deleteButtonText: {
+      fontWeight: "600",
+      fontSize: theme.typography.Body.fontSize,
     },
   });

@@ -214,6 +214,13 @@
       "bodyWithTrial": "Get updated macros after changing ingredients. Free for {{days}} days.",
       "cta": "Unlock recalculation",
       "ctaWithTrial": "Start free trial"
+    },
+    "delete": {
+      "label": "Delete Log",
+      "alert": {
+        "title": "Delete item",
+        "message": "Are you sure you want to delete this item?"
+      }
     }
   },
   "createLog": {
