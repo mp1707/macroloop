@@ -3,7 +3,7 @@ import Purchases, {
   LOG_LEVEL,
   PurchasesOfferings,
   PurchasesPackage,
-} from 'react-native-purchases';
+} from "react-native-purchases";
 
 type Listener = (info: CustomerInfo) => void;
 
@@ -20,13 +20,16 @@ export const ensureRevenueCatConfigured = (): boolean => {
 
   if (!apiKey) {
     if (__DEV__) {
-      console.warn('[RevenueCat] Missing EXPO_PUBLIC_REVENUECAT_IOS_KEY.');
+      console.warn("[RevenueCat] Missing EXPO_PUBLIC_REVENUECAT_IOS_KEY.");
     }
     return false;
   }
 
   Purchases.setLogLevel(__DEV__ ? LOG_LEVEL.DEBUG : LOG_LEVEL.WARN);
-  Purchases.configure({ apiKey });
+  Purchases.configure({
+    apiKey,
+    appUserID: __DEV__ ? "dev-marco-1" : null, // null = anonymous in production
+  });
   isConfigured = true;
 
   return true;
@@ -34,7 +37,7 @@ export const ensureRevenueCatConfigured = (): boolean => {
 
 const requireConfiguration = () => {
   if (!ensureRevenueCatConfigured()) {
-    throw new Error('RevenueCat is not configured.');
+    throw new Error("RevenueCat is not configured.");
   }
 };
 
@@ -45,14 +48,14 @@ export const fetchCurrentPackages = async (): Promise<PurchasesPackage[]> => {
   const current = offerings.current;
 
   if (!current || current.availablePackages.length === 0) {
-    throw new Error('No subscription packages available right now.');
+    throw new Error("No subscription packages available right now.");
   }
 
   return current.availablePackages;
 };
 
 export const purchasePackage = async (
-  pkg: PurchasesPackage,
+  pkg: PurchasesPackage
 ): Promise<CustomerInfo> => {
   requireConfiguration();
 
