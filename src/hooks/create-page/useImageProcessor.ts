@@ -60,9 +60,7 @@ export const useImageProcessor = (
     // Delete the image file if it exists (fire-and-forget)
     if (draft?.localImagePath) {
       const file = new File(draft.localImagePath);
-      file.delete().catch(() => {
-        // File doesn't exist or can't be deleted - safe to ignore
-      });
+      file.delete();
     }
 
     // Update the draft to remove image references immediately

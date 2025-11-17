@@ -53,19 +53,14 @@ export const DateSlider = () => {
 
   // Pre-index food logs by date for O(1) lookups (Phase 2 optimization)
   const foodLogsByDate = useMemo(() => {
-    const index = new Map<
-      string,
-      { calories: number; protein: number; carbs: number }
-    >();
+    const index = new Map<string, { calories: number; protein: number }>();
     foodLogs.forEach((log) => {
       const existing = index.get(log.logDate) || {
         calories: 0,
         protein: 0,
-        carbs: 0,
       };
-      existing.calories += log.calories;
-      existing.protein += log.protein;
-      existing.carbs += log.carbs;
+      existing.calories += log.calories * ((log.percentageEaten ?? 100) / 100);
+      existing.protein += log.protein * ((log.percentageEaten ?? 100) / 100);
       index.set(log.logDate, existing);
     });
     return index;
@@ -97,7 +92,6 @@ export const DateSlider = () => {
         const dailyTotals = foodLogsByDate.get(dateString) || {
           calories: 0,
           protein: 0,
-          carbs: 0,
         };
 
         const percentages = {
@@ -106,9 +100,6 @@ export const DateSlider = () => {
             : 0,
           protein: dailyTargets?.protein
             ? (dailyTotals.protein / dailyTargets.protein) * 100
-            : 0,
-          carbs: dailyTargets?.carbs
-            ? (dailyTotals.carbs / dailyTargets.carbs) * 100
             : 0,
         };
 
@@ -309,7 +300,6 @@ export const DateSlider = () => {
           windowSize={2} // Reduced buffer for better performance
           updateCellsBatchingPeriod={100} // Batch updates for smoother scrolling
           removeClippedSubviews={true}
-          recyclingKey="date-slider"
           onMomentumScrollEnd={handleScrollEnd}
           contentContainerStyle={{ paddingRight: SCREEN_WIDTH }}
         />

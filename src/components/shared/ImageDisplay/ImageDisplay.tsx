@@ -231,7 +231,8 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
   }));
 
   const canInteract = imageUrl && !isUploading;
-  const shouldShowTrash = deleteImage && imageUrl && !isUploading && !isExpanded;
+  const shouldShowTrash =
+    deleteImage && imageUrl && !isUploading && !isExpanded;
 
   const content = (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
@@ -243,7 +244,9 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
           accessibilityRole={isUploading ? "progressbar" : undefined}
           accessibilityLabel={isUploading ? "Uploading image" : undefined}
           accessibilityValue={
-            isUploading ? { text: "Loading", now: 0, min: 0, max: 100 } : undefined
+            isUploading
+              ? { text: "Loading", now: 0, min: 0, max: 100 }
+              : undefined
           }
         >
           <Card padding={0} style={styles.imageCard}>
@@ -287,10 +290,6 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
                 onPress: deleteImage,
                 color: colors.errorBackground,
                 variant: "glassProminent",
-                // ACCESSIBILITY: Label for delete button (WCAG 4.1.2)
-                accessibilityLabel: "Delete image",
-                accessibilityHint: "Double tap to remove this image",
-                accessibilityRole: "button",
               }}
               imageProps={{
                 systemName: "trash",

@@ -18,7 +18,6 @@ export interface DayData {
   percentages: {
     calories: number;
     protein: number;
-    carbs: number;
   };
 }
 
