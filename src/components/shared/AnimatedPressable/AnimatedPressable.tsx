@@ -67,8 +67,9 @@ export const AnimatedPressable = ({
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={accessibilityRole}
       accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
       testID={testID}
-      hitSlop={22}
+      hitSlop={22} // Larger touch target for accessibility (WCAG 2.5.8)
       {...pressableProps}
     >
       <Animated.View style={[style, pressAnimatedStyle]}>

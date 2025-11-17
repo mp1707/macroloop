@@ -41,12 +41,31 @@ const MacroRow = ({
   const Icon = icon;
   const { t } = useTranslation();
 
+  // ACCESSIBILITY: Create text alternative for visual data (WCAG 1.1.1)
+  const accessibilityLabel = isRemainder
+    ? `${label}: Not allocated yet`
+    : `${label}: ${grams} grams, ${calories} kilocalories, ${percentage} percent of total`;
+
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessible={true}
+      accessibilityRole="text"
+      accessibilityLabel={accessibilityLabel}
+    >
       <View style={styles.labelRow}>
         <View style={styles.labelLeft}>
-          <Icon size={16} color={color} fill={color} strokeWidth={0} />
-          <AppText role="Caption" color="secondary">{label}</AppText>
+          <Icon
+            size={16}
+            color={color}
+            fill={color}
+            strokeWidth={0}
+            // ACCESSIBILITY: Icon is decorative, text provides the info
+            importantForAccessibility="no-hide-descendants"
+          />
+          <AppText role="Caption" color="secondary">
+            {label}
+          </AppText>
         </View>
         <View style={styles.labelRight}>
           <AppText role="Body">{isRemainder ? "—" : `${grams}g`}</AppText>
@@ -62,7 +81,11 @@ const MacroRow = ({
       </View>
 
       {/* Progress Bar */}
-      <View style={styles.progressBarContainer}>
+      <View
+        style={styles.progressBarContainer}
+        // ACCESSIBILITY: Progress bar is decorative, text provides the percentage
+        importantForAccessibility="no-hide-descendants"
+      >
         <View style={styles.progressBarTrack}>
           <View
             style={[
@@ -102,8 +125,16 @@ export const CalorieBreakdown = ({
   const fatPct = Math.round((fatCals / totalCalories) * 100);
   const carbPct = Math.round((carbCals / totalCalories) * 100);
 
+  // ACCESSIBILITY: Provide text alternative for calorie breakdown visualization (WCAG 1.1.1)
+  const accessibilityLabel = `Calorie breakdown for ${totalCalories} kilocalories total. Protein: ${proteinGrams} grams (${proteinPct}%), Fat: ${fatGrams} grams (${fatPct}%), Carbs: ${carbGrams} grams (${carbPct}%)${remaining > 0 ? `. ${remaining} kilocalories remaining` : ""}`;
+
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessible={true}
+      accessibilityRole="summary"
+      accessibilityLabel={accessibilityLabel}
+    >
       {/* Header */}
       <View style={styles.header}>
         <AppText role="Caption" color="secondary">

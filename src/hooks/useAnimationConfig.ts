@@ -7,16 +7,31 @@ import {
   runOnJS,
   useAnimatedReaction,
   Easing,
+  withSpring,
 } from "react-native-reanimated";
+import { useReducedMotion } from "./useReducedMotion";
 
 /**
  * Centralized animation configuration matching the DashboardRing spring animation
  * Used for consistent feel across all animated components
+ *
+ * ACCESSIBILITY: When reduce motion is enabled, animations use instant or minimal duration
+ * to comply with WCAG 2.3.3 (Animation from Interactions)
  */
 export const SPRING_CONFIG = {
   mass: 1.2,
   damping: 25,
   stiffness: 80,
+} as const;
+
+/**
+ * Reduced motion spring config for accessibility
+ * Very stiff and heavily damped = instant movement with no bounce
+ */
+export const SPRING_CONFIG_REDUCED = {
+  mass: 0.5,
+  damping: 500,
+  stiffness: 1000,
 } as const;
 
 /**
@@ -39,10 +54,15 @@ export const easeOutCubic = (t: number): number => {
  * - Instant updates for tiny changes (≤2 units)
  * - Smooth ease-out animation (1500ms, reduced from 2000ms for snappier feel)
  * - Minimal JS thread impact via batched updates
+ *
+ * ACCESSIBILITY: Respects reduce motion preference (WCAG 2.3.3)
+ * - When reduce motion enabled: instant updates (duration: 0)
+ * - When reduce motion disabled: smooth animations (duration: 1500ms)
  */
 export const useNumberReveal = (initial: number) => {
   const prevRef = useRef(initial);
   const [display, setDisplay] = useState(initial);
+  const reduceMotion = useReducedMotion();
 
   // Animated value that runs on UI thread
   const animatedValue = useSharedValue(initial);
@@ -86,6 +106,16 @@ export const useNumberReveal = (initial: number) => {
 
     const difference = Math.abs(target - from);
 
+    // ACCESSIBILITY: Skip animation if reduce motion is enabled (WCAG 2.3.3)
+    if (reduceMotion) {
+      if (delay > 0) {
+        animatedValue.value = withDelay(delay, withTiming(target, { duration: 0 }));
+      } else {
+        animatedValue.value = target;
+      }
+      return;
+    }
+
     // Skip animation entirely for very small changes (≤2 units)
     if (difference <= 2) {
       if (delay > 0) {
@@ -124,7 +154,7 @@ export const useNumberReveal = (initial: number) => {
         easing: Easing.out(Easing.cubic),
       });
     }
-  }, [animatedValue, targetValue]);
+  }, [animatedValue, targetValue, reduceMotion]);
 
   const setValue = useCallback((value: number) => {
     // Set value instantly without animation
@@ -153,6 +183,8 @@ export const useNumberReveal = (initial: number) => {
  *
  * Performance: Perfect for high-frequency updates (no JS bridging)
  *
+ * ACCESSIBILITY: Respects reduce motion preference (WCAG 2.3.3)
+ *
  * Usage:
  * ```tsx
  * const animatedValue = useAnimatedNumber(0);
@@ -164,6 +196,7 @@ export const useAnimatedNumber = (initial: number) => {
   const animatedValue = useSharedValue(initial);
   const targetValue = useSharedValue(initial);
   const prevRef = useRef(initial);
+  const reduceMotion = useReducedMotion();
 
   const animateTo = useCallback((target: number, delay: number = 0) => {
     const from = prevRef.current;
@@ -171,6 +204,16 @@ export const useAnimatedNumber = (initial: number) => {
     targetValue.value = target;
 
     const difference = Math.abs(target - from);
+
+    // ACCESSIBILITY: Skip animation if reduce motion is enabled (WCAG 2.3.3)
+    if (reduceMotion) {
+      if (delay > 0) {
+        animatedValue.value = withDelay(delay, withTiming(target, { duration: 0 }));
+      } else {
+        animatedValue.value = target;
+      }
+      return;
+    }
 
     // Skip animation entirely for very small changes (≤2 units)
     if (difference <= 2) {
@@ -209,7 +252,7 @@ export const useAnimatedNumber = (initial: number) => {
         easing: Easing.out(Easing.cubic),
       });
     }
-  }, [animatedValue, targetValue]);
+  }, [animatedValue, targetValue, reduceMotion]);
 
   const setValue = useCallback((value: number) => {
     prevRef.current = value;

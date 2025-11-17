@@ -1,6 +1,6 @@
 import { useTheme } from "@/theme/ThemeProvider";
 import React from "react";
-import { Text, TextProps, TextStyle } from "react-native";
+import { Text, TextProps, TextStyle, AccessibilityRole } from "react-native";
 
 export type TypographyRole =
   | "Title1"
@@ -15,6 +15,31 @@ interface AppTextProps extends Omit<TextProps, "role"> {
   role?: TypographyRole;
   color?: "primary" | "secondary" | "accent" | "white" | "disabled";
   children: React.ReactNode;
+  /**
+   * Override the default accessibility role mapping
+   * By default, Title1 = header, Title2 = header, others = text
+   */
+  accessibilityRole?: AccessibilityRole;
+  /**
+   * Accessibility label for screen readers
+   * If not provided, uses children as text content
+   */
+  accessibilityLabel?: string;
+  /**
+   * Whether this text is a heading (alternative to accessibilityRole)
+   * Useful for semantic structure with screen readers
+   */
+  isHeading?: boolean;
+  /**
+   * Enable dynamic text scaling (WCAG 1.4.4)
+   * Default: true
+   */
+  allowFontScaling?: boolean;
+  /**
+   * Maximum font size multiplier when scaling
+   * Default: theme.accessibility.textScaling.maximum (2.0)
+   */
+  maxFontSizeMultiplier?: number;
 }
 
 export const AppText: React.FC<AppTextProps> = ({
@@ -22,6 +47,11 @@ export const AppText: React.FC<AppTextProps> = ({
   color,
   style,
   children,
+  accessibilityRole,
+  accessibilityLabel,
+  isHeading,
+  allowFontScaling = true,
+  maxFontSizeMultiplier,
   ...props
 }) => {
   const { colors, theme } = useTheme();
@@ -60,15 +90,43 @@ export const AppText: React.FC<AppTextProps> = ({
     }
   }
 
+  // Map typography role to accessibility role (WCAG 1.3.1 - Info and Relationships)
+  // This helps screen readers understand document structure
+  const getAccessibilityRole = (): AccessibilityRole => {
+    if (accessibilityRole) return accessibilityRole;
+    if (isHeading) return "header";
+
+    switch (role) {
+      case "Title1":
+      case "Title2":
+        return "header"; // Semantic heading for screen readers
+      case "Button":
+        return "button"; // If text is styled like a button
+      default:
+        return "text"; // Default for body text, captions, etc.
+    }
+  };
+
   const textStyle: TextStyle = {
     fontFamily: typographyStyle.fontFamily,
-    fontSize: typographyStyle.fontSize,
+    fontSize: typographyStyle.fontSize, // Let React Native handle scaling via allowFontScaling
     fontWeight: typographyStyle.fontWeight,
     color: textColor,
   };
 
   return (
-    <Text style={[textStyle, style]} {...props}>
+    <Text
+      style={[textStyle, style]}
+      accessibilityRole={getAccessibilityRole()}
+      accessibilityLabel={accessibilityLabel}
+      // ACCESSIBILITY: Let React Native handle font scaling natively (WCAG 1.4.4)
+      // Don't manually multiply fontSize - that causes double-scaling (fontSize * scale²)
+      allowFontScaling={allowFontScaling}
+      maxFontSizeMultiplier={
+        maxFontSizeMultiplier ?? theme.accessibility.textScaling.maximum
+      }
+      {...props}
+    >
       {children}
     </Text>
   );

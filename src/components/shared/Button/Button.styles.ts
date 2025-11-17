@@ -1,11 +1,7 @@
 import { StyleSheet } from "react-native";
 import type { Colors, ColorScheme, Theme, Typography } from "@/theme";
 
-export const createStyles = (
-  colors: Colors,
-  theme: Theme,
-  fontScale: number
-) => {
+export const createStyles = (colors: Colors, theme: Theme) => {
   const { typography } = theme;
   return StyleSheet.create({
     container: {
@@ -13,9 +9,9 @@ export const createStyles = (
       alignItems: "center",
       justifyContent: "center",
       borderRadius: 9999,
-      paddingVertical: Math.max(12 * fontScale, 12),
-      paddingHorizontal: Math.max(16 * fontScale, 16),
-      minHeight: 44 * fontScale,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      minHeight: 44, // Meet WCAG 2.5.8 minimum touch target (44pt)
       flexShrink: 1, // ✅ allow button to shrink if needed
       minWidth: 0, // ✅ required so child text can ellipsize
     },
@@ -33,7 +29,8 @@ export const createStyles = (
     },
     label: {
       ...typography.Button,
-      fontSize: typography.Button.fontSize * fontScale,
+      // Let React Native handle font scaling via Text's allowFontScaling prop
+      // Manual scaling causes double-scaling (fontSize * scale²)
       textAlign: "center",
       flexShrink: 1,
       minWidth: 0,

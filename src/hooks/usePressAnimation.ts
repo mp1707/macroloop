@@ -7,6 +7,7 @@ import {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { theme } from "@/theme";
+import { useReducedMotion } from "./useReducedMotion";
 
 interface UsePressAnimationOptions {
   /**
@@ -31,6 +32,10 @@ interface UsePressAnimationOptions {
 /**
  * Reusable hook for consistent press animations and haptic feedback
  *
+ * ACCESSIBILITY: Respects user's reduce motion preference (WCAG 2.3.3)
+ * - When reduce motion is enabled, animations are instant
+ * - Haptic feedback is preserved as it's not visual motion
+ *
  * @example
  * ```tsx
  * const { handlePressIn, handlePressOut, pressAnimatedStyle } = usePressAnimation();
@@ -52,32 +57,43 @@ export const usePressAnimation = (options: UsePressAnimationOptions = {}) => {
   } = options;
 
   const scale = useSharedValue(1);
+  const reduceMotion = useReducedMotion();
 
   const handlePressIn = useCallback(() => {
     if (disabled) return;
 
-    // Scale down with timing
-    scale.value = withTiming(theme.interactions.press.scale, {
-      duration: theme.interactions.press.timing.duration,
-      easing: theme.interactions.press.timing.easing,
-    });
+    // ACCESSIBILITY: Use instant animation if reduce motion is enabled
+    if (reduceMotion) {
+      scale.value = theme.interactions.press.scale; // Instant, no animation
+    } else {
+      // Scale down with timing
+      scale.value = withTiming(theme.interactions.press.scale, {
+        duration: theme.interactions.press.timing.duration,
+        easing: theme.interactions.press.timing.easing,
+      });
+    }
 
-    // Trigger haptic feedback
+    // Trigger haptic feedback (preserved even with reduce motion - it's not visual)
     if (!disableHaptics) {
       const hapticStyle = theme.interactions.haptics[hapticIntensity];
       Haptics.impactAsync(hapticStyle).catch(() => undefined);
     }
-  }, [disabled, disableHaptics, hapticIntensity]);
+  }, [disabled, disableHaptics, hapticIntensity, reduceMotion]);
 
   const handlePressOut = useCallback(() => {
     if (disabled) return;
 
-    // Scale back with spring
-    scale.value = withSpring(1.0, {
-      damping: theme.interactions.press.spring.damping,
-      stiffness: theme.interactions.press.spring.stiffness,
-    });
-  }, [disabled]);
+    // ACCESSIBILITY: Use instant animation if reduce motion is enabled
+    if (reduceMotion) {
+      scale.value = 1.0; // Instant, no animation
+    } else {
+      // Scale back with spring
+      scale.value = withSpring(1.0, {
+        damping: theme.interactions.press.spring.damping,
+        stiffness: theme.interactions.press.spring.stiffness,
+      });
+    }
+  }, [disabled, reduceMotion]);
 
   const pressAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

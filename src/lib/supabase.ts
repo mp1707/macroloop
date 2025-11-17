@@ -74,7 +74,7 @@ export const estimateTextBased = async (
     console.log("Text estimation request:", request);
   }
 
-  const response = await fetch(`${supabaseUrl}/functions/v1/textEstimationDE`, {
+  const response = await fetch(`${supabaseUrl}/functions/v1/textEstimation`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -115,19 +115,16 @@ export const refineEstimation = async (
   }
 
   const { signal, ...requestData } = request;
-  const response = await fetch(
-    `${supabaseUrl}/functions/v1/refineEstimationDE`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${supabaseAnonKey}`,
-        apikey: supabaseAnonKey,
-      },
-      body: JSON.stringify(requestData),
-      signal,
-    }
-  );
+  const response = await fetch(`${supabaseUrl}/functions/v1/refineEstimation`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${supabaseAnonKey}`,
+      apikey: supabaseAnonKey,
+    },
+    body: JSON.stringify(requestData),
+    signal,
+  });
 
   if (__DEV__) {
     console.log("Refine estimation response status:", response.status);

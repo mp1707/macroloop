@@ -189,16 +189,12 @@ export const HudNotification: React.FC = () => {
               <View style={styles.iconContainer}>{icon}</View>
 
               <View style={styles.textContainer}>
-                <AppText role="Headline" color="white" style={styles.titleText}>
+                <AppText role="Headline" style={styles.titleText}>
                   {title}
                 </AppText>
 
                 {subtitle && (
-                  <AppText
-                    role="Caption"
-                    color="white"
-                    style={styles.subtitleText}
-                  >
+                  <AppText role="Caption" style={styles.subtitleText}>
                     {subtitle}
                   </AppText>
                 )}
@@ -238,7 +234,7 @@ const createStyles = (
       maxWidth: 400,
       minHeight: 80,
       borderRadius: 20,
-      overflow: "hidden",
+      // overflow: "hidden",
       // iOS 26 liquid glass subtle shadow
       shadowColor:
         colorScheme === "dark" ? "rgba(0, 0, 0, 0.4)" : "rgba(0, 0, 0, 0.15)",

@@ -187,6 +187,11 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
               : undefined;
           const ringIcon = ringKey === "calories" ? Flame : BicepsFlexed;
 
+          const ringTotal = staticTotals[ringKey];
+          const accessibilityLabel = ringTarget
+            ? `${ringConfig.label} ${ringTotal} ${t("nutrients.of")} ${ringTarget}`
+            : `${ringConfig.label} ${ringTotal}`;
+
           return (
             <View key={ringKey} style={styles.ringCell}>
               <AppText
@@ -197,6 +202,9 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
                 {ringConfig.label}
               </AppText>
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={accessibilityLabel}
+                accessibilityHint={t("nutrients.tapToViewDetails")}
                 onPress={() => handleOpenExplainer(ringKey)}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
@@ -296,6 +304,16 @@ const MacroGridCell: React.FC<MacroGridCellProps> = ({
   const NUTRIENT_LABELS = getNutrientLabels(t);
   const config = NUTRIENT_LABELS[nutrientKey];
 
+  // Create accessibility label with current and target values
+  const totalValue = typeof total === "object" && "value" in total
+    ? Math.round(total.value as number)
+    : typeof total === "number"
+    ? Math.round(total)
+    : total;
+  const accessibilityLabel = target != null
+    ? `${config.label} ${totalValue} ${t("nutrients.of")} ${target} ${unit}`
+    : `${config.label} ${totalValue} ${unit}`;
+
   // Only use getNutrientIcon for calories and protein (rings)
   const IconComponent =
     nutrientKey === "calories" || nutrientKey === "protein"
@@ -392,6 +410,8 @@ const MacroGridCell: React.FC<MacroGridCellProps> = ({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={t("nutrients.tapToViewDetails")}
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}

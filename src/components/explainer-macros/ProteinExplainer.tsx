@@ -36,6 +36,11 @@ export const ProteinExplainer: React.FC<ProteinExplainerProps> = ({
     router.push("/onboarding/target-method");
   };
 
+  // WCAG 1.1.1 - Accessibility label for ring visualization
+  const ringAccessibilityLabel = target
+    ? `${t("nutrients.protein.label")} ${total} ${t("nutrients.of")} ${target} ${t("nutrients.protein.unit")}`
+    : `${t("nutrients.protein.label")} ${total} ${t("nutrients.protein.unit")}`;
+
   return (
     <View style={styles.container}>
       <AppText role="Title1" style={styles.title}>
@@ -46,7 +51,12 @@ export const ProteinExplainer: React.FC<ProteinExplainerProps> = ({
       </AppText>
       <View style={styles.content}>
         <View style={styles.ringSection}>
-          <View style={styles.ringContainer}>
+          <View
+            style={styles.ringContainer}
+            accessible={true}
+            accessibilityRole="image"
+            accessibilityLabel={ringAccessibilityLabel}
+          >
             <DashboardRing
               percentage={percentage}
               color={semanticColor}
