@@ -114,14 +114,18 @@ export default function EditFavorite() {
   const updatePercentageEaten = useCallback(
     (newPercentage: number) => {
       if (!editedFavorite) return;
-      replaceEditedFavorite({ ...editedFavorite, percentageEaten: newPercentage });
+      replaceEditedFavorite({
+        ...editedFavorite,
+        percentageEaten: newPercentage,
+      });
     },
     [editedFavorite, replaceEditedFavorite]
   );
 
   const titleChanged =
     draftTitle.trim() !== (originalFavorite?.title || "").trim();
-  const percentageChanged = percentageEaten !== (originalFavorite?.percentageEaten ?? 100);
+  const percentageChanged =
+    percentageEaten !== (originalFavorite?.percentageEaten ?? 100);
 
   const handleOpenEditor = useCallback(
     (index: number, component: FoodComponent) => {
@@ -256,6 +260,7 @@ export default function EditFavorite() {
 
   const doneDisabled =
     isEditEstimating ||
+    (editedFavorite?.foodComponents?.length || 0) === 0 ||
     (!hasReestimated &&
       !isDirty &&
       !titleChanged &&
@@ -366,7 +371,8 @@ export default function EditFavorite() {
             {isPro &&
               hasUnsavedChanges &&
               !isEditEstimating &&
-              !isVerifyingSubscription && (
+              !isVerifyingSubscription &&
+              (editedFavorite?.foodComponents?.length || 0) > 0 && (
                 <Animated.View layout={easeLayout}>
                   <RecalculateButton
                     changesCount={changesCount}
@@ -417,7 +423,9 @@ export default function EditFavorite() {
                   {t("favorites.edit.percentageEaten.title")}
                 </AppText>
                 <AppText role="Body" style={styles.percentageText}>
-                  {t("favorites.edit.percentageEaten.value", { percentage: Math.round(percentageEaten) })}
+                  {t("favorites.edit.percentageEaten.value", {
+                    percentage: Math.round(percentageEaten),
+                  })}
                 </AppText>
               </View>
               <View style={styles.sliderContainer}>
@@ -486,6 +494,7 @@ const createStyles = (colors: Colors, theme: Theme) =>
       letterSpacing: 0.6,
       color: colors.secondaryText,
       textTransform: "uppercase",
+      marginBottom: theme.spacing.md,
     },
     percentageSection: {
       gap: theme.spacing.sm,

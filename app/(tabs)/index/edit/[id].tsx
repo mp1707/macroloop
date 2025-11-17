@@ -271,6 +271,7 @@ export default function Edit() {
   const doneDisabled =
     isEditEstimating ||
     Boolean(originalLog?.isEstimating) ||
+    (editedLog?.foodComponents?.length || 0) === 0 ||
     (!hasReestimated &&
       !isDirty &&
       !titleChanged &&
@@ -414,7 +415,8 @@ export default function Edit() {
             {isPro &&
               hasUnsavedChanges &&
               !isEditEstimating &&
-              !isVerifyingSubscription && (
+              !isVerifyingSubscription &&
+              (editedLog?.foodComponents?.length || 0) > 0 && (
                 <Animated.View layout={easeLayout}>
                   <RecalculateButton
                     changesCount={changesCount}
