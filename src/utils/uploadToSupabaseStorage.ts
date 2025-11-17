@@ -1,7 +1,5 @@
 import * as ImageManipulator from "expo-image-manipulator";
 import { supabase } from "@/lib/supabase";
-import { showErrorToast } from "@/lib/toast";
-import i18n from "@/lib/i18n";
 
 /**
  * Upload an image to Supabase Storage and return the public URL
@@ -31,20 +29,12 @@ export const uploadToSupabaseStorage = async (
 
     if (uploadError) {
       console.error("Error uploading image to Supabase:", uploadError);
-      showErrorToast(
-        i18n.t("errors.network.title"),
-        i18n.t("errors.network.message")
-      );
       throw uploadError;
     }
 
     return filename;
   } catch (error) {
     console.error("Error uploading image to Supabase:", error);
-    showErrorToast(
-      i18n.t("errors.network.title"),
-      i18n.t("errors.network.message")
-    );
     throw error;
   }
 };

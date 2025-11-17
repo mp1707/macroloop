@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
+import { Alert } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useTranslation } from "react-i18next";
 import { processImage } from "@/utils/processImage";
-import { showErrorToast } from "@/lib/toast";
 import type { FoodLog } from "@/types/models";
 import { useCreationStore } from "@/store/useCreationStore";
 import { File } from "expo-file-system";
@@ -28,7 +28,7 @@ export const useImageProcessor = (
         result = await processImage(uri);
         success = true;
       } catch (error) {
-        showErrorToast(
+        Alert.alert(
           t("createLog.toasts.imageProcessing.title"),
           t("createLog.toasts.imageProcessing.message")
         );
