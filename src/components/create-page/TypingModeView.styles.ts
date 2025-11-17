@@ -44,9 +44,9 @@ export const createStyles = (
       height: CREATE_ACCESSORY_HEIGHT,
     },
     waveformBar: {
-      width: 3,
+      width: 5,
       borderRadius: theme.spacing.xs,
-      marginHorizontal: 2,
+      marginHorizontal: 4,
       backgroundColor: colors.accent,
     },
   });

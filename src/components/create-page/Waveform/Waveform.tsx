@@ -2,11 +2,10 @@ import React, { useEffect, useRef, useMemo } from "react";
 import { View, StyleProp, ViewStyle } from "react-native";
 import Animated, {
   Easing,
-  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withTiming,
+  withSpring,
 } from "react-native-reanimated";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -30,11 +29,19 @@ interface WaveformProps {
  * - Respects reduced motion preferences (WCAG 2.3.3)
  * - Provides text alternative for visual representation (WCAG 1.1.1)
  * - Volume level announced to screen readers
+ *
+ * PERFORMANCE OPTIMIZED:
+ * - Reduced from 32 to 6 bars (83% reduction)
+ * - Simplified animation calculations
+ * - Removed complex math operations (power, distance, falloff)
+ * - Uses spring animations for natural movement
  */
 
-const BAR_COUNT = 32;
-const MIN_BAR_HEIGHT = 3;
+const BAR_COUNT = 6;
+const MIN_BAR_HEIGHT = 4;
 const MAX_BAR_HEIGHT = 100;
+// Each bar has a slightly different multiplier for visual variation
+const BAR_MULTIPLIERS = [0.6, 0.85, 1.0, 1.0, 0.85, 0.6];
 
 export const Waveform: React.FC<WaveformProps> = ({
   volumeLevel,
@@ -44,10 +51,11 @@ export const Waveform: React.FC<WaveformProps> = ({
   accessibilityLabel,
 }) => {
   const reduceMotion = useReducedMotion();
+
+  // Create shared values for each bar
   const bars = useRef(
     Array.from({ length: BAR_COUNT }, () => useSharedValue(MIN_BAR_HEIGHT))
   ).current;
-  const smoothedVolume = useSharedValue(0);
 
   // ACCESSIBILITY: Create text alternative for volume level (WCAG 1.1.1)
   const volumePercentage = Math.round(volumeLevel);
@@ -66,68 +74,47 @@ export const Waveform: React.FC<WaveformProps> = ({
     : "inactive";
 
   useEffect(() => {
-    // ACCESSIBILITY: Respect reduce motion preference (WCAG 2.3.3)
-    const animationDuration = reduceMotion ? 0 : isActive ? 50 : 400;
-
-    if (isActive) {
-      smoothedVolume.value = withTiming(volumeLevel, {
-        duration: animationDuration,
-        easing: Easing.out(Easing.quad),
-      });
-    } else {
-      smoothedVolume.value = withTiming(0, { duration: animationDuration });
+    if (!isActive) {
+      // Reset all bars to minimum height when not active
       bars.forEach((bar) => {
         bar.value = reduceMotion
           ? MIN_BAR_HEIGHT
-          : withDelay(
-              100,
-              withTiming(MIN_BAR_HEIGHT, {
-                duration: 400,
-                easing: Easing.out(Easing.cubic),
-              })
-            );
+          : withTiming(MIN_BAR_HEIGHT, {
+              duration: 300,
+              easing: Easing.out(Easing.ease),
+            });
       });
+      return;
     }
-  }, [volumeLevel, isActive, smoothedVolume, bars, reduceMotion]);
 
-  useAnimatedReaction(
-    () => smoothedVolume.value,
-    (currentVolume) => {
-      if (!isActive) return;
+    // Simplified calculation: direct mapping from volume to height
+    // No complex math operations like power functions or distance calculations
+    bars.forEach((bar, idx) => {
+      const multiplier = BAR_MULTIPLIERS[idx];
 
-      const center = Math.floor(BAR_COUNT / 2);
-      const enhancedVolume = Math.pow(currentVolume / 100, 0.75) * 100;
+      // Simple linear mapping with multiplier for visual variation
+      const targetHeight = Math.max(
+        MIN_BAR_HEIGHT,
+        Math.min(MAX_BAR_HEIGHT, (volumeLevel / 100) * MAX_BAR_HEIGHT * multiplier)
+      );
 
-      bars.forEach((bar, idx) => {
-        const distance = Math.abs(idx - center);
-        const falloff = Math.pow(1 - distance / center, 2);
-
-        const targetHeight = Math.max(
-          MIN_BAR_HEIGHT,
-          Math.min(
-            MAX_BAR_HEIGHT,
-            (enhancedVolume / 100) * MAX_BAR_HEIGHT * falloff * 1.5
-          )
-        );
-
-        // ACCESSIBILITY: Instant updates when reduce motion is enabled (WCAG 2.3.3)
-        if (reduceMotion) {
-          bar.value = targetHeight;
-        } else if (targetHeight > bar.value) {
-          bar.value = withTiming(targetHeight, {
-            duration: 120,
-            easing: Easing.out(Easing.quad),
-          });
-        } else {
-          bar.value = withTiming(targetHeight, {
-            duration: 500,
-            easing: Easing.out(Easing.cubic),
-          });
-        }
-      });
-    },
-    [isActive, reduceMotion]
-  );
+      // ACCESSIBILITY: Instant updates when reduce motion is enabled (WCAG 2.3.3)
+      if (reduceMotion) {
+        bar.value = targetHeight;
+      } else {
+        // Use spring animation for natural, organic movement
+        // Spring is efficient and provides smooth motion with less computation
+        bar.value = withSpring(targetHeight, {
+          damping: 15,
+          stiffness: 150,
+          mass: 0.5,
+          overshootClamping: true,
+          restDisplacementThreshold: 0.01,
+          restSpeedThreshold: 0.01,
+        });
+      }
+    });
+  }, [volumeLevel, isActive, bars, reduceMotion]);
 
   return (
     <View
@@ -145,7 +132,9 @@ export const Waveform: React.FC<WaveformProps> = ({
     >
       {bars.map((bar, index) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        const animatedStyle = useAnimatedStyle(() => ({ height: bar.value }));
+        const animatedStyle = useAnimatedStyle(() => ({
+          height: bar.value,
+        }));
         return <Animated.View key={index} style={[barStyle, animatedStyle]} />;
       })}
     </View>
