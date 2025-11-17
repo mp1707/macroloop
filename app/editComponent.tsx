@@ -53,6 +53,8 @@ export default function EditComponent() {
   // Refs for focus management
   const nameInputRef = useRef<any>(null);
   const amountInputRef = useRef<any>(null);
+  const focusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldRefocusAmount = useRef(false);
 
   // Track if we've set initial focus
   const hasSetInitialFocus = useRef(false);
@@ -145,11 +147,32 @@ export default function EditComponent() {
   const handleUnitChange = useCallback((newUnit: FoodUnit) => {
     Haptics.selectionAsync();
     setUnit(newUnit);
-    // Restore focus to amount input after unit change
-    setTimeout(() => {
-      amountInputRef.current?.focus();
-    }, 100);
+    shouldRefocusAmount.current = true;
   }, []);
+
+  useEffect(() => {
+    if (!shouldRefocusAmount.current) {
+      return;
+    }
+
+    shouldRefocusAmount.current = false;
+
+    if (focusTimeoutRef.current) {
+      clearTimeout(focusTimeoutRef.current);
+    }
+
+    focusTimeoutRef.current = setTimeout(() => {
+      amountInputRef.current?.focus();
+      focusTimeoutRef.current = null;
+    }, 75);
+
+    return () => {
+      if (focusTimeoutRef.current) {
+        clearTimeout(focusTimeoutRef.current);
+        focusTimeoutRef.current = null;
+      }
+    };
+  }, [unit]);
 
   // Handle Save
   const handleSave = useCallback(() => {
