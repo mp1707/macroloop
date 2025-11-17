@@ -53,7 +53,7 @@ export default function ProteinGoalsScreen() {
   const styles = createStyles(colors, themeObj);
   const { weight, proteinGoalType, setProteinGoal, setProteinGoalType } =
     useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
   const scrollRef = useRef<ScrollView>(null);
   const { t } = useTranslation();
 
@@ -107,6 +107,7 @@ export default function ProteinGoalsScreen() {
           label={t("onboarding.common.continue")}
           disabled={!selectedMethod}
           onPress={handleContinue}
+          isLoading={isNavigating}
         />
       }
     >

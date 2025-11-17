@@ -22,7 +22,7 @@ const SexSelectionScreen = () => {
     [colors, themeObj]
   );
   const { sex, setSex } = useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
   const { t } = useTranslation();
 
   const [selectedSex, setSelectedSex] = useState<SexOption | null>(sex ?? null);
@@ -54,6 +54,7 @@ const SexSelectionScreen = () => {
           label={t("onboarding.common.continue")}
           disabled={!selectedSex}
           onPress={handleContinue}
+          isLoading={isNavigating}
         />
       }
     >

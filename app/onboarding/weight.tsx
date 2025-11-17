@@ -17,7 +17,7 @@ const WeightSelectionScreen = () => {
     [colors, themeObj]
   );
   const { weight, setWeight } = useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
   const [currentWeight, setCurrentWeight] = useState(weight || 70);
   const { t } = useTranslation();
 
@@ -60,6 +60,7 @@ const WeightSelectionScreen = () => {
             variant="primary"
             label={t("onboarding.common.continue")}
             onPress={handleContinue}
+            isLoading={isNavigating}
           />
         </View>
       </ScrollView>

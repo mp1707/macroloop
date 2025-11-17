@@ -26,7 +26,7 @@ const CALCULATE_STEP_MAP: Record<string, number> = {
 
 export default function OnboardingLayout() {
   const { colors } = useTheme();
-  const { safeDismissTo, safeBack } = useNavigationGuard();
+  const { safeDismissTo, safeBack, isNavigating } = useNavigationGuard();
   const { setUserSkippedOnboarding } = useOnboardingStore();
   const { setTransitioning } = useNavigationTransition();
   const pathname = usePathname();
@@ -77,6 +77,7 @@ export default function OnboardingLayout() {
           totalSteps={totalSteps}
           showProgressBar={showProgressBar}
           hideBackButton={hideBackButton}
+          isNavigating={isNavigating}
         />
       )}
       <Stack

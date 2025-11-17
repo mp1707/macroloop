@@ -14,6 +14,7 @@ interface OnboardingHeaderProps {
   totalSteps?: number;
   showProgressBar?: boolean;
   hideBackButton?: boolean;
+  isNavigating?: boolean;
 }
 
 export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
@@ -23,6 +24,7 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
   totalSteps = 7,
   showProgressBar = false,
   hideBackButton = false,
+  isNavigating = false,
 }) => {
   const { colors, theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -46,6 +48,7 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
               buttonProps={{
                 onPress: onBack,
                 color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
+                disabled: isNavigating,
               }}
             />
           )}
@@ -58,6 +61,7 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
             buttonProps={{
               onPress: onSkip,
               color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
+              disabled: isNavigating,
             }}
           />
         </View>

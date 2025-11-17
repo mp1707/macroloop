@@ -14,7 +14,7 @@ const AgeSelectionScreen = () => {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(colors, themeObj);
   const { age, setAge } = useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
   const [selectedAge, setSelectedAge] = useState<number>(age || 30);
   const { t } = useTranslation();
 
@@ -51,6 +51,7 @@ const AgeSelectionScreen = () => {
           variant="primary"
           label={t("onboarding.common.continue")}
           onPress={handleContinue}
+          isLoading={isNavigating}
         />
       }
     >

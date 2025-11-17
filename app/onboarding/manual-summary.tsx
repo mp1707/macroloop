@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 const ManualSummaryScreen = () => {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(colors, themeObj);
-  const { safeDismissTo, safeNavigate } = useNavigationGuard();
+  const { safeDismissTo, safeNavigate, isNavigating } = useNavigationGuard();
   const [isConfirming, setIsConfirming] = useState(false);
   const { t } = useTranslation();
 
@@ -73,6 +73,7 @@ const ManualSummaryScreen = () => {
   };
 
   const handleEditTargets = async () => {
+    if (isNavigating) return;
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     safeNavigate("/onboarding/manual-input");
   };
@@ -97,6 +98,7 @@ const ManualSummaryScreen = () => {
             }
             onPress={handleConfirmAndStartTracking}
             disabled={isConfirming}
+            isLoading={isNavigating}
           />
         </View>
       }

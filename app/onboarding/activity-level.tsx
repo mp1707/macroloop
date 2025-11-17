@@ -17,7 +17,7 @@ export default function Step2ActivityLevelScreen() {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(themeObj);
   const { activityLevel, setActivityLevel } = useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
   const scrollRef = useRef<ScrollView>(null);
   const { t } = useTranslation();
 
@@ -53,6 +53,7 @@ export default function Step2ActivityLevelScreen() {
           label={t("onboarding.common.continue")}
           disabled={!selectedLevel}
           onPress={handleContinue}
+          isLoading={isNavigating}
         />
       }
     >

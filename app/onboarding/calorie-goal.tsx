@@ -27,7 +27,7 @@ export default function Step3GoalsScreen() {
     setCalorieGoal,
     setInputMethod,
   } = useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
   const scrollRef = useRef<ScrollView>(null);
   const { t } = useTranslation();
 
@@ -81,6 +81,7 @@ export default function Step3GoalsScreen() {
             label={t("onboarding.common.goBack")}
             onPress={() => safePush("/onboarding/activity-level")}
             disabled={false}
+            isLoading={isNavigating}
           />
         }
       >
@@ -126,6 +127,7 @@ export default function Step3GoalsScreen() {
           label={t("onboarding.common.continue")}
           disabled={!selectedGoal}
           onPress={handleContinue}
+          isLoading={isNavigating}
         />
       }
     >

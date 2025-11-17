@@ -19,9 +19,11 @@ export const TargetMethodContent = () => {
   );
   const { t } = useTranslation();
   const { setInputMethod } = useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
 
   const handleMethodSelect = async (method: "calculate" | "manual") => {
+    if (isNavigating) return;
+
     setInputMethod(method);
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
@@ -88,7 +90,7 @@ export const TargetMethodContent = () => {
 const TargetMethodScreen = () => {
   const { colors } = useTheme();
   const styles = useMemo(() => createScreenStyles(colors), [colors]);
-  const { safeDismissTo, safeBack } = useNavigationGuard();
+  const { safeDismissTo, safeBack, isNavigating } = useNavigationGuard();
   const { setUserSkippedOnboarding, reset } = useOnboardingStore();
 
   const handleSkip = () => {
@@ -111,6 +113,7 @@ const TargetMethodScreen = () => {
         onBack={handleBack}
         onSkip={handleSkip}
         hideBackButton={true}
+        isNavigating={isNavigating}
       />
       <TargetMethodContent />
     </View>
