@@ -35,6 +35,11 @@ export const CaloriesExplainer: React.FC<CaloriesExplainerProps> = ({
     router.push("/onboarding/target-method");
   };
 
+  // WCAG 1.1.1 - Accessibility label for ring visualization
+  const ringAccessibilityLabel = target
+    ? `${t("nutrients.calories.label")} ${total} ${t("nutrients.of")} ${target} kcal`
+    : `${t("nutrients.calories.label")} ${total} kcal`;
+
   return (
     <View style={styles.container}>
       <AppText role="Title1" style={styles.title}>
@@ -45,7 +50,12 @@ export const CaloriesExplainer: React.FC<CaloriesExplainerProps> = ({
       </AppText>
       <View style={styles.content}>
         <View style={styles.ringSection}>
-          <View style={styles.ringContainer}>
+          <View
+            style={styles.ringContainer}
+            accessible={true}
+            accessibilityRole="image"
+            accessibilityLabel={ringAccessibilityLabel}
+          >
             <DashboardRing
               percentage={percentage}
               color={semanticColor}
