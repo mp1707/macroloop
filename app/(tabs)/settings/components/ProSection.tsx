@@ -1,5 +1,5 @@
-import React, { useMemo, useCallback, useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import React, { useMemo, useCallback, useState, useEffect } from "react";
+import { View, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { Crown, BadgeCheck, RotateCcw } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { restorePurchases } from "@/lib/revenuecat/client";
@@ -19,8 +19,12 @@ export const ProSection = () => {
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const { safeNavigate } = useNavigationGuard();
-  const { isPro, isProCanceled, proExpirationDate } = useAppStore();
+  const { isPro, isProCanceled, proExpirationDate, isVerifyingSubscription } =
+    useAppStore();
   const [isRestoringPurchases, setRestoringPurchases] = useState(false);
+  const [hasResolvedSubscription, setHasResolvedSubscription] = useState(
+    !isVerifyingSubscription || isPro
+  );
 
   // Get trial info for paywall
   const { options } = usePaywall();
@@ -52,25 +56,27 @@ export const ProSection = () => {
     });
   }, [language, proExpirationDate]);
 
-  const cancellationDescription = useMemo(() => {
-    if (!isProCanceled) {
-      return t("settings.sections.subscription.manageDescription");
+  const subscriptionStatusDescription = useMemo(() => {
+    if (isProCanceled) {
+      if (formattedExpirationDate) {
+        return t("settings.sections.subscription.canceledWithDate", {
+          date: formattedExpirationDate,
+        });
+      }
+
+      return t("settings.sections.subscription.canceledWithoutDate");
     }
 
-    if (formattedExpirationDate) {
-      return t("settings.sections.subscription.canceledWithDate", {
-        date: formattedExpirationDate,
-      });
-    }
-
-    return t("settings.sections.subscription.canceledWithoutDate");
+    return t("settings.sections.subscription.activeDescription");
   }, [formattedExpirationDate, isProCanceled, t]);
 
-  const handleShowPaywall = useCallback(() => {
-    safeNavigate(PROMO_LINK);
-  }, [safeNavigate]);
+  useEffect(() => {
+    if (!isVerifyingSubscription) {
+      setHasResolvedSubscription(true);
+    }
+  }, [isVerifyingSubscription]);
 
-  const handleManageSubscription = useCallback(() => {
+  const handleShowPaywall = useCallback(() => {
     safeNavigate(PROMO_LINK);
   }, [safeNavigate]);
 
@@ -106,13 +112,33 @@ export const ProSection = () => {
     }
   }, [t]);
 
-  return (
-    <View style={styles.section}>
-      <AppText role="Caption" color="secondary" style={styles.sectionHeader}>
-        {t("settings.sections.subscription.label")}
-      </AppText>
-      <Card padding={0} style={styles.sectionCard}>
-        {!isPro && trialPillLabel && (
+  const renderContent = () => {
+    if (!hasResolvedSubscription) {
+      return (
+        <SettingRow
+          icon={RotateCcw}
+          title={t("settings.sections.subscription.verifyingTitle")}
+          subtitle={t("settings.sections.subscription.verifyingDescription")}
+          accessory="none"
+          trailingContent={<ActivityIndicator color={colors.secondaryText} />}
+        />
+      );
+    }
+
+    if (isPro) {
+      return (
+        <SettingRow
+          icon={BadgeCheck}
+          title={t("settings.sections.subscription.activeTitle")}
+          subtitle={subscriptionStatusDescription}
+          accessory="none"
+        />
+      );
+    }
+
+    return (
+      <>
+        {trialPillLabel && (
           <View style={styles.trialPillWrapper}>
             <View style={styles.trialPill}>
               <AppText role="Caption" style={styles.trialPillText}>
@@ -122,41 +148,42 @@ export const ProSection = () => {
           </View>
         )}
         <SettingRow
-          icon={isPro ? BadgeCheck : Crown}
-          title={
-            isPro
-              ? t("settings.sections.subscription.manageTitle")
-              : t("settings.sections.subscription.upgradeTitle")
-          }
+          icon={Crown}
+          title={t("settings.sections.subscription.upgradeTitle")}
           subtitle={
-            isPro
-              ? cancellationDescription
-              : hasTrial
+            hasTrial
               ? t("settings.sections.subscription.upgradeDescriptionWithTrial")
               : t("settings.sections.subscription.upgradeDescription")
           }
           accessory="chevron"
-          onPress={isPro ? handleManageSubscription : handleShowPaywall}
+          onPress={handleShowPaywall}
           hapticIntensity="light"
         />
-        {!isPro && (
-          <>
-            <View style={styles.separator} />
-            <SettingRow
-              icon={RotateCcw}
-              title={t("settings.sections.subscription.restore.title")}
-              subtitle={t("settings.sections.subscription.restore.subtitle")}
-              actionButton={{
-                label: isRestoringPurchases
-                  ? t("settings.sections.subscription.restore.buttonLoading")
-                  : t("settings.sections.subscription.restore.button"),
-                onPress: handleRestorePurchases,
-                loading: isRestoringPurchases,
-              }}
-              accessory="none"
-            />
-          </>
-        )}
+        <View style={styles.separator} />
+        <SettingRow
+          icon={RotateCcw}
+          title={t("settings.sections.subscription.restore.title")}
+          subtitle={t("settings.sections.subscription.restore.subtitle")}
+          actionButton={{
+            label: isRestoringPurchases
+              ? t("settings.sections.subscription.restore.buttonLoading")
+              : t("settings.sections.subscription.restore.button"),
+            onPress: handleRestorePurchases,
+            loading: isRestoringPurchases,
+          }}
+          accessory="none"
+        />
+      </>
+    );
+  };
+
+  return (
+    <View style={styles.section}>
+      <AppText role="Caption" color="secondary" style={styles.sectionHeader}>
+        {t("settings.sections.subscription.label")}
+      </AppText>
+      <Card padding={0} style={styles.sectionCard}>
+        {renderContent()}
       </Card>
     </View>
   );

@@ -802,13 +802,15 @@
     "sections": {
       "subscription": {
         "label": "ABO",
-        "manageTitle": "Abo verwalten",
+        "activeTitle": "Abonnement aktiv",
         "upgradeTitle": "Auf Pro upgraden",
-        "manageDescription": "Abrechnung & Tarif.",
-        "canceledWithDate": "Automatische Verlängerung beendet. Zugriff bis {{date}}.",
-        "canceledWithoutDate": "Automatische Verlängerung beendet. Zugriff bis zum Ende des aktuellen Zeitraums.",
+        "canceledWithDate": "Automatische Verlängerung beendet. Zugriff bis {{date}}. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
+        "canceledWithoutDate": "Automatische Verlängerung beendet. Zugriff bis zum Ende des aktuellen Zeitraums. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
         "upgradeDescription": "Zutatenerkennung, Nährwertschätzung, müheloses Tracking.",
         "upgradeDescriptionWithTrial": "Zutatenerkennung, Nährwertschätzung, müheloses Tracking. Kostenloser Test verfügbar.",
+        "activeDescription": "Ein automatisch verlängerndes Abonnement ist aktiv. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
+        "verifyingTitle": "Abo wird überprüft",
+        "verifyingDescription": "Einen Moment, wir bestätigen deinen Kaufstatus.",
         "restore": {
           "title": "Bereits abonniert?",
           "subtitle": "Käufe nach Neuinstallation oder Gerätewechsel wiederherstellen.",

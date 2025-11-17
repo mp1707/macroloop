@@ -804,13 +804,15 @@
     "sections": {
       "subscription": {
         "label": "SUBSCRIPTION",
-        "manageTitle": "Manage Subscription",
+        "activeTitle": "Subscription active",
         "upgradeTitle": "Upgrade to Pro",
-        "manageDescription": "Billing & plan.",
-        "canceledWithDate": "Auto‑renew canceled. Access through {{date}}.",
-        "canceledWithoutDate": "Auto‑renew canceled. Access until the current period ends.",
+        "canceledWithDate": "Auto-renew canceled. Access through {{date}}. Manage in iOS Settings -> Apple ID -> Subscriptions.",
+        "canceledWithoutDate": "Auto-renew canceled. Access until the current period ends. Manage in iOS Settings -> Apple ID -> Subscriptions.",
         "upgradeDescription": "Ingredient recognition, nutrition estimates, effortless tracking.",
         "upgradeDescriptionWithTrial": "Ingredient recognition, nutrition estimates, effortless tracking. Free trial available.",
+        "activeDescription": "An auto-renewing subscription is active. Manage in iOS Settings -> Apple ID -> Subscriptions.",
+        "verifyingTitle": "Checking subscription",
+        "verifyingDescription": "Hang tight while we confirm your purchase status.",
         "restore": {
           "title": "Already subscribed?",
           "subtitle": "Restore purchases after reinstalling or switching devices.",
