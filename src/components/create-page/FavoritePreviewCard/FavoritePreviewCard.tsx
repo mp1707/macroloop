@@ -68,7 +68,7 @@ export const FavoritePreviewCard: React.FC<FavoritePreviewCardProps> = ({
                 ]}
               />
               <AppText role="Caption" style={styles.nutrientText}>
-                {Math.round(favorite.calories)} {caloriesUnit}
+                {Math.round(favorite.calories * ((favorite.percentageEaten ?? 100) / 100))} {caloriesUnit}
               </AppText>
             </View>
             <View style={styles.nutrientItem}>
@@ -79,7 +79,7 @@ export const FavoritePreviewCard: React.FC<FavoritePreviewCardProps> = ({
                 ]}
               />
               <AppText role="Caption" style={styles.nutrientText}>
-                {Math.round(favorite.protein)} {proteinUnit}
+                {Math.round(favorite.protein * ((favorite.percentageEaten ?? 100) / 100))} {proteinUnit}
               </AppText>
             </View>
           </View>
