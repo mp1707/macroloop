@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { showErrorToast } from "./toast";
 import { FoodComponent } from "@/types/models";
+import i18n from "./i18n";
 
 type Language = string;
 
@@ -91,6 +92,10 @@ export const estimateTextBased = async (
   if (!response.ok) {
     const errorText = await response.text();
     console.error("AI estimation HTTP error:", response.status, errorText);
+    showErrorToast(
+      i18n.t("errors.network.title"),
+      i18n.t("errors.network.message")
+    );
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
@@ -101,6 +106,10 @@ export const estimateTextBased = async (
 
   if (data.error) {
     console.error("AI estimation error:", data.error);
+    showErrorToast(
+      i18n.t("errors.network.title"),
+      i18n.t("errors.network.message")
+    );
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
@@ -133,6 +142,10 @@ export const refineEstimation = async (
   if (!response.ok) {
     const errorText = await response.text();
     console.error("AI estimation HTTP error:", response.status, errorText);
+    showErrorToast(
+      i18n.t("errors.network.title"),
+      i18n.t("errors.network.message")
+    );
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
@@ -143,6 +156,10 @@ export const refineEstimation = async (
 
   if (data.error) {
     console.error("AI estimation error:", data.error);
+    showErrorToast(
+      i18n.t("errors.network.title"),
+      i18n.t("errors.network.message")
+    );
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
@@ -177,9 +194,10 @@ export const estimateNutritionImageBased = async (
   if (!response.ok) {
     const errorText = await response.text();
     console.error("Image estimation HTTP error:", response.status, errorText);
-    if (response.status === 429) {
-      showErrorToast("Rate limit exceeded", "Please try again later.");
-    }
+    showErrorToast(
+      i18n.t("errors.network.title"),
+      i18n.t("errors.network.message")
+    );
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
@@ -190,6 +208,10 @@ export const estimateNutritionImageBased = async (
 
   if (data.error) {
     console.error("Image-based estimation error:", data.error);
+    showErrorToast(
+      i18n.t("errors.network.title"),
+      i18n.t("errors.network.message")
+    );
     throw new Error("AI_ESTIMATION_FAILED");
   }
 

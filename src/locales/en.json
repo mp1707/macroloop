@@ -35,6 +35,12 @@
     "recommended": "Recommended",
     "ok": "OK"
   },
+  "errors": {
+    "network": {
+      "title": "Oops, something went wrong",
+      "message": "Please try again later."
+    }
+  },
   "dates": {
     "labels": {
       "today": "Today",

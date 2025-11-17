@@ -35,6 +35,12 @@
     "recommended": "Empfohlen",
     "ok": "OK"
   },
+  "errors": {
+    "network": {
+      "title": "Hoppla, etwas ist schiefgelaufen",
+      "message": "Bitte versuche es später noch einmal."
+    }
+  },
   "dates": {
     "labels": {
       "today": "Heute",
