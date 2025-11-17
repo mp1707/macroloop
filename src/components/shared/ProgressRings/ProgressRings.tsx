@@ -562,8 +562,11 @@ export const ProgressRingsStatic: React.FC<ProgressRingsStaticProps> = ({
   const { colors, colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  const center = size / 2;
-  const outerRadius = center - strokeWidth / 2 - padding;
+  const center = useMemo(() => size / 2, [size]);
+  const outerRadius = useMemo(
+    () => center - strokeWidth / 2 - padding,
+    [center, strokeWidth, padding]
+  );
 
   const ringConfigs = useMemo(
     () => resolveRingConfigs(nutrientKeys),
@@ -612,21 +615,32 @@ export const ProgressRingsStatic: React.FC<ProgressRingsStaticProps> = ({
     [percentages, ringConfigs]
   );
 
+  // Memoize styles to prevent unnecessary re-renders
+  const containerStyle = useMemo(
+    () => ({
+      width: size,
+      height: size,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+    }),
+    [size]
+  );
+
+  const canvasStyle = useMemo(
+    () => ({ width: size, height: size }),
+    [size]
+  );
+
   return (
     <View
-      style={{
-        width: size,
-        height: size,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      style={containerStyle}
       pointerEvents="none"
       accessibilityLabel={accessibilityLabelStatic}
       accessibilityRole="image"
       accessible={true}
     >
       <Canvas
-        style={{ width: size, height: size }}
+        style={canvasStyle}
         pointerEvents="none"
         key={isDark ? "dark" : "light"}
       >

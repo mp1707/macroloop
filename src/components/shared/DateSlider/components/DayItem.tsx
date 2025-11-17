@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Pressable, Text } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -11,6 +11,9 @@ import * as Haptics from "expo-haptics";
 import { ProgressRingsStatic } from "@/components/shared/ProgressRings";
 import { useTheme, theme } from "@/theme";
 import { getTodayKey } from "@/utils/dateHelpers";
+
+// Constant array to prevent recreating on every render
+const NUTRIENT_KEYS = ["calories", "protein"] as const;
 
 export interface DayData {
   date: string; // YYYY-MM-DD
@@ -91,7 +94,7 @@ export const DayItem: React.FC<DayItemProps> = React.memo(
               strokeWidth={6}
               spacing={1}
               padding={1}
-              nutrientKeys={["calories", "protein"]}
+              nutrientKeys={NUTRIENT_KEYS}
             />
           </View>
         </Animated.View>
