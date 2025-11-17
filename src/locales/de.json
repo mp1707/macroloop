@@ -456,7 +456,7 @@
         "sections": {
           "hitTarget": {
             "title": "Triff dein Tagesziel",
-            "body": "Halte jeden Tag eine konstante Basis, damit Energie und Mahlzeiten sättigend bleiben."
+            "body": "Halte jeden Tag eine konstante Basis, damit Energie und Mahlzeiten sättigend bleiben. Dieser Wert dient nur als Basis und darf jederzeit überschritten werden solange die Gesamtkalorien eingehalten werden."
           },
           "why": {
             "title": "Darum ist es wichtig",
@@ -665,7 +665,7 @@
       "subtitle": "Hier sind deine Startwerte. Du kannst sie jederzeit anpassen.",
       "helper": "Hinweis: Durch Rundungen kann es zu kleinen Abweichungen kommen.",
       "proteinSubtitle": "{{factor}} g pro kg Körpergewicht",
-      "fatSubtitle": "{{percentage}} % der Gesamtkalorien",
+      "fatSubtitle": "{{percentage}} % der Gesamtkalorien\nDieser Wert dient nur als Basis und darf jederzeit überschritten werden solange die Gesamtkalorien eingehalten werden",
       "rows": {
         "calories": "Kalorien",
         "protein": "Protein - 4 kcal/g",
@@ -926,7 +926,7 @@
       "options": {
         "device": {
           "label": "Gerät",
-          "subtitle": "Folgt der Sprache deines iPhones."
+          "subtitle": "Folgt der Sprache deines iPhones. Aktuell werden nur Deutsch und Englisch unterstützt."
         },
         "en": {
           "label": "Englisch",

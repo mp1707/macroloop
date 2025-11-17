@@ -266,9 +266,13 @@ const createStyles = (colors: Colors, theme: Theme) => {
       alignItems: "center",
       gap: spacing.md,
       flex: 1,
+      flexShrink: 1,
+      marginRight: spacing.md,
     },
     targetLabels: {
       gap: spacing.xs / 2,
+      flex: 1,
+      flexShrink: 1,
     },
     targetRight: {
       alignItems: "flex-end",

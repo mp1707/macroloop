@@ -456,7 +456,7 @@
         "sections": {
           "hitTarget": {
             "title": "Hit your daily target",
-            "body": "Keep a steady baseline each day so energy and meals stay satisfying."
+            "body": "Keep a steady baseline each day so energy and meals stay satisfying. This value serves only as a baseline and may be exceeded at any time as long as total calories are maintained."
           },
           "why": {
             "title": "Why it matters",
@@ -667,7 +667,7 @@
       "subtitle": "Here are your starting values. You can adjust them anytime.",
       "helper": "Note: Rounding may cause small differences.",
       "proteinSubtitle": "{{factor}} g per kg body weight",
-      "fatSubtitle": "{{percentage}}% of total calories",
+      "fatSubtitle": "{{percentage}}% of total calories\nThis value serves only as a baseline and may be exceeded at any time as long as total calories are maintained",
       "rows": {
         "calories": "Calories",
         "protein": "Protein — 4 kcal/g",
@@ -928,7 +928,7 @@
       "options": {
         "device": {
           "label": "Device",
-          "subtitle": "Follows your iPhone’s language."
+          "subtitle": "Follows your iPhone's language. Currently only German and English are supported."
         },
         "en": {
           "label": "English",
