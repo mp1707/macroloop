@@ -20,7 +20,7 @@ export default function SettingsScreen() {
     () => createStyles(colors, theme, colorScheme),
     [colors, theme, colorScheme]
   );
-  const { isPro, isVerifyingSubscription } = useAppStore();
+  const { isPro } = useAppStore();
 
   const version = Constants.expoConfig?.version ?? "1.0.0";
   const build =
@@ -41,7 +41,7 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {!isPro && !isVerifyingSubscription && <ProSection />}
+        {!isPro && <ProSection />}
         <AppearanceSection />
         <GoalsSection />
         <DataManagementSection />
