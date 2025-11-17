@@ -19,9 +19,11 @@ export const TargetMethodContent = () => {
   );
   const { t } = useTranslation();
   const { setInputMethod } = useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
 
   const handleMethodSelect = async (method: "calculate" | "manual") => {
+    if (isNavigating) return;
+
     setInputMethod(method);
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 

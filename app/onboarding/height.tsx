@@ -19,7 +19,7 @@ const HeightSelectionScreen = () => {
     [colors, themeObj]
   );
   const { height, setHeight } = useOnboardingStore();
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
   const [currentHeight, setCurrentHeight] = useState(height || 175);
   const { t } = useTranslation();
 
@@ -70,6 +70,7 @@ const HeightSelectionScreen = () => {
             variant="primary"
             label={t("onboarding.common.continue")}
             onPress={handleContinue}
+            isLoading={isNavigating}
           />
         </View>
       </ScrollView>

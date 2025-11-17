@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 const ManualInputScreen = () => {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(colors, themeObj);
-  const { safePush } = useNavigationGuard();
+  const { safePush, isNavigating } = useNavigationGuard();
   const {
     calorieGoal,
     proteinGoal,
@@ -92,6 +92,7 @@ const ManualInputScreen = () => {
           label={t("onboarding.common.continue")}
           onPress={handleContinue}
           disabled={!isValid}
+          isLoading={isNavigating}
         />
       }
     >

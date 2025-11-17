@@ -24,7 +24,7 @@ const PROTEIN_FACTORS: Record<ProteinGoalType, number> = {
 const CalculatorSummaryScreen = () => {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(colors, themeObj);
-  const { safeDismissTo, safeNavigate } = useNavigationGuard();
+  const { safeDismissTo, safeNavigate, isNavigating } = useNavigationGuard();
   const [isConfirming, setIsConfirming] = useState(false);
   const { t } = useTranslation();
 
@@ -68,6 +68,7 @@ const CalculatorSummaryScreen = () => {
   });
 
   const handleAdjustTargets = async () => {
+    if (isNavigating) return;
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     safeNavigate("/onboarding/calorie-goal");
   };
@@ -174,6 +175,7 @@ const CalculatorSummaryScreen = () => {
             disabled={
               currentCalories <= 0 || currentProtein <= 0 || isConfirming
             }
+            isLoading={isNavigating}
           />
         </View>
       }
