@@ -42,7 +42,9 @@ export default function EditComponent() {
 
   // Local state for editing
   const [name, setName] = useState(nameParam || "");
-  const [amount, setAmount] = useState(amountParam || "");
+  const [amount, setAmount] = useState(
+    mode === "create" ? "" : amountParam || ""
+  );
   const [unit, setUnit] = useState<FoodUnit>(
     mode === "create" ? lastUsedUnit : (unitParam as FoodUnit) || "g"
   );
@@ -95,7 +97,7 @@ export default function EditComponent() {
       setIsDirty(hasChanges);
     } else {
       // In create mode, dirty if any field has content
-      setIsDirty(name.trim().length > 0 || parseFloat(amount) > 0);
+      setIsDirty(name.trim().length > 0 || amount.trim().length > 0);
     }
   }, [name, amount, unit, nameParam, amountParam, unitParam, mode]);
 
@@ -115,6 +117,12 @@ export default function EditComponent() {
   }, [name, mode, t]);
 
   const amountError = useMemo(() => {
+    // Allow empty amount field (will show placeholder)
+    if (amount.trim() === "") {
+      return mode === "create"
+        ? null
+        : t("editComponent.validation.amountInvalid");
+    }
     const num = parseFloat(amount);
     if (isNaN(num) || num <= 0) {
       return t("editComponent.validation.amountInvalid");
@@ -125,14 +133,22 @@ export default function EditComponent() {
       return t("editComponent.validation.amountPrecision");
     }
     return null;
-  }, [amount, t]);
+  }, [amount, mode, t]);
 
-  const isValid = !nameError && !amountError && name.trim().length > 0;
+  const isValid =
+    !nameError &&
+    !amountError &&
+    name.trim().length > 0 &&
+    amount.trim().length > 0;
 
   // Handle unit change
   const handleUnitChange = useCallback((newUnit: FoodUnit) => {
     Haptics.selectionAsync();
     setUnit(newUnit);
+    // Restore focus to amount input after unit change
+    setTimeout(() => {
+      amountInputRef.current?.focus();
+    }, 100);
   }, []);
 
   // Handle Save
