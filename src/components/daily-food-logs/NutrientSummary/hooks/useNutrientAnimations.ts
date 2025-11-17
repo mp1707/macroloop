@@ -31,9 +31,14 @@ export const useNutrientAnimations = ({
 
   // Check if date changed for skipAnimation prop
   const dateChanged = prevSelectedDate.current !== selectedDate;
-  if (dateChanged) {
-    prevSelectedDate.current = selectedDate;
-  }
+
+  // Update prevSelectedDate in useEffect to ensure dateChanged stays true
+  // for all effects in this render cycle
+  useEffect(() => {
+    if (dateChanged) {
+      prevSelectedDate.current = selectedDate;
+    }
+  }, [dateChanged, selectedDate]);
 
   // Animated scales for icon transitions
   const proteinIconScale = useSharedValue(1);
