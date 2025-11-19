@@ -256,12 +256,19 @@
     },
     "permissions": {
       "cameraDenied": {
-        "title": "Kamerazugriff verweigert",
-        "message": "Erlaube den Kamerazugriff in den Einstellungen, um Fotos zu machen."
+        "title": "Kamerazugriff erforderlich",
+        "message": "MacroLoop benötigt Kamerazugriff, um Fotos deiner Mahlzeiten für die Essensprotokollierung aufzunehmen.",
+        "openSettings": "Einstellungen öffnen"
       },
       "microphoneDenied": {
-        "title": "Mikrofonzugriff verweigert",
-        "message": "Erlaube den Mikrofonzugriff in den Einstellungen, um die Spracheingabe zu nutzen."
+        "title": "Mikrofonzugriff erforderlich",
+        "message": "MacroLoop benötigt Mikrofonzugriff, um deine Stimme für die freihändige Essensprotokollierung in Text umzuwandeln.",
+        "openSettings": "Einstellungen öffnen"
+      },
+      "photoLibraryDenied": {
+        "title": "Fotozugriff erforderlich",
+        "message": "MacroLoop benötigt Zugriff auf deine Fotos, damit du Essensbilder für die Essensprotokollierung auswählen kannst.",
+        "openSettings": "Einstellungen öffnen"
       }
     },
     "toasts": {

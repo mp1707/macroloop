@@ -256,12 +256,19 @@
     },
     "permissions": {
       "cameraDenied": {
-        "title": "Camera access denied",
-        "message": "Enable camera access in Settings to take photos."
+        "title": "Camera Access Required",
+        "message": "MacroLoop needs camera access to photograph your meals for food logging.",
+        "openSettings": "Open Settings"
       },
       "microphoneDenied": {
-        "title": "Microphone access denied",
-        "message": "Enable microphone access in Settings to use voice input."
+        "title": "Microphone Access Required",
+        "message": "MacroLoop needs microphone access to transcribe your voice for hands-free food logging.",
+        "openSettings": "Open Settings"
+      },
+      "photoLibraryDenied": {
+        "title": "Photo Library Access Required",
+        "message": "MacroLoop needs access to your photos so you can select meal images for food logging.",
+        "openSettings": "Open Settings"
       }
     },
     "toasts": {
