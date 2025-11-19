@@ -73,8 +73,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-camera",
       {
-        cameraPermission: "MacroLoop needs camera access to let you take photos of your meals and food items for nutritional tracking. For example, you can photograph your plate to log your food entries.",
-        microphonePermission: "MacroLoop needs microphone access to record audio while capturing food videos. For example, you can add voice notes when recording meal videos.",
+        cameraPermission: "MacroLoop needs camera access to let you take photos of your meals and food items for image analysis. For example, you can photograph your plate and the app will analyze the image to help log your food entries.",
+        microphonePermission: "MacroLoop needs microphone access to transcribe your voice into text for hands-free food logging. For example, you can say 'chicken breast 200 grams' and the app will convert your speech to text on-device to create a food log entry. Audio is processed locally and not sent to third parties.",
         recordAudioAndroid: true,
       },
     ],
