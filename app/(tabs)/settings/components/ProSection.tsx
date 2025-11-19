@@ -101,8 +101,7 @@ export const ProSection = () => {
     } catch (error: any) {
       Alert.alert(
         t("settings.sections.subscription.restore.alerts.error.title"),
-        error?.message ??
-          t("settings.sections.subscription.restore.alerts.error.message")
+        t("settings.sections.subscription.restore.alerts.error.message")
       );
       if (__DEV__) {
         console.warn("[RC] restore failed:", error);

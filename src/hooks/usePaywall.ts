@@ -110,14 +110,8 @@ const isPurchasesError = (error: unknown): error is PurchasesError => {
 };
 
 const toErrorMessage = (error: unknown, t: TFunction): string => {
-  if (isPurchasesError(error) && error.message) {
-    return error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
+  // Always return a user-friendly generic message instead of raw error details
+  // This prevents debug/technical errors from being shown to users
   return t('paywall.errors.generic');
 };
 
