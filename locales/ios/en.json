@@ -1,0 +1,7 @@
+{
+  "NSCameraUsageDescription": "MacroLoop needs camera access to take photos of your meals for automatic food logging. For example, photograph your plate and the app will identify the food and estimate portions.",
+  "NSMicrophoneUsageDescription": "MacroLoop needs microphone access for voice-based food logging. For example, you can say 'chicken breast 200 grams' and the app will transcribe your speech to create a food entry.",
+  "NSPhotoLibraryUsageDescription": "MacroLoop needs access to your photos so you can select meal images from your library for automatic food logging.",
+  "NSPhotoLibraryAddUsageDescription": "MacroLoop needs permission to save meal photos to your photo library for future reference.",
+  "NSSpeechRecognitionUsageDescription": "MacroLoop needs speech recognition to convert your voice into text for hands-free food logging. For example, speak your meal details and the app will create a food entry from your words."
+}

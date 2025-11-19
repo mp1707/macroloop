@@ -1,0 +1,7 @@
+{
+  "NSCameraUsageDescription": "MacroLoop benötigt Kamerazugriff, um Fotos Ihrer Mahlzeiten für die automatische Essensprotokollierung aufzunehmen. Fotografieren Sie zum Beispiel Ihren Teller und die App erkennt die Lebensmittel und schätzt die Portionen.",
+  "NSMicrophoneUsageDescription": "MacroLoop benötigt Mikrofonzugriff für die sprachbasierte Essensprotokollierung. Sie können zum Beispiel 'Hühnerbrust 200 Gramm' sagen und die App wandelt Ihre Sprache in Text um, um einen Eintrag zu erstellen.",
+  "NSPhotoLibraryUsageDescription": "MacroLoop benötigt Zugriff auf Ihre Fotos, damit Sie Essensbilder aus Ihrer Bibliothek für die automatische Essensprotokollierung auswählen können.",
+  "NSPhotoLibraryAddUsageDescription": "MacroLoop benötigt die Berechtigung, Essensfotos in Ihrer Fotobibliothek zu speichern, um sie später wiederzufinden.",
+  "NSSpeechRecognitionUsageDescription": "MacroLoop benötigt Spracherkennung, um Ihre Stimme in Text für die freihändige Essensprotokollierung umzuwandeln. Sprechen Sie zum Beispiel Ihre Mahlzeitendetails und die App erstellt einen Eintrag aus Ihren Worten."
+}
