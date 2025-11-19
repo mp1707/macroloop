@@ -378,7 +378,6 @@
   "explainer": {
     "common": {
       "close": "Close explainer",
-      "adjustTargets": "Adjust targets",
       "ofTarget": "of {{target}}"
     },
     "aiEstimation": {

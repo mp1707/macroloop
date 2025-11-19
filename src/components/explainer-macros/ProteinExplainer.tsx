@@ -1,13 +1,10 @@
 import React, { useMemo } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { BicepsFlexed } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { AppText } from "@/components/shared/AppText";
 import { Theme, useTheme } from "@/theme";
 import { DashboardRing } from "@/components/shared/ProgressRings";
-import { useSafeRouter } from "@/hooks/useSafeRouter";
-import { Host, Button } from "@expo/ui/swift-ui";
-import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 interface ProteinExplainerProps {
   total?: number;
@@ -22,9 +19,7 @@ export const ProteinExplainer: React.FC<ProteinExplainerProps> = ({
 }) => {
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const router = useSafeRouter();
   const { t } = useTranslation();
-  const hasLiquidGlass = isLiquidGlassAvailable();
 
   const semanticColor = colors.semantic.protein;
   const detailValue =
@@ -32,134 +27,126 @@ export const ProteinExplainer: React.FC<ProteinExplainerProps> = ({
       ? t("explainer.common.ofTarget", { target })
       : undefined;
 
-  const handleChangeTargets = () => {
-    router.push("/onboarding/target-method");
-  };
-
   // WCAG 1.1.1 - Accessibility label for ring visualization
   const ringAccessibilityLabel = target
-    ? `${t("nutrients.protein.label")} ${total} ${t("nutrients.of")} ${target} ${t("nutrients.protein.unit")}`
+    ? `${t("nutrients.protein.label")} ${total} ${t(
+        "nutrients.of"
+      )} ${target} ${t("nutrients.protein.unit")}`
     : `${t("nutrients.protein.label")} ${total} ${t("nutrients.protein.unit")}`;
 
   return (
     <View style={styles.container}>
-      <AppText role="Title1" style={styles.title}>
-        {t("nutrients.protein.label")}
-      </AppText>
-      <AppText role="Caption" style={styles.subTitle}>
-        {t("explainer.macros.protein.subtitle")}
-      </AppText>
-      <View style={styles.content}>
-        <View style={styles.ringSection}>
-          <View
-            style={styles.ringContainer}
-            accessible={true}
-            accessibilityRole="image"
-            accessibilityLabel={ringAccessibilityLabel}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <AppText role="Title1" style={styles.title}>
+          {t("nutrients.protein.label")}
+        </AppText>
+        <AppText role="Caption" style={styles.subTitle}>
+          {t("explainer.macros.protein.subtitle")}
+        </AppText>
+        <View style={styles.content}>
+          <View style={styles.ringSection}>
+            <View
+              style={styles.ringContainer}
+              accessible={true}
+              accessibilityRole="image"
+              accessibilityLabel={ringAccessibilityLabel}
+            >
+              <DashboardRing
+                percentage={percentage}
+                color={semanticColor}
+                trackColor={colors.semanticSurfaces.protein}
+                textColor={colors.primaryText}
+                displayValue={total}
+                displayUnit={t("nutrients.protein.unit")}
+                detailValue={detailValue}
+                animationDelay={0}
+                strokeWidth={22}
+                Icon={BicepsFlexed}
+                smallIcon
+                skipAnimation
+              />
+            </View>
+          </View>
+
+          <AppText
+            role="Headline"
+            color="primary"
+            style={[styles.sectionHeading, { color: semanticColor }]}
           >
-            <DashboardRing
-              percentage={percentage}
-              color={semanticColor}
-              trackColor={colors.semanticSurfaces.protein}
-              textColor={colors.primaryText}
-              displayValue={total}
-              displayUnit={t("nutrients.protein.unit")}
-              detailValue={detailValue}
-              animationDelay={0}
-              strokeWidth={22}
-              Icon={BicepsFlexed}
-              smallIcon
-              skipAnimation
-            />
+            {t("explainer.macros.protein.howItWorks.title")}
+          </AppText>
+          <View style={styles.bulletRow}>
+            <AppText role="Body" color="secondary" style={styles.bulletChar}>
+              •
+            </AppText>
+            <AppText role="Body" color="secondary" style={styles.bulletText}>
+              {t("explainer.macros.protein.howItWorks.bullets.ring")}
+            </AppText>
+          </View>
+          <View style={styles.bulletRow}>
+            <AppText role="Body" color="secondary" style={styles.bulletChar}>
+              •
+            </AppText>
+            <AppText role="Body" color="secondary" style={styles.bulletText}>
+              {t("explainer.macros.protein.howItWorks.bullets.iconPrefix")}
+              <BicepsFlexed
+                size={16}
+                color={semanticColor}
+                fill={semanticColor}
+                strokeWidth={0}
+                style={styles.inlineIcon}
+              />
+              {t("explainer.macros.protein.howItWorks.bullets.iconSuffix")}
+            </AppText>
+          </View>
+          <View style={styles.bulletRow}>
+            <AppText role="Body" color="secondary" style={styles.bulletChar}>
+              •
+            </AppText>
+            <AppText role="Body" color="secondary" style={styles.bulletText}>
+              {t("explainer.macros.protein.howItWorks.bullets.close")}
+            </AppText>
+          </View>
+
+          <AppText
+            role="Headline"
+            color="primary"
+            style={[
+              styles.sectionHeading,
+              { color: semanticColor, marginTop: theme.spacing.md },
+            ]}
+          >
+            {t("explainer.macros.protein.quickTips.title")}
+          </AppText>
+          <View style={styles.bulletRow}>
+            <AppText role="Body" color="secondary" style={styles.bulletChar}>
+              •
+            </AppText>
+            <AppText role="Body" color="secondary" style={styles.bulletText}>
+              {t("explainer.macros.protein.quickTips.bullets.eachMeal")}
+            </AppText>
+          </View>
+          <View style={styles.bulletRow}>
+            <AppText role="Body" color="secondary" style={styles.bulletChar}>
+              •
+            </AppText>
+            <AppText role="Body" color="secondary" style={styles.bulletText}>
+              {t("explainer.macros.protein.quickTips.bullets.spread")}
+            </AppText>
+          </View>
+          <View style={styles.bulletRow}>
+            <AppText role="Body" color="secondary" style={styles.bulletChar}>
+              •
+            </AppText>
+            <AppText role="Body" color="secondary" style={styles.bulletText}>
+              {t("explainer.macros.protein.quickTips.bullets.over")}
+            </AppText>
           </View>
         </View>
-
-        <AppText
-          role="Headline"
-          color="primary"
-          style={[styles.sectionHeading, { color: semanticColor }]}
-        >
-          {t("explainer.macros.protein.howItWorks.title")}
-        </AppText>
-        <View style={styles.bulletRow}>
-          <AppText role="Body" color="secondary" style={styles.bulletChar}>
-            •
-          </AppText>
-          <AppText role="Body" color="secondary" style={styles.bulletText}>
-            {t("explainer.macros.protein.howItWorks.bullets.ring")}
-          </AppText>
-        </View>
-        <View style={styles.bulletRow}>
-          <AppText role="Body" color="secondary" style={styles.bulletChar}>
-            •
-          </AppText>
-          <AppText role="Body" color="secondary" style={styles.bulletText}>
-            {t("explainer.macros.protein.howItWorks.bullets.iconPrefix")}
-            <BicepsFlexed
-              size={16}
-              color={semanticColor}
-              fill={semanticColor}
-              strokeWidth={0}
-              style={styles.inlineIcon}
-            />
-            {t("explainer.macros.protein.howItWorks.bullets.iconSuffix")}
-          </AppText>
-        </View>
-        <View style={styles.bulletRow}>
-          <AppText role="Body" color="secondary" style={styles.bulletChar}>
-            •
-          </AppText>
-          <AppText role="Body" color="secondary" style={styles.bulletText}>
-            {t("explainer.macros.protein.howItWorks.bullets.close")}
-          </AppText>
-        </View>
-
-        <AppText
-          role="Headline"
-          color="primary"
-          style={[
-            styles.sectionHeading,
-            { color: semanticColor, marginTop: theme.spacing.md },
-          ]}
-        >
-          {t("explainer.macros.protein.quickTips.title")}
-        </AppText>
-        <View style={styles.bulletRow}>
-          <AppText role="Body" color="secondary" style={styles.bulletChar}>
-            •
-          </AppText>
-          <AppText role="Body" color="secondary" style={styles.bulletText}>
-            {t("explainer.macros.protein.quickTips.bullets.eachMeal")}
-          </AppText>
-        </View>
-        <View style={styles.bulletRow}>
-          <AppText role="Body" color="secondary" style={styles.bulletChar}>
-            •
-          </AppText>
-          <AppText role="Body" color="secondary" style={styles.bulletText}>
-            {t("explainer.macros.protein.quickTips.bullets.spread")}
-          </AppText>
-        </View>
-        <View style={styles.bulletRow}>
-          <AppText role="Body" color="secondary" style={styles.bulletChar}>
-            •
-          </AppText>
-          <AppText role="Body" color="secondary" style={styles.bulletText}>
-            {t("explainer.macros.protein.quickTips.bullets.over")}
-          </AppText>
-        </View>
-      </View>
-
-      <Host matchContents style={{ width: "100%", alignSelf: "center" }}>
-        <Button
-          variant={hasLiquidGlass ? "glassProminent" : "borderedProminent"}
-          color={colors.secondaryBackground}
-          onPress={handleChangeTargets}
-          controlSize="large"
-        >
-          {t("explainer.common.adjustTargets")}
-        </Button>
-      </Host>
+      </ScrollView>
     </View>
   );
 };
@@ -168,9 +155,10 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
+    },
+    scrollContent: {
       paddingHorizontal: theme.spacing.lg,
       paddingTop: theme.spacing.md,
-      paddingBottom: theme.spacing.xl,
     },
     title: {
       textAlign: "center",
@@ -179,9 +167,7 @@ const createStyles = (theme: Theme) =>
       textAlign: "center",
       marginBottom: theme.spacing.lg,
     },
-    content: {
-      flex: 1,
-    },
+    content: {},
     ringSection: {
       alignItems: "center",
       marginBottom: theme.spacing.lg,

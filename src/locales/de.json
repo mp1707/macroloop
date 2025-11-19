@@ -378,7 +378,6 @@
   "explainer": {
     "common": {
       "close": "Erklärfenster schließen",
-      "adjustTargets": "Ziele anpassen",
       "ofTarget": "von {{target}}"
     },
     "aiEstimation": {
