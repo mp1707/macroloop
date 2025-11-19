@@ -359,13 +359,13 @@
       }
     },
     "errors": {
-      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
-      "loadFailed": "Pro-Optionen können gerade nicht geladen werden. Bitte versuche es später noch einmal.",
-      "purchaseFailed": "Der Kauf konnte nicht abgeschlossen werden. Bitte versuche es später noch einmal.",
-      "restoreFailed": "Käufe konnten nicht wiederhergestellt werden. Bitte versuche es später noch einmal.",
-      "noSelection": "Bitte wähle einen Plan.",
-      "planUnavailable": "Der ausgewählte Plan ist nicht mehr verfügbar.",
-      "noSubscription": "Für diese Apple-ID wurde kein Abonnement gefunden."
+      "generic": "Da ist etwas schiefgelaufen. Versuch's bitte nochmal.",
+      "loadFailed": "Wir können die Pro-Optionen gerade nicht laden. Versuch's gleich nochmal.",
+      "purchaseFailed": "Der Kauf hat leider nicht geklappt. Versuch's bitte nochmal.",
+      "restoreFailed": "Die Wiederherstellung hat nicht geklappt. Versuch's bitte nochmal.",
+      "noSelection": "Bitte wähle einen Plan aus.",
+      "planUnavailable": "Dieser Plan ist leider nicht mehr verfügbar.",
+      "noSubscription": "Wir konnten kein Abo für diese Apple-ID finden."
     }
   },
   "explainer": {
@@ -827,16 +827,16 @@
           "buttonLoading": "Prüfen …",
           "alerts": {
             "restored": {
-              "title": "Wiederhergestellt",
-              "message": "Dein Abo wurde wiederhergestellt."
+              "title": "Geschafft!",
+              "message": "Dein Abo ist jetzt wiederhergestellt."
             },
             "notFound": {
-              "title": "Nichts zum Wiederherstellen",
-              "message": "Wir konnten keine vergangenen Käufe für diese Apple-ID finden."
+              "title": "Nichts gefunden",
+              "message": "Wir konnten leider keine Käufe für diese Apple-ID finden."
             },
             "error": {
-              "title": "Wiederherstellung fehlgeschlagen",
-              "message": "Bitte versuche es erneut."
+              "title": "Hat nicht geklappt",
+              "message": "Versuch's bitte nochmal."
             }
           }
         }
