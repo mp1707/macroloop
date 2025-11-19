@@ -826,7 +826,7 @@
         "canceledWithoutDate": "Auto-renew canceled. Access until the current period ends. Manage in iOS Settings -> Apple ID -> Subscriptions.",
         "upgradeDescription": "Ingredient recognition, nutrition estimates, effortless tracking.",
         "upgradeDescriptionWithTrial": "Ingredient recognition, nutrition estimates, effortless tracking. Free trial available.",
-        "activeDescription": "An auto-renewing subscription is active. Manage in iOS Settings -> Apple ID -> Subscriptions.",
+        "activeDescription": "Manage subscriptions in iOS Settings -> iCloud -> Subscriptions.",
         "verifyingTitle": "Checking subscription",
         "verifyingDescription": "Hang tight while we confirm your purchase status.",
         "restore": {

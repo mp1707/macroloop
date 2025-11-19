@@ -824,7 +824,7 @@
         "canceledWithoutDate": "Automatische Verlängerung beendet. Zugriff bis zum Ende des aktuellen Zeitraums. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
         "upgradeDescription": "Zutatenerkennung, Nährwertschätzung, müheloses Tracking.",
         "upgradeDescriptionWithTrial": "Zutatenerkennung, Nährwertschätzung, müheloses Tracking. Kostenloser Test verfügbar.",
-        "activeDescription": "Ein automatisch verlängerndes Abonnement ist aktiv. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
+        "activeDescription": "Verwalte aktive Abos es in den iOS-Einstellungen unter Abonnements.",
         "verifyingTitle": "Abo wird überprüft",
         "verifyingDescription": "Einen Moment, wir bestätigen deinen Kaufstatus.",
         "restore": {
