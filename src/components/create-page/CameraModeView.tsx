@@ -74,12 +74,14 @@ export const CameraModeView = ({ onImageSelected }: CameraModeViewProps) => {
       exiting={FadeOut.duration(200)}
       style={styles.container}
     >
-      <CameraView
-        key={permission?.granted ? "camera-granted" : "camera-waiting"}
-        style={styles.camera}
-        ref={cameraRef}
-        onCameraReady={() => setIsCameraReady(true)}
-      />
+      {permission?.granted && (
+        <CameraView
+          key={permission?.granted ? "camera-granted" : "camera-waiting"}
+          style={styles.camera}
+          ref={cameraRef}
+          onCameraReady={() => setIsCameraReady(true)}
+        />
+      )}
 
       {/* Shutter flash overlay */}
       <Animated.View
