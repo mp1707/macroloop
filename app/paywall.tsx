@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +13,7 @@ import * as Haptics from "expo-haptics";
 import { BrainCircuit, Calculator, Check, Heart, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
+import { Host, Picker } from "@expo/ui/swift-ui";
 
 import { AppText } from "@/components/shared/AppText";
 import { Button } from "@/components/shared/Button";
@@ -40,7 +41,7 @@ const getPaywallFeatures = (t: TFunction) => [
 ];
 
 export default function PaywallScreen() {
-  const { theme, colors } = useTheme();
+  const { theme, colors, colorScheme } = useTheme();
   const styles = useMemo(() => createStyles(theme, colors), [theme, colors]);
   const router = useSafeRouter();
   const { t } = useTranslation();
@@ -57,6 +58,19 @@ export default function PaywallScreen() {
     purchase,
     restore,
   } = usePaywall();
+
+  // State for segmented picker when there are two options
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Sync selectedIndex with selectedId when options change
+  React.useEffect(() => {
+    if (options.length === 2 && selectedId) {
+      const index = options.findIndex((opt) => opt.id === selectedId);
+      if (index !== -1 && index !== selectedIndex) {
+        setSelectedIndex(index);
+      }
+    }
+  }, [selectedId, options, selectedIndex]);
 
   const handleClose = () => {
     if (router.canGoBack()) {
@@ -228,19 +242,30 @@ export default function PaywallScreen() {
         </View>
 
         <View style={styles.packages}>
-          {options.map((option) => {
-            const isSelected = option.id === selectedId;
-            const isMonthly = option.package.packageType === "MONTHLY";
-            const hasTrial = Boolean(option.trialInfo);
-            const trialDays = option.trialInfo?.days ?? 0;
+          {options.length === 2 && (
+            <Host matchContents colorScheme={colorScheme}>
+              <Picker
+                options={options.map((opt) => opt.title || opt.price)}
+                selectedIndex={selectedIndex}
+                onOptionSelected={({ nativeEvent: { index } }) => {
+                  Haptics.selectionAsync();
+                  setSelectedIndex(index);
+                  selectOption(options[index].id);
+                }}
+                variant="segmented"
+              />
+            </Host>
+          )}
+
+          {(() => {
+            const displayOption = options.length === 2 ? options[selectedIndex] : options[0];
+            const isMonthly = displayOption.package.packageType === "MONTHLY";
+            const isYearly = displayOption.package.packageType === "ANNUAL";
+            const hasTrial = Boolean(displayOption.trialInfo);
+            const trialDays = displayOption.trialInfo?.days ?? 0;
 
             return (
-              <TouchableOpacity
-                key={option.id}
-                activeOpacity={0.7}
-                onPress={() => handleSelectOption(option.id)}
-                style={[styles.package, isSelected && styles.packageSelected]}
-              >
+              <View style={[styles.package, styles.packageSelected]}>
                 {isMonthly ? (
                   <>
                     {hasTrial && (
@@ -259,7 +284,7 @@ export default function PaywallScreen() {
                     )}
                     <View style={styles.monthlyPriceRow}>
                       <AppText role="Title2" style={styles.monthlyPrice}>
-                        {option.price}
+                        {displayOption.price}
                       </AppText>
                       <AppText role="Caption" style={styles.priceMetaLabel}>
                         {t("paywall.options.period.perMonth")}
@@ -308,22 +333,24 @@ export default function PaywallScreen() {
                   </>
                 ) : (
                   <>
-                    {option.title && (
+                    {displayOption.title && (
                       <>
                         <View style={styles.packageHeader}>
-                          <AppText role="Headline">{option.title}</AppText>
+                          <AppText role="Headline">{displayOption.title}</AppText>
                         </View>
-                        <AppText role="Title2">{option.price}</AppText>
+                        <AppText role="Title2">{displayOption.price}</AppText>
                       </>
                     )}
                     <AppText role="Caption" color="secondary">
-                      {option.periodDescription}
+                      {isYearly
+                        ? displayOption.periodDescription?.replace(/per month/i, "per year") || displayOption.periodDescription
+                        : displayOption.periodDescription}
                     </AppText>
                   </>
                 )}
-              </TouchableOpacity>
+              </View>
             );
-          })}
+          })()}
         </View>
 
         <Button
