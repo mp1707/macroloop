@@ -43,10 +43,10 @@ yarn-error.*
 .env
 
 # ios build
-ios/
+/ios/
 
 # android build
-android/
+/android/
 
 # build
 build/

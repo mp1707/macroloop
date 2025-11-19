@@ -21,6 +21,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       // Permission descriptions are handled by the plugins below.
       ITSAppUsesNonExemptEncryption: false,
+      CFBundleAllowMixedLocalizations: true,
     },
     bundleIdentifier: IS_DEV
       ? "com.mp17.mpapps.macroloop.dev"
@@ -73,16 +74,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-camera",
       {
-        cameraPermission: "Allow MacroLoop to access your camera",
-        microphonePermission: "Allow MacroLoop to access your microphone",
+        cameraPermission: "MacroLoop needs camera access to take photos of your meals for automatic food logging. For example, photograph your plate and the app will identify the food and estimate portions.",
+        microphonePermission: "MacroLoop needs microphone access for voice-based food logging. For example, you can say 'chicken breast 200 grams' and the app will transcribe your speech to create a food entry.",
         recordAudioAndroid: true,
       },
     ],
     [
       "expo-media-library",
       {
-        photosPermission: "Allow MacroLoop to access your photos.",
-        savePhotosPermission: "Allow MacroLoop to save photos.",
+        photosPermission: "MacroLoop needs access to your photos so you can select meal images from your library for automatic food logging.",
         isAccessMediaLocationEnabled: true,
       },
     ],
@@ -90,9 +90,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-speech-recognition",
       {
         microphonePermission:
-          "Allow MacroLoop to use the microphone for audio food logging.",
+          "MacroLoop needs microphone access for voice-based food logging. For example, you can say 'chicken breast 200 grams' and the app will transcribe your speech to create a food entry.",
         speechRecognitionPermission:
-          "Allow MacroLoop to use speech recognition for audio food logging.",
+          "MacroLoop needs speech recognition to convert your voice into text for hands-free food logging. For example, speak your meal details and the app will create a food entry from your words.",
       },
     ],
     [
@@ -118,4 +118,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     policy: "appVersion",
   },
   owner: "mp17",
+  locales: {
+    en: "./locales/ios/en.json",
+    de: "./locales/ios/de.json",
+  },
 });

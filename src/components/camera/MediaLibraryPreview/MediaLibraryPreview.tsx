@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "@/theme";
 import { createStyles } from "./MediaLibraryPreview.styles";
 import { Host, Button, Image as SwiftImage } from "@expo/ui/swift-ui";
+import { showPermissionDeniedAlert } from "@/lib/permissions";
 
 interface MediaLibraryPreviewProps {
   onImageSelected: (uri: string) => void;
@@ -17,7 +18,19 @@ export const MediaLibraryPreview = ({
   const { colors, theme } = useTheme();
   const styles = createStyles(theme);
 
-  const handleImagePickerPress = useCallback(() => {
+  const handleImagePickerPress = useCallback(async () => {
+    // Check permissions first
+    const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
+
+    if (status === "denied" || status === "undetermined") {
+      const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!granted) {
+        showPermissionDeniedAlert("photoLibrary");
+        return;
+      }
+    }
+
     ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,

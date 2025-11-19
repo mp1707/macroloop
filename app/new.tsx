@@ -30,10 +30,9 @@ export default function Create() {
   const isIOS = Platform.OS === "ios";
 
   // Get initial mode from query params
+  // Always start with typing mode - we'll switch to camera/recording after permission checks
   const params = useLocalSearchParams<{ mode?: string }>();
-  const initialMode: CreationMode =
-    params.mode === "camera" ? "camera" : "typing";
-  const [mode, setMode] = useState<CreationMode>(initialMode);
+  const [mode, setMode] = useState<CreationMode>("typing");
 
   const { startNewDraft, clearDraft, updateDraft } = useCreationStore();
   const [draftId, setDraftId] = useState<string | null>(null);

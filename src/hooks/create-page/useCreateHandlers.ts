@@ -4,7 +4,7 @@ import { useCameraPermissions } from "expo-camera";
 import type { FoodLog, Favorite } from "@/types/models";
 import type { CreationMode } from "@/types/creation";
 import { generateFoodLogId } from "@/utils/idGenerator";
-import { showErrorToast } from "@/lib/toast";
+import { showPermissionDeniedAlert } from "@/lib/permissions";
 
 interface UseCreateHandlersParams {
   router: ReturnType<typeof import("@/hooks/useSafeRouter").useSafeRouter>;
@@ -98,10 +98,7 @@ export const useCreateHandlers = ({
     if (!cameraPermission?.granted) {
       const result = await requestCameraPermission();
       if (!result.granted) {
-        showErrorToast(
-          "Camera Permission Required",
-          "Please enable camera access in settings"
-        );
+        showPermissionDeniedAlert("camera");
         return;
       }
     }
@@ -114,6 +111,7 @@ export const useCreateHandlers = ({
 
     const hasPermission = await requestPermission();
     if (!hasPermission) {
+      showPermissionDeniedAlert("microphone");
       return;
     }
 
