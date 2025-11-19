@@ -360,6 +360,9 @@
     },
     "errors": {
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "loadFailed": "Pro-Optionen können gerade nicht geladen werden. Bitte versuche es später noch einmal.",
+      "purchaseFailed": "Der Kauf konnte nicht abgeschlossen werden. Bitte versuche es später noch einmal.",
+      "restoreFailed": "Käufe konnten nicht wiederhergestellt werden. Bitte versuche es später noch einmal.",
       "noSelection": "Bitte wähle einen Plan.",
       "planUnavailable": "Der ausgewählte Plan ist nicht mehr verfügbar.",
       "noSubscription": "Für diese Apple-ID wurde kein Abonnement gefunden."

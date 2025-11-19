@@ -360,6 +360,9 @@
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",
+      "loadFailed": "We couldn't load Pro options right now. Please try again later.",
+      "purchaseFailed": "We couldn't complete your purchase. Please try again later.",
+      "restoreFailed": "We couldn't restore your purchases. Please try again later.",
       "noSelection": "Please choose a plan.",
       "planUnavailable": "Selected plan is no longer available.",
       "noSubscription": "We couldn't find a subscription for this Apple ID."

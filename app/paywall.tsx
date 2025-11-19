@@ -81,7 +81,7 @@ export default function PaywallScreen() {
     if (result.status === "error") {
       Alert.alert(
         t("paywall.alerts.purchaseFailed.title"),
-        t("errors.network.message")
+        t("paywall.errors.purchaseFailed")
       );
     }
   };
@@ -102,7 +102,7 @@ export default function PaywallScreen() {
     if (result.status === "error") {
       Alert.alert(
         t("paywall.alerts.restoreFailed.title"),
-        t("errors.network.message")
+        t("paywall.errors.restoreFailed")
       );
     }
   };
@@ -148,10 +148,10 @@ export default function PaywallScreen() {
         />
         <View style={styles.errorContainer}>
           <AppText role="Headline" style={styles.errorTitle}>
-            {t("errors.network.title")}
+            {t("common.error")}
           </AppText>
           <AppText role="Body" color="secondary" style={styles.errorMessage}>
-            {t("errors.network.message")}
+            {t("paywall.errors.loadFailed")}
           </AppText>
           <Button
             variant="primary"
