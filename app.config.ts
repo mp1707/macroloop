@@ -83,7 +83,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-media-library",
       {
         photosPermission: "MacroLoop needs access to your photos so you can select meal images from your library for automatic food logging.",
-        savePhotosPermission: "MacroLoop needs permission to save meal photos to your photo library for future reference.",
         isAccessMediaLocationEnabled: true,
       },
     ],
