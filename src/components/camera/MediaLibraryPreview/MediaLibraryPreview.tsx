@@ -38,17 +38,7 @@ export const MediaLibraryPreview = ({
     })
       .then((result) => {
         if (!result.canceled && result.assets[0]) {
-          const asset = result.assets[0];
-          console.log("Selected image asset:", {
-            uri: asset.uri,
-            width: asset.width,
-            height: asset.height,
-            type: asset.type,
-            fileName: asset.fileName,
-            fileSize: asset.fileSize,
-            mimeType: asset.mimeType,
-          });
-          onImageSelected(asset.uri);
+          onImageSelected(result.assets[0].uri);
         }
       })
       .catch((error) => {
