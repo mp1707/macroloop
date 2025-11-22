@@ -9,6 +9,40 @@ export interface ProcessedImageResult {
   supabaseImagePath: string;
 }
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Attempts to manipulate an image with retry logic for GPU context loss errors
+ */
+const manipulateWithRetry = async (
+  uri: string,
+  actions: ImageManipulator.Action[],
+  options: ImageManipulator.SaveOptions,
+  maxRetries = 3
+): Promise<ImageManipulator.ImageResult> => {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`processImage: Manipulation attempt ${attempt}/${maxRetries}`);
+      const result = await ImageManipulator.manipulateAsync(uri, actions, options);
+      return result;
+    } catch (error) {
+      lastError = error as Error;
+      console.warn(`processImage: Attempt ${attempt} failed:`, error);
+
+      if (attempt < maxRetries) {
+        // Wait before retrying (exponential backoff: 100ms, 200ms, 400ms)
+        const waitTime = 100 * Math.pow(2, attempt - 1);
+        console.log(`processImage: Waiting ${waitTime}ms before retry...`);
+        await delay(waitTime);
+      }
+    }
+  }
+
+  throw lastError;
+};
+
 /**
  * Processes an image by resizing, compressing, saving locally, and uploading to Supabase
  * @param uri - The original image URI to process
@@ -23,36 +57,12 @@ export const processImage = async (
   try {
     console.log("processImage: Starting with URI:", uri);
 
-    // Check if the image is HEIC format (common on iOS for screenshots and photos)
-    const isHeic = uri.toLowerCase().includes(".heic");
-
-    let processedImage;
-
-    if (isHeic) {
-      // For HEIC images, first convert to JPEG without resize to avoid GPU context loss
-      // This is a workaround for expo-image-manipulator issues with HEIC + resize
-      console.log("processImage: HEIC detected, converting format first");
-      const convertedImage = await ImageManipulator.manipulateAsync(
-        uri,
-        [], // No transformations, just format conversion
-        { format: ImageManipulator.SaveFormat.JPEG }
-      );
-      console.log("processImage: Converted to JPEG:", convertedImage.uri);
-
-      // Then resize the converted JPEG
-      processedImage = await ImageManipulator.manipulateAsync(
-        convertedImage.uri,
-        [{ resize: { width: 768 } }],
-        { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG }
-      );
-    } else {
-      // For non-HEIC images, process in a single step
-      processedImage = await ImageManipulator.manipulateAsync(
-        uri,
-        [{ resize: { width: 768 } }],
-        { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG }
-      );
-    }
+    // Process the image - resize to max width of 768px, maintaining aspect ratio
+    const processedImage = await manipulateWithRetry(
+      uri,
+      [{ resize: { width: 768 } }],
+      { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG }
+    );
 
     console.log("processImage: Processed image result:", {
       uri: processedImage.uri,

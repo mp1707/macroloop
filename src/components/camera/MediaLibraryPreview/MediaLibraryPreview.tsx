@@ -34,7 +34,7 @@ export const MediaLibraryPreview = ({
     ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: false,
-      quality: 1,
+      quality: 0.9, // Slightly less than 1 to encourage JPEG conversion from HEIC
     })
       .then((result) => {
         if (!result.canceled && result.assets[0]) {
