@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react-native";
 import { AppText } from "@/components";
 import { AnimatedPressable } from "@/components/shared/AnimatedPressable";
 import { useTheme, Colors, Theme } from "@/theme";
-import { SettingRowProps, ValueTone } from "./types";
+import { SettingRowProps, ValueTone } from "./_types";
 
 const valueToneMap: Record<ValueTone, (colors: Colors) => string> = {
   primary: (colors) => colors.primaryText,

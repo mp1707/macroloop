@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
-import { SettingRow } from "../SettingRow";
+import { SettingRow } from "../_SettingRow";
 import { useLocalization } from "@/context/LocalizationContext";
 
 export const AppearanceSection = () => {

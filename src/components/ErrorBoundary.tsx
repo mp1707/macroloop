@@ -1,6 +1,6 @@
 import React, { Component, ReactNode } from "react";
 import { View, StyleSheet } from "react-native";
-import { AppText } from "@/components/index";
+import { AppText } from "@/components/shared/AppText";
 import { Colors } from "@/theme";
 
 interface Props {
