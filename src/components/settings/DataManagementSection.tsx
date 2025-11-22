@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AppText, Card } from "@/components";
 import { useTheme, Theme } from "@/theme";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
-import { SettingRow } from "../SettingRow";
+import { SettingRow } from "./SettingRow";
 
 export const DataManagementSection = () => {
   const { t } = useTranslation();

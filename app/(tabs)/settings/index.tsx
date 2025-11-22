@@ -5,12 +5,12 @@ import { useTranslation } from "react-i18next";
 
 import { AppText } from "@/components";
 import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
-import { ProSection } from "./components/ProSection";
-import { AppearanceSection } from "./components/AppearanceSection";
-import { GoalsSection } from "./components/GoalsSection";
-import { DataManagementSection } from "./components/DataManagementSection";
-import { DeveloperSection } from "./components/DeveloperSection";
-import { AboutSection } from "./components/AboutSection";
+import { ProSection } from "@/components/settings/ProSection";
+import { AppearanceSection } from "@/components/settings/AppearanceSection";
+import { GoalsSection } from "@/components/settings/GoalsSection";
+import { DataManagementSection } from "@/components/settings/DataManagementSection";
+import { DeveloperSection } from "@/components/settings/DeveloperSection";
+import { AboutSection } from "@/components/settings/AboutSection";
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
