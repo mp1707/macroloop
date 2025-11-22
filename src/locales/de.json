@@ -797,7 +797,7 @@
     "recommendation": {
       "estimatePrefix": "Wir schätzen",
       "approx": "≈",
-      "estimateSuffix": ".",
+      "estimateSuffix": ":",
       "setButton": "{{amount}} {{unit}} übernehmen"
     }
   },
