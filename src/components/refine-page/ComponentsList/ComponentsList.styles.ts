@@ -44,6 +44,8 @@ export const createStyles = (colors: Colors, theme: Theme) =>
     solidBackgroundForSwipe: {
       backgroundColor: colors.primaryBackground,
       paddingVertical: theme.spacing.md,
+      paddingRight: theme.spacing.md,
+      marginRight: -theme.spacing.md,
     },
     componentExpandContainer: {
       flexDirection: "row",
@@ -100,11 +102,22 @@ export const createStyles = (colors: Colors, theme: Theme) =>
       gap: theme.spacing.sm,
       marginBottom: theme.spacing.sm,
     },
-    estimateText: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.spacing.sm,
+    estimateTextColumn: {
       flex: 1,
+      gap: theme.spacing.xs,
+    },
+    estimateConversionRow: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      flexWrap: "wrap",
+      gap: theme.spacing.xs,
+    },
+    estimateValueText: {
+      color: colors.primaryText,
+      fontWeight: "600",
+    },
+    approxSymbol: {
+      color: colors.secondaryText,
     },
     buttonRow: {
       flexDirection: "row",
@@ -122,7 +135,7 @@ export const createStyles = (colors: Colors, theme: Theme) =>
       flexShrink: 0,
     },
     acceptPillText: {
-      color: colors.accent === "#44EBD4" ? colors.black : colors.white,
+      color: colors.black,
       fontSize: theme.typography.Body.fontSize,
       fontWeight: "600",
     },
