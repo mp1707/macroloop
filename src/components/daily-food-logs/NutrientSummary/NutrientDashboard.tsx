@@ -3,6 +3,8 @@ import { View, StyleSheet, Pressable, useWindowDimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  useAnimatedReaction,
+  runOnJS,
   withDelay,
   withSpring,
   type SharedValue,
@@ -361,12 +363,23 @@ const MacroGridCell: React.FC<MacroGridCellProps> = ({
   const NUTRIENT_LABELS = getNutrientLabels(t);
   const config = NUTRIENT_LABELS[nutrientKey];
 
+  // Track SharedValue for accessibility without reading .value during render
+  const isSharedValue = typeof total === "object" && "value" in total;
+  const initialValue = isSharedValue ? 0 : (typeof total === "number" ? Math.round(total) : total);
+  const [accessibilityTotal, setAccessibilityTotal] = useState<number | string>(initialValue);
+
+  useAnimatedReaction(
+    () => (isSharedValue ? Math.round((total as SharedValue<number>).value) : null),
+    (currentValue, previousValue) => {
+      if (currentValue !== null && currentValue !== previousValue) {
+        runOnJS(setAccessibilityTotal)(currentValue);
+      }
+    },
+    [total, isSharedValue]
+  );
+
   // Create accessibility label with current and target values
-  const totalValue = typeof total === "object" && "value" in total
-    ? Math.round(total.value as number)
-    : typeof total === "number"
-    ? Math.round(total)
-    : total;
+  const totalValue = accessibilityTotal;
   const accessibilityLabel = target != null
     ? `${config.label} ${totalValue} ${t("nutrients.of")} ${target} ${unit}`
     : `${config.label} ${totalValue} ${unit}`;
