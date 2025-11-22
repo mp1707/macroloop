@@ -146,5 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     // Disable selection
     userSelect: "none",
+    // Keep text centered during digit count transitions
+    textAlign: "center",
   },
 });
