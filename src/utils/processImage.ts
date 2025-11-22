@@ -23,34 +23,59 @@ export const processImage = async (
   try {
     console.log("processImage: Starting with URI:", uri);
 
-    // Resize the image to a max width of 768px, maintaining aspect ratio.
-    const resizedImage = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 768 } }],
-      { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG }
-    );
-    console.log("processImage: Resized image result:", {
-      uri: resizedImage.uri,
-      width: resizedImage.width,
-      height: resizedImage.height,
+    // Check if the image is HEIC format (common on iOS for screenshots and photos)
+    const isHeic = uri.toLowerCase().includes(".heic");
+
+    let processedImage;
+
+    if (isHeic) {
+      // For HEIC images, first convert to JPEG without resize to avoid GPU context loss
+      // This is a workaround for expo-image-manipulator issues with HEIC + resize
+      console.log("processImage: HEIC detected, converting format first");
+      const convertedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [], // No transformations, just format conversion
+        { format: ImageManipulator.SaveFormat.JPEG }
+      );
+      console.log("processImage: Converted to JPEG:", convertedImage.uri);
+
+      // Then resize the converted JPEG
+      processedImage = await ImageManipulator.manipulateAsync(
+        convertedImage.uri,
+        [{ resize: { width: 768 } }],
+        { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG }
+      );
+    } else {
+      // For non-HEIC images, process in a single step
+      processedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 768 } }],
+        { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG }
+      );
+    }
+
+    console.log("processImage: Processed image result:", {
+      uri: processedImage.uri,
+      width: processedImage.width,
+      height: processedImage.height,
     });
 
-    if (!resizedImage.uri) {
+    if (!processedImage.uri) {
       throw new Error("ImageManipulator returned no URI");
     }
 
     const uniqueFilename = `${uuidv4()}.jpg`;
 
-    // Move the resized image from its temporary cache location to the permanent path.
-    console.log("processImage: Creating File from URI:", resizedImage.uri);
-    const sourceFile = new File(resizedImage.uri);
+    // Move the processed image from its temporary cache location to the permanent path.
+    console.log("processImage: Creating File from URI:", processedImage.uri);
+    const sourceFile = new File(processedImage.uri);
     const targetFile = new File(Paths.document, uniqueFilename);
     console.log("processImage: Target path:", targetFile.uri);
 
     const sourceExists = await sourceFile.exists();
     console.log("processImage: Source file exists:", sourceExists);
     if (!sourceExists) {
-      throw new Error(`Source file does not exist: ${resizedImage.uri}`);
+      throw new Error(`Source file does not exist: ${processedImage.uri}`);
     }
 
     await sourceFile.move(targetFile);
