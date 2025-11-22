@@ -77,20 +77,11 @@ export const processImage = async (
     const uniqueFilename = `${uuidv4()}.jpg`;
 
     // Move the processed image from its temporary cache location to the permanent path.
-    console.log("processImage: Creating File from URI:", processedImage.uri);
     const sourceFile = new File(processedImage.uri);
     const targetFile = new File(Paths.document, uniqueFilename);
-    console.log("processImage: Target path:", targetFile.uri);
-
-    const sourceExists = await sourceFile.exists();
-    console.log("processImage: Source file exists:", sourceExists);
-    if (!sourceExists) {
-      throw new Error(`Source file does not exist: ${processedImage.uri}`);
-    }
 
     await sourceFile.move(targetFile);
     localFile = sourceFile; // Track the file for cleanup if upload fails
-    console.log("processImage: Moved to:", sourceFile.uri);
 
     // After moving, sourceFile.uri is automatically updated to the new location
     const supabaseImagePath = await uploadToSupabaseStorage(sourceFile.uri);
