@@ -146,9 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     // Disable selection
     userSelect: "none",
-    // Fix flexbox layout to prevent text overlap
-    width: "auto",
-    flexShrink: 1,
-    minWidth: 0,
+    // Keep text centered during digit count transitions
+    textAlign: "center",
   },
 });
