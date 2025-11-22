@@ -7,7 +7,7 @@ import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useAppStore } from "@/store/useAppStore";
 import { seedFoodLogs } from "@/utils/seed";
-import { SettingRow } from "../_SettingRow";
+import { SettingRow } from "./SettingRow";
 import * as FileSystem from "expo-file-system";
 import { Paths } from "expo-file-system";
 

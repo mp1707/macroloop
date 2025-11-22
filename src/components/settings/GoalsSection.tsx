@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AppText, Card } from "@/components";
 import { useTheme, Theme, Colors } from "@/theme";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard";
-import { SettingRow } from "../_SettingRow";
+import { SettingRow } from "./SettingRow";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 
 export const GoalsSection = () => {

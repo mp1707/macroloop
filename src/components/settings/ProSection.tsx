@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { restorePurchases } from "@/lib/revenuecat/client";
 
 import { AppText, Card } from "@/components";
-import { SettingRow } from "../_SettingRow";
+import { SettingRow } from "./SettingRow";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useAppStore } from "@/store/useAppStore";
 import { usePaywall } from "@/hooks/usePaywall";

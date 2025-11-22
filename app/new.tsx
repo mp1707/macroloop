@@ -18,7 +18,7 @@ import { CreatePaywallView } from "@/components/create-page/CreatePaywallView";
 import { TypingModeView } from "@/components/create-page/TypingModeView";
 import { CameraModeView } from "@/components/create-page/CameraModeView";
 import type { CreationMode } from "@/types/creation";
-import { createStyles } from "./_new.styles";
+import { createStyles } from "@/styles/new.styles";
 
 export default function Create() {
   const router = useSafeRouter();

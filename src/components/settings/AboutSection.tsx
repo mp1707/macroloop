@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
-import { SettingRow } from "../_SettingRow";
+import { SettingRow } from "./SettingRow";
 
 const PRIVACY_URL =
   "https://mp1707.github.io/macroloopinfo/privacy-policy.html";
