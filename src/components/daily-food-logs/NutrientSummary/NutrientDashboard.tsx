@@ -3,8 +3,6 @@ import { View, StyleSheet, Pressable, useWindowDimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  useAnimatedReaction,
-  runOnJS,
   withDelay,
   withSpring,
   type SharedValue,
@@ -304,6 +302,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
           <MacroGridCell
             nutrientKey="fat"
             total={displayTotals.fat}
+            accessibilityTotal={staticTotals.fat}
             target={labelTargets.fat}
             unit={NUTRIENT_LABELS.fat.unit}
             percentage={percentages.fat}
@@ -315,6 +314,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
           <MacroGridCell
             nutrientKey="carbs"
             total={displayTotals.carbs}
+            accessibilityTotal={staticTotals.carbs}
             unit={NUTRIENT_LABELS.carbs.unit}
             semanticColor={semanticColors.carbs}
             onPress={() => handleOpenExplainer("carbs")}
@@ -328,6 +328,10 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
 interface MacroGridCellProps {
   nutrientKey: NutrientKey;
   total: number | string | SharedValue<number>;
+  /**
+   * Plain value used for accessibility labels so we never touch SharedValue.value on JS thread
+   */
+  accessibilityTotal?: number | string;
   target?: number | string;
   unit: string;
   percentage?: number;
@@ -342,6 +346,7 @@ interface MacroGridCellProps {
 const MacroGridCell: React.FC<MacroGridCellProps> = ({
   nutrientKey,
   total,
+  accessibilityTotal,
   target,
   unit,
   percentage,
@@ -363,23 +368,13 @@ const MacroGridCell: React.FC<MacroGridCellProps> = ({
   const NUTRIENT_LABELS = getNutrientLabels(t);
   const config = NUTRIENT_LABELS[nutrientKey];
 
-  // Track SharedValue for accessibility without reading .value during render
-  const isSharedValue = typeof total === "object" && "value" in total;
-  const initialValue = isSharedValue ? 0 : (typeof total === "number" ? Math.round(total) : total);
-  const [accessibilityTotal, setAccessibilityTotal] = useState<number | string>(initialValue);
-
-  useAnimatedReaction(
-    () => (isSharedValue ? Math.round((total as SharedValue<number>).value) : null),
-    (currentValue, previousValue) => {
-      if (currentValue !== null && currentValue !== previousValue) {
-        runOnJS(setAccessibilityTotal)(currentValue);
-      }
-    },
-    [total, isSharedValue]
-  );
-
   // Create accessibility label with current and target values
-  const totalValue = accessibilityTotal;
+  const totalValue = accessibilityTotal ??
+    (typeof total === "number"
+      ? Math.round(total)
+      : typeof total === "string"
+      ? total
+      : "");
   const accessibilityLabel = target != null
     ? `${config.label} ${totalValue} ${t("nutrients.of")} ${target} ${unit}`
     : `${config.label} ${totalValue} ${unit}`;
