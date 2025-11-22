@@ -33,8 +33,8 @@ export const MediaLibraryPreview = ({
 
     ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      allowsEditing: false,
-      quality: 0.9, // Slightly less than 1 to encourage JPEG conversion from HEIC
+      allowsEditing: true, // Forces iOS to convert HEIC to JPEG, avoiding GPU context errors
+      quality: 0.9,
     })
       .then((result) => {
         if (!result.canceled && result.assets[0]) {
