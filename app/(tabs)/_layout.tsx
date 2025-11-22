@@ -8,11 +8,23 @@ import {
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
+import { Appearance, View } from "react-native";
 
 export default function TabsLayout() {
   const { t } = useTranslation();
-  const { colors, colorScheme } = useTheme();
+  const { colors, colorScheme, isThemeLoaded } = useTheme();
   const hasLiquidGlass = isLiquidGlassAvailable();
+  const deviceColorScheme = Appearance.getColorScheme();
+  if (!isThemeLoaded) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: deviceColorScheme === "dark" ? "#000" : "#fff",
+        }}
+      />
+    );
+  }
 
   return (
     <NativeTabs
