@@ -157,6 +157,10 @@ export const MagicProcessingCard: React.FC<MagicProcessingCardProps> = ({
   // Whole-canvas fade when revealing
   const canvasOpacity = useDerivedValue(() => 1 - reveal.value);
 
+  // Aurora and shimmer opacity (fade out on reveal)
+  const auroraOpacity = useDerivedValue(() => 0.22 * (1 - reveal.value));
+  const shimmerOpacity = useDerivedValue(() => 0.18 * (1 - reveal.value));
+
   // ---- render ----
   return (
     <View style={{ width, height, borderRadius: radius, overflow: "hidden" }}>
@@ -178,7 +182,7 @@ export const MagicProcessingCard: React.FC<MagicProcessingCardProps> = ({
           </Rect>
 
           {/* Soft aurora blobs */}
-          <Group opacity={0.22 * (1 - reveal.value)}>
+          <Group opacity={auroraOpacity}>
             <Rect x={0} y={0} width={width} height={height}>
               <RadialGradient
                 c={vec(width * 0.2, height * 0.2)}
@@ -221,7 +225,7 @@ export const MagicProcessingCard: React.FC<MagicProcessingCardProps> = ({
           </Circle>
 
           {/* Shimmer sweep */}
-          <Group opacity={0.18 * (1 - reveal.value)}>
+          <Group opacity={shimmerOpacity}>
             <Rect
               x={shimmerX}
               y={-height * 0.2}
