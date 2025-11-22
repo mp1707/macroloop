@@ -302,6 +302,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
           <MacroGridCell
             nutrientKey="fat"
             total={displayTotals.fat}
+            accessibilityTotal={staticTotals.fat}
             target={labelTargets.fat}
             unit={NUTRIENT_LABELS.fat.unit}
             percentage={percentages.fat}
@@ -313,6 +314,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
           <MacroGridCell
             nutrientKey="carbs"
             total={displayTotals.carbs}
+            accessibilityTotal={staticTotals.carbs}
             unit={NUTRIENT_LABELS.carbs.unit}
             semanticColor={semanticColors.carbs}
             onPress={() => handleOpenExplainer("carbs")}
@@ -326,6 +328,10 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
 interface MacroGridCellProps {
   nutrientKey: NutrientKey;
   total: number | string | SharedValue<number>;
+  /**
+   * Plain value used for accessibility labels so we never touch SharedValue.value on JS thread
+   */
+  accessibilityTotal?: number | string;
   target?: number | string;
   unit: string;
   percentage?: number;
@@ -340,6 +346,7 @@ interface MacroGridCellProps {
 const MacroGridCell: React.FC<MacroGridCellProps> = ({
   nutrientKey,
   total,
+  accessibilityTotal,
   target,
   unit,
   percentage,
@@ -362,11 +369,12 @@ const MacroGridCell: React.FC<MacroGridCellProps> = ({
   const config = NUTRIENT_LABELS[nutrientKey];
 
   // Create accessibility label with current and target values
-  const totalValue = typeof total === "object" && "value" in total
-    ? Math.round(total.value as number)
-    : typeof total === "number"
-    ? Math.round(total)
-    : total;
+  const totalValue = accessibilityTotal ??
+    (typeof total === "number"
+      ? Math.round(total)
+      : typeof total === "string"
+      ? total
+      : "");
   const accessibilityLabel = target != null
     ? `${config.label} ${totalValue} ${t("nutrients.of")} ${target} ${unit}`
     : `${config.label} ${totalValue} ${unit}`;

@@ -819,7 +819,7 @@
         "label": "ABO",
         "activeTitle": "Abonnement aktiv",
         "upgradeTitle": "Auf Pro upgraden",
-        "canceledWithDate": "Automatische Verlängerung beendet. Zugriff bis {{date}}. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
+        "canceledWithDate": "Automatische Verlängerung beendet. Zugriff bis {{date}}. Verlängern in den iOS-Einstellungen unter Abonnements.",
         "canceledWithoutDate": "Automatische Verlängerung beendet. Zugriff bis zum Ende des aktuellen Zeitraums. Verwalte es in den iOS-Einstellungen -> Apple-ID -> Abonnements.",
         "upgradeDescription": "Zutatenerkennung, Nährwertschätzung, müheloses Tracking.",
         "upgradeDescriptionWithTrial": "Zutatenerkennung, Nährwertschätzung, müheloses Tracking. Kostenloser Test verfügbar.",
