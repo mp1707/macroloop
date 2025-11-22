@@ -47,6 +47,25 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
   const canExpand = hasRecommendation && !!onToggleExpansion;
   const showExpansion = hasRecommendation && isExpanded;
 
+  const recommendedMeasurementAmount =
+    component.recommendedMeasurement?.amount;
+  const recommendedMeasurementUnit =
+    component.recommendedMeasurement?.unit;
+
+  const originalMeasurementLabel = useMemo(() => {
+    const amount = component.amount;
+    const unit = component.unit ?? "";
+    const amountString = amount != null ? `${amount}` : "";
+    return `${amountString} ${unit}`.trim();
+  }, [component.amount, component.unit]);
+
+  const recommendedMeasurementLabel = useMemo(() => {
+    const amount = recommendedMeasurementAmount;
+    const unit = recommendedMeasurementUnit ?? "";
+    const amountString = amount != null ? `${amount}` : "";
+    return `${amountString} ${unit}`.trim();
+  }, [recommendedMeasurementAmount, recommendedMeasurementUnit]);
+
   const ignorePressRef = useRef(false);
   const resetIgnoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -81,21 +100,18 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
     });
   }, [lightbulbScale]);
 
-  const handleTap = useCallback(
-    () => {
-      if (ignorePressRef.current) {
-        ignorePressRef.current = false;
-        if (resetIgnoreTimeoutRef.current) {
-          clearTimeout(resetIgnoreTimeoutRef.current);
-          resetIgnoreTimeoutRef.current = null;
-        }
-        return;
+  const handleTap = useCallback(() => {
+    if (ignorePressRef.current) {
+      ignorePressRef.current = false;
+      if (resetIgnoreTimeoutRef.current) {
+        clearTimeout(resetIgnoreTimeoutRef.current);
+        resetIgnoreTimeoutRef.current = null;
       }
+      return;
+    }
 
-      onTap(index, component);
-    },
-    [onTap, index, component]
-  );
+    onTap(index, component);
+  }, [onTap, index, component]);
 
   const handleToggleExpansion = useCallback(
     () => onToggleExpansion?.(index),
@@ -157,12 +173,13 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <AnimatedPressable
                     onPress={handleTap}
-                    accessibilityLabel={t("componentRow.accessibility.editLabel", {
-                      name: component.name,
-                    })}
-                    accessibilityHint={t(
-                      "componentRow.accessibility.editHint"
+                    accessibilityLabel={t(
+                      "componentRow.accessibility.editLabel",
+                      {
+                        name: component.name,
+                      }
                     )}
+                    accessibilityHint={t("componentRow.accessibility.editHint")}
                   >
                     <View
                       style={{
@@ -251,29 +268,33 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
                       style={styles.expansionContent}
                     >
                       <View style={styles.estimateLine}>
-                        <AppText
-                          role="Body"
-                          color="secondary"
-                          style={{ flex: 1 }}
-                        >
-                          {t("componentRow.recommendation.estimatePrefix")} {" "}
-                          <AppText
-                            role="Body"
-                            style={{ color: colors.primaryText }}
-                          >
-                            {component.amount} {component.unit}
-                          </AppText>{" "}
-                          {t("componentRow.recommendation.approx")} {" "}
-                          <AppText
-                            role="Body"
-                            style={{ color: colors.primaryText }}
-                          >
-                            {component.recommendedMeasurement?.amount}{" "}
-                            {component.recommendedMeasurement?.unit}
+                        <View style={styles.estimateTextColumn}>
+                          <AppText role="Body" color="secondary">
+                            {t("componentRow.recommendation.estimatePrefix")}
+                            {t("componentRow.recommendation.estimateSuffix")}
                           </AppText>
-                          {t("componentRow.recommendation.estimateSuffix")}
-                        </AppText>
-
+                          <View style={styles.estimateConversionRow}>
+                            <AppText
+                              role="Body"
+                              style={styles.estimateValueText}
+                            >
+                              {originalMeasurementLabel}
+                            </AppText>
+                            <AppText
+                              role="Body"
+                              color="secondary"
+                              style={styles.approxSymbol}
+                            >
+                              {t("componentRow.recommendation.approx")}
+                            </AppText>
+                            <AppText
+                              role="Body"
+                              style={styles.estimateValueText}
+                            >
+                              {recommendedMeasurementLabel}
+                            </AppText>
+                          </View>
+                        </View>
                         <Pressable
                           style={styles.acceptPill}
                           onPress={() => {
