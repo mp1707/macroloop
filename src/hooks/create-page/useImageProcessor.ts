@@ -28,6 +28,8 @@ export const useImageProcessor = (
         result = await processImage(uri);
         success = true;
       } catch (error) {
+        console.error("Image processing error:", error);
+        console.error("Failed URI:", uri);
         Alert.alert(
           t("createLog.toasts.imageProcessing.title"),
           t("createLog.toasts.imageProcessing.message")
