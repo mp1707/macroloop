@@ -32,7 +32,10 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>("light");
+  // Initialize with system color scheme to reduce initial flash
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>(
+    () => Appearance.getColorScheme() || "light"
+  );
   const [appearancePreference, setAppearancePreferenceState] =
     useState<AppearancePreference>("system");
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);

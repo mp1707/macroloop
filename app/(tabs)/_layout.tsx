@@ -11,8 +11,14 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 export default function TabsLayout() {
   const { t } = useTranslation();
-  const { colors, colorScheme } = useTheme();
+  const { colors, colorScheme, isThemeLoaded } = useTheme();
   const hasLiquidGlass = isLiquidGlassAvailable();
+
+  // Prevent rendering until theme is loaded to avoid tab bar flicker
+  // where icons drift and snap to position on fresh app load
+  if (!isThemeLoaded) {
+    return null;
+  }
 
   return (
     <NativeTabs
