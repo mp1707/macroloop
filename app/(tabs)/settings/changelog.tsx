@@ -16,20 +16,19 @@ interface VersionChangelog {
   changes: ChangelogEntry[];
 }
 
-// Fill this array with your changelog entries
-const CHANGELOG_DATA: VersionChangelog[] = [
+const CHANGELOG_DATA_EN: VersionChangelog[] = [
   {
     version: "1.0.4",
     changes: [
       {
         title: "Per-ingredient macros",
         description:
-          "Rebuilt calculations so each ingredient keeps its own calories and macros for better accuracy when editing meals.",
+          "Ingredient calculations were rebuilt so each ingredient keeps its own calories and macros for better accuracy when editing meals.",
       },
       {
         title: "Ingredient breakdown details",
         description:
-          "See per-ingredient calories and protein right inside the breakdown for easier fine-tuning.",
+          "Per-ingredient calories and protein now appear directly inside the breakdown for easier fine-tuning.",
       },
       {
         title: "Calendar navigation",
@@ -44,7 +43,17 @@ const CHANGELOG_DATA: VersionChangelog[] = [
       {
         title: "Polish & fixes",
         description:
-          "Cleaned up several styling glitches and typos throughout the app.",
+          "Styling glitches and typos throughout the app were cleaned up for a smoother feel.",
+      },
+      {
+        title: "Settings rate & share links",
+        description:
+          "Quickly rate the app or share it with friends directly from the Settings screen.",
+      },
+      {
+        title: "Changelog view",
+        description:
+          "A new changelog tab inside the app now highlights everything that's new.",
       },
     ],
   },
@@ -74,27 +83,27 @@ const CHANGELOG_DATA: VersionChangelog[] = [
       {
         title: "Automated ingredient breakdown",
         description:
-          "Detect and split ingredients automatically so you can fine-tune servings.",
+          "Ingredients are detected and split automatically so servings are easier to fine-tune.",
       },
       {
         title: "Favorite food logs",
         description:
-          "Save frequent food logs as favorites and add them back with a single tap.",
+          "Frequent food logs can be saved as favorites and added back with a single tap.",
       },
       {
         title: "Flexible ingredient editing",
         description:
-          "Add, swap, or remove ingredients on an existing log and instantly recalc macros.",
+          "Ingredients on an existing log can be added, swapped, or removed with macros recalculated instantly.",
       },
       {
         title: "Suggested ingredient amounts",
         description:
-          "Get auto-suggested amounts in the breakdown view when initial info is incomplete.",
+          "Auto-suggested ingredient amounts now appear in the breakdown view when initial info is incomplete.",
       },
       {
         title: "Delete old logs",
         description:
-          "Clean up older logs in bulk to reclaim space and keep things tidy.",
+          "Older logs can be removed in bulk to reclaim space and keep things tidy.",
       },
       {
         title: "Playful interface animations",
@@ -123,20 +132,135 @@ const CHANGELOG_DATA: VersionChangelog[] = [
   // },
 ];
 
+const CHANGELOG_DATA_DE: VersionChangelog[] = [
+  {
+    version: "1.0.4",
+    changes: [
+      {
+        title: "Makros pro Zutat",
+        description:
+          "Die Berechnungen wurden neu aufgesetzt, damit jede Zutat ihre eigenen Kalorien und Makros behält – dadurch werden Anpassungen an Gerichten deutlich präziser.",
+      },
+      {
+        title: "Detailansicht im Zutaten-Split",
+        description:
+          "Die Breakdown zeigt jetzt direkt Kalorien und Protein pro Zutat an, damit Anpassungen schneller gelingen.",
+      },
+      {
+        title: "Kalender-Navigation",
+        description:
+          "Ein Tipp auf ein Datum im Kalender bringt dich jetzt sofort auf den Home-Tab.",
+      },
+      {
+        title: "Bildformat-Unterstützung",
+        description:
+          "Die Bilderkennung unterstützt nun deutlich mehr Dateiformate und verarbeitet dadurch auch Screenshots zuverlässig.",
+      },
+      {
+        title: "Feinschliff & Fixes",
+        description:
+          "Diverse Styling-Ausreißer und Tippfehler im gesamten Interface sind ausgebügelt.",
+      },
+      {
+        title: "Bewerten & Teilen aus den Einstellungen",
+        description:
+          "Macroloop lässt sich jetzt direkt aus den Einstellungen bewerten oder mit Freund:innen teilen.",
+      },
+      {
+        title: "Changelog-Ansicht",
+        description:
+          "Alle Neuerungen stehen nun gebündelt im neuen Changelog-Tab direkt in der App.",
+      },
+    ],
+  },
+  {
+    version: "1.0.3",
+    changes: [
+      {
+        title: "Erstveröffentlichung",
+        description:
+          "Der erste öffentliche Build – Tracking-Erlebnis poliert und startklar.",
+      },
+      {
+        title: "Textbasiertes Logging",
+        description:
+          "Trage Mahlzeiten mit natürlicher Sprache ein und spare dir mühsames Tippen.",
+      },
+      {
+        title: "Logging per Sprachaufnahme",
+        description:
+          "Sprich ein, was du gegessen hast, und die App wandelt es automatisch in einen sauberen Log um.",
+      },
+      {
+        title: "Logging per Foto",
+        description:
+          "Fotografiere deinen Teller und erhalte passende Vorschläge.",
+      },
+      {
+        title: "Automatische Zutaten-Aufschlüsselung",
+        description:
+          "Zutaten werden automatisch erkannt und getrennt, damit du Mengen leicht anpassen kannst.",
+      },
+      {
+        title: "Lieblings-Logs",
+        description:
+          "Speichere häufige Einträge als Favorit und füge sie mit einem Tipp wieder hinzu.",
+      },
+      {
+        title: "Flexible Zutatenbearbeitung",
+        description:
+          "Zutaten hinzufügen, tauschen oder löschen – die Makros werden sofort neu berechnet.",
+      },
+      {
+        title: "Vorgeschlagene Mengen",
+        description:
+          "Wenn Infos fehlen, schlägt dir die Breakdown passende Mengen vor.",
+      },
+      {
+        title: "Alte Logs löschen",
+        description:
+          "Räume ältere Einträge gesammelt weg und halte alles schlank.",
+      },
+      {
+        title: "Verspielte Animationen",
+        description:
+          "Ring-Progress und wackelige Lade-Animationen machen das Logging ein Stück spaßiger.",
+      },
+      {
+        title: "Lokalisierung",
+        description:
+          "Die App fühlt sich jetzt auf Englisch wie auf Deutsch zuhause an.",
+      },
+      {
+        title: "Onboarding & Ziele",
+        description:
+          "Geführtes Onboarding plus Makroziele per Mifflin-St.-Jeor-Rechner oder manueller Eingabe.",
+      },
+    ],
+  },
+];
+
 export default function ChangelogScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
+  const normalizedLanguage = (
+    i18n.resolvedLanguage || i18n.language || "en"
+  )
+    .split("-")[0]
+    .toLowerCase();
+  const changelogData =
+    normalizedLanguage === "de" ? CHANGELOG_DATA_DE : CHANGELOG_DATA_EN;
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        {CHANGELOG_DATA.length === 0 ? (
+        {changelogData.length === 0 ? (
           <AppText role="Body" color="secondary" style={styles.emptyState}>
             {t("settings.changelog.emptyState")}
           </AppText>
         ) : (
-          CHANGELOG_DATA.map((versionEntry, versionIndex) => (
+          changelogData.map((versionEntry, versionIndex) => (
             <View
               key={versionEntry.version}
               style={[

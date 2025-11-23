@@ -870,14 +870,14 @@
             "subtitle": "Kopiere den AppStore-Link, um MacroLoop zu teilen.",
             "toast": {
               "successTitle": "Link kopiert",
-              "successSubtitle": "Teile ihn mit allen, die MacroLoop lieben würden.",
+              "successSubtitle": "Danke, dass du MacroLoop teilst.",
               "errorTitle": "Link konnte nicht kopiert werden",
               "errorSubtitle": "Versuche es bitte erneut."
             }
           },
           "rateApp": {
             "title": "MacroLoop bewerten",
-            "subtitle": "Hinterlasse eine Bewertung im App Store.",
+            "subtitle": "Freue mich über jedes Feedback :)",
             "toast": {
               "errorTitle": "App Store konnte nicht geöffnet werden",
               "errorSubtitle": "Bitte später erneut versuchen."

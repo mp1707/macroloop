@@ -872,14 +872,14 @@
             "subtitle": "Copy the AppStore link to share MacroLoop.",
             "toast": {
               "successTitle": "Link copied",
-              "successSubtitle": "Share it with someone who’ll love MacroLoop.",
+              "successSubtitle": "Thanks for sharing MacroLoop.",
               "errorTitle": "Copy failed",
               "errorSubtitle": "Please try again."
             }
           },
           "rateApp": {
             "title": "Rate MacroLoop",
-            "subtitle": "Leave a review in the App Store.",
+            "subtitle": "Leave a review in the App Store :)",
             "toast": {
               "errorTitle": "Can’t open App Store",
               "errorSubtitle": "Please try again later."
