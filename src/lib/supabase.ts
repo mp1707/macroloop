@@ -56,13 +56,6 @@ export interface ImageEstimateRequest {
   language: Language;
 }
 
-export interface ImageRefineRequest {
-  imagePath: string;
-  title?: string;
-  description?: string;
-  foodComponents: FoodComponent[];
-}
-
 export interface FoodEstimateResponse {
   generatedTitle: string;
   calories: number;
