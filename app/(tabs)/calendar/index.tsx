@@ -8,7 +8,7 @@ import React, {
 import { View, Dimensions, StyleSheet, ViewToken } from "react-native";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { Colors, ColorScheme, Theme, useTheme } from "@/theme";
 import { useAppStore } from "@/store/useAppStore";
 import { CalendarGrid } from "@/components/shared/DatePicker/components/CalendarGrid";
@@ -50,6 +50,7 @@ export default function CalendarTabScreen() {
   const { selectedDate, setSelectedDate, foodLogs, dailyTargets } =
     useAppStore();
   const navigation = useNavigation();
+  const router = useRouter();
   const [visibleMonth, setVisibleMonth] = useState<{
     year: number;
     month: number;
@@ -217,8 +218,9 @@ export default function CalendarTabScreen() {
     (dateKey: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setSelectedDate(dateKey);
+      router.navigate("/(tabs)");
     },
-    [setSelectedDate]
+    [setSelectedDate, router]
   );
 
   const handleJumpToToday = useCallback(() => {
@@ -239,6 +241,7 @@ export default function CalendarTabScreen() {
       });
       setSelectedDate(today);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      router.navigate("/(tabs)");
     }
   }, [monthsData, setSelectedDate]);
 
