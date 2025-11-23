@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AppText } from "@/components";
 import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
 import { ProSection } from "@/components/settings/ProSection";
-import { AppearanceSection } from "@/components/settings/AppearanceSection";
+import { GeneralSection } from "@/components/settings/GeneralSection";
 import { GoalsSection } from "@/components/settings/GoalsSection";
 import { DataManagementSection } from "@/components/settings/DataManagementSection";
 import { DeveloperSection } from "@/components/settings/DeveloperSection";
@@ -39,7 +39,7 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ProSection />
-        <AppearanceSection />
+        <GeneralSection />
         <GoalsSection />
         <DataManagementSection />
         <AboutSection />

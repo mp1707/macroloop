@@ -35,14 +35,6 @@ export default function SettingsLayout() {
         }}
       />
       <Stack.Screen
-        name="design"
-        options={{
-          title: t("settings.design.header"),
-          headerLargeTitle: isIOS,
-          headerLargeTitleShadowVisible: false,
-        }}
-      />
-      <Stack.Screen
         name="language"
         options={{
           title: t("settings.language.header"),
