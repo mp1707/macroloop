@@ -29,6 +29,11 @@ export type FoodComponent = {
     amount: number;
     unit: ExactMeasurementUnit;
   };
+  // Per-component nutrition stats (from V2 endpoints)
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
 };
 
 export type Favorite = {

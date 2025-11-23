@@ -2,6 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import type { FoodComponent, FoodLog } from "@/types/models";
 import type { AppState } from "@/store/useAppStore";
 
+// Extended FoodLog type that includes baseline components for V2 refinement
+export type EditedFoodLog = FoodLog & {
+  // Baseline components from last AI estimate (for consistent refinements)
+  // When editing, these preserve the original values to send as base* fields
+  baselineFoodComponents?: FoodComponent[];
+};
+
 export const useEditedLog = ({
   logId,
   originalLog,
@@ -15,8 +22,8 @@ export const useEditedLog = ({
   clearPendingComponentEdit: () => void;
   onComponentChange: () => void;
 }) => {
-  const [editedLog, setEditedLogState] = useState<FoodLog | undefined>(
-    originalLog
+  const [editedLog, setEditedLogState] = useState<EditedFoodLog | undefined>(
+    undefined
   );
   const [isDirty, setIsDirty] = useState(false);
 
@@ -24,6 +31,7 @@ export const useEditedLog = ({
     setIsDirty(true);
   }, []);
 
+  // Initialize or update edited log from original
   useEffect(() => {
     if (!originalLog) {
       setEditedLogState(undefined);
@@ -31,13 +39,23 @@ export const useEditedLog = ({
     }
 
     if (!isDirty) {
-      setEditedLogState(originalLog);
+      // Initialize with baseline set to original components (for V2 refinement)
+      setEditedLogState({
+        ...originalLog,
+        baselineFoodComponents: originalLog.foodComponents,
+      });
     }
   }, [originalLog, isDirty]);
 
   const replaceEditedLog = useCallback(
-    (next: FoodLog, options: { markDirty?: boolean } = {}) => {
-      setEditedLogState(next);
+    (next: EditedFoodLog, options: { markDirty?: boolean } = {}) => {
+      // Preserve baseline if not provided in the update (e.g., from refine response)
+      setEditedLogState((prev) => ({
+        ...next,
+        // Use baseline from next if provided, otherwise preserve from prev
+        baselineFoodComponents:
+          next.baselineFoodComponents ?? prev?.baselineFoodComponents,
+      }));
       if (options.markDirty !== false) {
         markDirty();
       }
@@ -72,14 +90,24 @@ export const useEditedLog = ({
 
   const deleteComponent = useCallback(
     (index: number) => {
-      updateComponents((components) => {
-        if (!components[index]) {
-          return components;
+      setEditedLogState((prev) => {
+        if (!prev) return prev;
+        const currentComponents = prev.foodComponents || [];
+        if (!currentComponents[index]) {
+          return prev;
         }
-        return components.filter((_, i) => i !== index);
+        // Also delete from baseline to keep indices in sync
+        const currentBaseline = prev.baselineFoodComponents || [];
+        markDirty();
+        onComponentChange();
+        return {
+          ...prev,
+          foodComponents: currentComponents.filter((_, i) => i !== index),
+          baselineFoodComponents: currentBaseline.filter((_, i) => i !== index),
+        };
       });
     },
-    [updateComponents]
+    [markDirty, onComponentChange]
   );
 
   const acceptRecommendation = useCallback(

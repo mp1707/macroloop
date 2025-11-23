@@ -17,9 +17,34 @@ export interface TextEstimateRequest {
   language: Language;
 }
 
-export interface RefineRequest {
+// Legacy V1 refine request (string-based)
+export interface RefineRequestV1 {
   foodComponents: string;
   macrosPerReferencePortion?: MacrosPerReferencePortion;
+  language: Language;
+  signal?: AbortSignal;
+}
+
+// V2 refine input with per-component baseline stats
+export interface RefineFoodComponentInput {
+  // CURRENT state after user edits (required)
+  name: string;
+  amount: number;
+  unit: "g" | "ml" | "piece" | "stück";
+
+  // OPTIONAL baseline from last AI estimate
+  baseName?: string | null;
+  baseAmount?: number | null;
+  baseUnit?: "g" | "ml" | "piece" | "stück" | null;
+  baseCalories?: number | null;
+  baseProtein?: number | null;
+  baseCarbs?: number | null;
+  baseFat?: number | null;
+}
+
+// V2 refine request (typed array with baseline stats)
+export interface RefineRequest {
+  foodComponents: RefineFoodComponentInput[];
   language: Language;
   signal?: AbortSignal;
 }
@@ -47,8 +72,10 @@ export interface FoodEstimateResponse {
   foodComponents: FoodComponent[];
   macrosPerReferencePortion?: MacrosPerReferencePortion;
 }
+// V2 refined response includes updated food components with their macros
 export interface RefinedFoodEstimateResponse {
-  calories: number;
+  foodComponents: FoodComponent[]; // Updated components with per-ingredient macros
+  calories: number; // Totals (sum of foodComponents[*].calories)
   protein: number;
   carbs: number;
   fat: number;
@@ -66,14 +93,15 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// V2 text estimation - returns per-component nutrition stats
 export const estimateTextBased = async (
   request: TextEstimateRequest
 ): Promise<FoodEstimateResponse> => {
   if (__DEV__) {
-    console.log("Text estimation request:", request);
+    console.log("Text estimation V2 request:", request);
   }
 
-  const response = await fetch(`${supabaseUrl}/functions/v1/textEstimation`, {
+  const response = await fetch(`${supabaseUrl}/functions/v1/textEstimation2`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -84,7 +112,7 @@ export const estimateTextBased = async (
   });
 
   if (__DEV__) {
-    console.log("Text estimation response status:", response.status);
+    console.log("Text estimation V2 response status:", response.status);
   }
 
   if (!response.ok) {
@@ -95,7 +123,7 @@ export const estimateTextBased = async (
 
   const data = await response.json();
   if (__DEV__) {
-    console.log("Text estimation response data:", data);
+    console.log("Text estimation V2 response data:", data);
   }
 
   if (data.error) {
@@ -106,27 +134,31 @@ export const estimateTextBased = async (
   return data as FoodEstimateResponse;
 };
 
+// V2 refine estimation - uses per-component baseline stats for consistent refinements
 export const refineEstimation = async (
   request: RefineRequest
 ): Promise<RefinedFoodEstimateResponse> => {
   if (__DEV__) {
-    console.log("Refine estimation request:", request);
+    console.log("Refine estimation V2 request:", request);
   }
 
   const { signal, ...requestData } = request;
-  const response = await fetch(`${supabaseUrl}/functions/v1/refineEstimation`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${supabaseAnonKey}`,
-      apikey: supabaseAnonKey,
-    },
-    body: JSON.stringify(requestData),
-    signal,
-  });
+  const response = await fetch(
+    `${supabaseUrl}/functions/v1/refineEstimation2`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify(requestData),
+      signal,
+    }
+  );
 
   if (__DEV__) {
-    console.log("Refine estimation response status:", response.status);
+    console.log("Refine estimation V2 response status:", response.status);
   }
 
   if (!response.ok) {
@@ -137,7 +169,7 @@ export const refineEstimation = async (
 
   const data = await response.json();
   if (__DEV__) {
-    console.log("Refine estimation response data:", data);
+    console.log("Refine estimation V2 response data:", data);
   }
 
   if (data.error) {
@@ -145,21 +177,18 @@ export const refineEstimation = async (
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
-  if (__DEV__) {
-    console.log("refine response data:", data);
-  }
-
   return data as RefinedFoodEstimateResponse;
 };
 
+// V2 image estimation - returns per-component nutrition stats
 export const estimateNutritionImageBased = async (
   request: ImageEstimateRequest
 ): Promise<FoodEstimateResponse> => {
   if (__DEV__) {
-    console.log("Image estimation request:", request);
+    console.log("Image estimation V2 request:", request);
   }
 
-  const response = await fetch(`${supabaseUrl}/functions/v1/imageEstimation`, {
+  const response = await fetch(`${supabaseUrl}/functions/v1/imageEstimation2`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -170,7 +199,7 @@ export const estimateNutritionImageBased = async (
   });
 
   if (__DEV__) {
-    console.log("Image estimation response status:", response.status);
+    console.log("Image estimation V2 response status:", response.status);
   }
 
   if (!response.ok) {
@@ -181,7 +210,7 @@ export const estimateNutritionImageBased = async (
 
   const data = await response.json();
   if (__DEV__) {
-    console.log("Image estimation response data:", data);
+    console.log("Image estimation V2 response data:", data);
   }
 
   if (data.error) {
