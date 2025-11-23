@@ -897,7 +897,8 @@
         "label": "RECHTLICHES",
         "rows": {
           "privacy": "Datenschutzerklärung",
-          "terms": "Nutzungsbedingungen"
+          "terms": "Nutzungsbedingungen",
+          "changelog": "Änderungsprotokoll"
         },
         "linkError": "Link konnte nicht geöffnet werden"
       },
@@ -966,6 +967,10 @@
     "design": {
       "header": "Design",
       "placeholder": "Kommt bald"
+    },
+    "changelog": {
+      "header": "Änderungsprotokoll",
+      "emptyState": "Noch keine Einträge vorhanden."
     },
     "dataCleanup": {
       "header": "Alte Logs löschen",

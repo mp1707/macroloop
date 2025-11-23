@@ -58,6 +58,14 @@ export default function SettingsLayout() {
           headerLargeTitleShadowVisible: false,
         }}
       />
+      <Stack.Screen
+        name="changelog"
+        options={{
+          title: t("settings.changelog.header"),
+          headerLargeTitle: isIOS,
+          headerLargeTitleShadowVisible: false,
+        }}
+      />
     </Stack>
   );
 }

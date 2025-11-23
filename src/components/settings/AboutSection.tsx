@@ -1,10 +1,11 @@
 import React, { useMemo, useCallback } from "react";
 import { View, StyleSheet, Alert, Linking } from "react-native";
-import { Shield, FileText } from "lucide-react-native";
+import { Shield, FileText, History } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
+import { useSafeRouter } from "@/hooks/useSafeRouter";
 import { SettingRow } from "./SettingRow";
 
 const PRIVACY_URL =
@@ -14,6 +15,7 @@ const TERMS_URL = "https://mp1707.github.io/macroloopinfo/";
 export const AboutSection = () => {
   const { t } = useTranslation();
   const { colors, theme } = useTheme();
+  const router = useSafeRouter();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
   const handleOpenLink = useCallback(
@@ -43,6 +45,13 @@ export const AboutSection = () => {
           title={t("settings.sections.legal.rows.terms")}
           onPress={() => handleOpenLink(TERMS_URL)}
           accessory="none"
+        />
+        <View style={styles.separator} />
+        <SettingRow
+          icon={History}
+          title={t("settings.sections.legal.rows.changelog")}
+          accessory="chevron"
+          onPress={() => router.push("/settings/changelog")}
         />
       </Card>
     </View>

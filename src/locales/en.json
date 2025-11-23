@@ -899,9 +899,10 @@
         "label": "LEGAL",
         "rows": {
           "privacy": "Privacy Policy",
-          "terms": "Terms of Use"
+          "terms": "Terms of Use",
+          "changelog": "Changelog"
         },
-        "linkError": "Couldn’t open link"
+        "linkError": "Couldn't open link"
       },
       "developer": {
         "label": "DEVELOPER",
@@ -968,6 +969,10 @@
     "design": {
       "header": "Design",
       "placeholder": "Coming soon"
+    },
+    "changelog": {
+      "header": "Changelog",
+      "emptyState": "No changelog entries yet."
     },
     "dataCleanup": {
       "header": "Delete old logs",
