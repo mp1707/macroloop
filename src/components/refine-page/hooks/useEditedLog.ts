@@ -2,6 +2,20 @@ import { useCallback, useEffect, useState } from "react";
 import type { FoodComponent, FoodLog } from "@/types/models";
 import type { AppState } from "@/store/useAppStore";
 
+// Extended FoodComponent with UI-only stale indicator (not persisted or sent to API)
+export type EditableFoodComponent = FoodComponent & {
+  isStale?: boolean;
+};
+
+// Extended FoodLog type that includes baseline components for V2 refinement
+export type EditedFoodLog = Omit<FoodLog, "foodComponents"> & {
+  // Food components with optional UI-only stale indicator
+  foodComponents: EditableFoodComponent[];
+  // Baseline components from last AI estimate (for consistent refinements)
+  // When editing, these preserve the original values to send as base* fields
+  baselineFoodComponents?: FoodComponent[];
+};
+
 export const useEditedLog = ({
   logId,
   originalLog,
@@ -15,8 +29,8 @@ export const useEditedLog = ({
   clearPendingComponentEdit: () => void;
   onComponentChange: () => void;
 }) => {
-  const [editedLog, setEditedLogState] = useState<FoodLog | undefined>(
-    originalLog
+  const [editedLog, setEditedLogState] = useState<EditedFoodLog | undefined>(
+    undefined
   );
   const [isDirty, setIsDirty] = useState(false);
 
@@ -24,6 +38,7 @@ export const useEditedLog = ({
     setIsDirty(true);
   }, []);
 
+  // Initialize or update edited log from original
   useEffect(() => {
     if (!originalLog) {
       setEditedLogState(undefined);
@@ -31,13 +46,23 @@ export const useEditedLog = ({
     }
 
     if (!isDirty) {
-      setEditedLogState(originalLog);
+      // Initialize with baseline set to original components (for V2 refinement)
+      setEditedLogState({
+        ...originalLog,
+        baselineFoodComponents: originalLog.foodComponents,
+      });
     }
   }, [originalLog, isDirty]);
 
   const replaceEditedLog = useCallback(
-    (next: FoodLog, options: { markDirty?: boolean } = {}) => {
-      setEditedLogState(next);
+    (next: EditedFoodLog, options: { markDirty?: boolean } = {}) => {
+      // Preserve baseline if not provided in the update (e.g., from refine response)
+      setEditedLogState((prev) => ({
+        ...next,
+        // Use baseline from next if provided, otherwise preserve from prev
+        baselineFoodComponents:
+          next.baselineFoodComponents ?? prev?.baselineFoodComponents,
+      }));
       if (options.markDirty !== false) {
         markDirty();
       }
@@ -54,7 +79,7 @@ export const useEditedLog = ({
   );
 
   const updateComponents = useCallback(
-    (updater: (components: FoodComponent[]) => FoodComponent[]) => {
+    (updater: (components: EditableFoodComponent[]) => EditableFoodComponent[]) => {
       setEditedLogState((prev) => {
         if (!prev) return prev;
         const currentComponents = prev.foodComponents || [];
@@ -72,14 +97,24 @@ export const useEditedLog = ({
 
   const deleteComponent = useCallback(
     (index: number) => {
-      updateComponents((components) => {
-        if (!components[index]) {
-          return components;
+      setEditedLogState((prev) => {
+        if (!prev) return prev;
+        const currentComponents = prev.foodComponents || [];
+        if (!currentComponents[index]) {
+          return prev;
         }
-        return components.filter((_, i) => i !== index);
+        // Also delete from baseline to keep indices in sync
+        const currentBaseline = prev.baselineFoodComponents || [];
+        markDirty();
+        onComponentChange();
+        return {
+          ...prev,
+          foodComponents: currentComponents.filter((_, i) => i !== index),
+          baselineFoodComponents: currentBaseline.filter((_, i) => i !== index),
+        };
       });
     },
-    [updateComponents]
+    [markDirty, onComponentChange]
   );
 
   const acceptRecommendation = useCallback(
@@ -96,6 +131,7 @@ export const useEditedLog = ({
           amount,
           unit: unit as FoodComponent["unit"],
           recommendedMeasurement: undefined,
+          isStale: true,
         };
         return next;
       });
@@ -112,7 +148,16 @@ export const useEditedLog = ({
         if (pendingComponentEdit.index === "new") {
           next.push(pendingComponentEdit.component);
         } else {
-          next[pendingComponentEdit.index] = pendingComponentEdit.component;
+          // Preserve existing macro values when editing (only name/amount/unit change)
+          // Drop outdated recommendations so the UI doesn't suggest stale measurements
+          // Mark component as stale since macros need recalculation
+          const existingComponent = components[pendingComponentEdit.index];
+          next[pendingComponentEdit.index] = {
+            ...existingComponent,
+            ...pendingComponentEdit.component,
+            recommendedMeasurement: undefined,
+            isStale: true,
+          };
         }
         return next;
       });

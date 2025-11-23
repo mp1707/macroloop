@@ -12,6 +12,7 @@ import {
   refineEstimation,
   type RefinedFoodEstimateResponse,
   type FoodEstimateResponse,
+  type RefineFoodComponentInput,
 } from "../lib";
 
 // Helpers
@@ -40,6 +41,9 @@ type EditableEntry = {
   fat: number;
   foodComponents: FoodComponent[];
   macrosPerReferencePortion?: FoodLog["macrosPerReferencePortion"];
+  // Baseline components from last AI estimate (for V2 refinement)
+  // When provided, these are used to populate base* fields for consistent refinements
+  baselineFoodComponents?: FoodComponent[];
 };
 
 const makeCompletedFromRefinement = <T extends EditableEntry>(
@@ -53,6 +57,10 @@ const makeCompletedFromRefinement = <T extends EditableEntry>(
     protein: results.protein,
     carbs: results.carbs,
     fat: results.fat,
+    // V2: Update foodComponents with fresh per-ingredient macros
+    foodComponents: results.foodComponents,
+    // Update baseline to the new components (for future refinements)
+    baselineFoodComponents: results.foodComponents,
     ...("isEstimating" in base ? { isEstimating: false } : {}),
   } as T);
 
@@ -164,22 +172,50 @@ export const useEstimation = () => {
       activeRequestRef.current = abortController;
 
       if (__DEV__) {
-        console.log("🛠️ Components refinement");
+        console.log("🛠️ Components refinement V2");
       }
 
-      // Convert food components to string format: "Name Amount Unit, Name Amount Unit, ..."
-      const foodComponentsString = (editedEntry.foodComponents || [])
-        .map(
-          (component) =>
-            `${component.name} ${component.amount} ${component.unit}`
-        )
-        .join(", ");
+      // Build RefineFoodComponentInput array with baseline stats for consistent refinements
+      // Baseline comes from baselineFoodComponents (after previous refine) or original foodComponents
+      const baselineComponents = editedEntry.baselineFoodComponents || [];
+
+      const refineInputComponents: RefineFoodComponentInput[] = (
+        editedEntry.foodComponents || []
+      ).map((current, index) => {
+        // Try to find baseline for this component by index
+        // For new components (index >= baseline length), no baseline is available
+        const baseline = baselineComponents[index];
+
+        const input: RefineFoodComponentInput = {
+          // CURRENT state after user edits (required)
+          name: current.name,
+          amount: current.amount,
+          unit: current.unit,
+        };
+
+        // Add baseline values if available (for proportional refinement)
+        if (baseline) {
+          input.baseName = baseline.name;
+          input.baseAmount = baseline.amount;
+          input.baseUnit = baseline.unit;
+          // Per-component macros from V2 endpoints (may be undefined for old logs)
+          input.baseCalories = baseline.calories ?? null;
+          input.baseProtein = baseline.protein ?? null;
+          input.baseCarbs = baseline.carbs ?? null;
+          input.baseFat = baseline.fat ?? null;
+        }
+
+        return input;
+      });
+
+      if (__DEV__) {
+        console.log("🛠️ Refine input components:", refineInputComponents);
+      }
 
       setIsEditEstimating(true);
       try {
         const refined: RefinedFoodEstimateResponse = await refineEstimation({
-          foodComponents: foodComponentsString,
-          macrosPerReferencePortion: editedEntry.macrosPerReferencePortion,
+          foodComponents: refineInputComponents,
           language,
           signal: abortController.signal,
         });

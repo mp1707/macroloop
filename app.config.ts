@@ -12,7 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: IS_DEV ? "MacroLoop D" : IS_PREVIEW ? "MacroLoop P" : "MacroLoop",
   slug: "gainslog",
-  version: "1.0.3",
+  version: "1.0.4",
   orientation: "portrait",
   newArchEnabled: true,
   scheme: SCHEME,
@@ -74,15 +74,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-camera",
       {
-        cameraPermission: "MacroLoop needs camera access to take photos of your meals for automatic food logging. For example, photograph your plate and the app will identify the food and estimate portions.",
-        microphonePermission: "MacroLoop needs microphone access for voice-based food logging. For example, you can say 'chicken breast 200 grams' and the app will transcribe your speech to create a food entry.",
+        cameraPermission:
+          "MacroLoop needs camera access to take photos of your meals for automatic food logging. For example, photograph your plate and the app will identify the food and estimate portions.",
+        microphonePermission:
+          "MacroLoop needs microphone access for voice-based food logging. For example, you can say 'chicken breast 200 grams' and the app will transcribe your speech to create a food entry.",
         recordAudioAndroid: true,
       },
     ],
     [
       "expo-media-library",
       {
-        photosPermission: "MacroLoop needs access to your photos so you can select meal images from your library for automatic food logging.",
+        photosPermission:
+          "MacroLoop needs access to your photos so you can select meal images from your library for automatic food logging.",
         isAccessMediaLocationEnabled: true,
       },
     ],

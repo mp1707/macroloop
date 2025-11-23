@@ -2,6 +2,20 @@ import { useCallback, useEffect, useState } from "react";
 import type { Favorite, FoodComponent } from "@/types/models";
 import type { AppState } from "@/store/useAppStore";
 
+// Extended FoodComponent with UI-only stale indicator (not persisted or sent to API)
+export type EditableFoodComponent = FoodComponent & {
+  isStale?: boolean;
+};
+
+// Extended Favorite type that includes baseline components for V2 refinement
+export type EditedFavorite = Omit<Favorite, "foodComponents"> & {
+  // Food components with optional UI-only stale indicator
+  foodComponents: EditableFoodComponent[];
+  // Baseline components from last AI estimate (for consistent refinements)
+  // When editing, these preserve the original values to send as base* fields
+  baselineFoodComponents?: FoodComponent[];
+};
+
 export const useEditedFavorite = ({
   favoriteId,
   originalFavorite,
@@ -15,15 +29,16 @@ export const useEditedFavorite = ({
   clearPendingComponentEdit: () => void;
   onComponentChange: () => void;
 }) => {
-  const [editedFavorite, setEditedFavorite] = useState<Favorite | undefined>(
-    originalFavorite
-  );
+  const [editedFavorite, setEditedFavorite] = useState<
+    EditedFavorite | undefined
+  >(undefined);
   const [isDirty, setIsDirty] = useState(false);
 
   const markDirty = useCallback(() => {
     setIsDirty(true);
   }, []);
 
+  // Initialize or update edited favorite from original
   useEffect(() => {
     if (!originalFavorite) {
       setEditedFavorite(undefined);
@@ -31,13 +46,23 @@ export const useEditedFavorite = ({
     }
 
     if (!isDirty) {
-      setEditedFavorite(originalFavorite);
+      // Initialize with baseline set to original components (for V2 refinement)
+      setEditedFavorite({
+        ...originalFavorite,
+        baselineFoodComponents: originalFavorite.foodComponents,
+      });
     }
   }, [originalFavorite, isDirty]);
 
   const replaceEditedFavorite = useCallback(
-    (next: Favorite, options: { markDirty?: boolean } = {}) => {
-      setEditedFavorite(next);
+    (next: EditedFavorite, options: { markDirty?: boolean } = {}) => {
+      // Preserve baseline if not provided in the update (e.g., from refine response)
+      setEditedFavorite((prev) => ({
+        ...next,
+        // Use baseline from next if provided, otherwise preserve from prev
+        baselineFoodComponents:
+          next.baselineFoodComponents ?? prev?.baselineFoodComponents,
+      }));
       if (options.markDirty !== false) {
         markDirty();
       }
@@ -54,7 +79,7 @@ export const useEditedFavorite = ({
   );
 
   const updateComponents = useCallback(
-    (updater: (components: FoodComponent[]) => FoodComponent[]) => {
+    (updater: (components: EditableFoodComponent[]) => EditableFoodComponent[]) => {
       setEditedFavorite((prev) => {
         if (!prev) return prev;
         const currentComponents = prev.foodComponents || [];
@@ -72,14 +97,24 @@ export const useEditedFavorite = ({
 
   const deleteComponent = useCallback(
     (index: number) => {
-      updateComponents((components) => {
-        if (!components[index]) {
-          return components;
+      setEditedFavorite((prev) => {
+        if (!prev) return prev;
+        const currentComponents = prev.foodComponents || [];
+        if (!currentComponents[index]) {
+          return prev;
         }
-        return components.filter((_, i) => i !== index);
+        // Also delete from baseline to keep indices in sync
+        const currentBaseline = prev.baselineFoodComponents || [];
+        markDirty();
+        onComponentChange();
+        return {
+          ...prev,
+          foodComponents: currentComponents.filter((_, i) => i !== index),
+          baselineFoodComponents: currentBaseline.filter((_, i) => i !== index),
+        };
       });
     },
-    [updateComponents]
+    [markDirty, onComponentChange]
   );
 
   const acceptRecommendation = useCallback(
@@ -96,6 +131,7 @@ export const useEditedFavorite = ({
           amount,
           unit: unit as FoodComponent["unit"],
           recommendedMeasurement: undefined,
+          isStale: true,
         };
         return next;
       });
@@ -114,7 +150,16 @@ export const useEditedFavorite = ({
         if (pendingComponentEdit.index === "new") {
           next.push(pendingComponentEdit.component);
         } else {
-          next[pendingComponentEdit.index] = pendingComponentEdit.component;
+          // Preserve existing macro values when editing (only name/amount/unit change)
+          // Drop outdated recommendations so the UI doesn't suggest stale measurements
+          // Mark component as stale since macros need recalculation
+          const existingComponent = components[pendingComponentEdit.index];
+          next[pendingComponentEdit.index] = {
+            ...existingComponent,
+            ...pendingComponentEdit.component,
+            recommendedMeasurement: undefined,
+            isStale: true,
+          };
         }
         return next;
       });

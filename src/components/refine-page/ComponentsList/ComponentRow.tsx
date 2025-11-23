@@ -19,14 +19,19 @@ import { createStyles } from "./ComponentsList.styles";
 import type { FoodComponent } from "@/types/models";
 import { useTranslation } from "react-i18next";
 
+// Extended FoodComponent with UI-only stale indicator
+type EditableFoodComponent = FoodComponent & {
+  isStale?: boolean;
+};
+
 interface ComponentRowProps {
-  component: FoodComponent;
+  component: EditableFoodComponent;
   index: number;
   isExpanded: boolean;
-  onTap: (index: number, comp: FoodComponent) => void;
+  onTap: (index: number, comp: EditableFoodComponent) => void;
   onToggleExpansion?: (index: number) => void;
   onDelete: (index: number) => void;
-  onAcceptRecommendation: (index: number, comp: FoodComponent) => void;
+  onAcceptRecommendation: (index: number, comp: EditableFoodComponent) => void;
 }
 
 const easeLayout = Layout.duration(220).easing(Easing.inOut(Easing.quad));
@@ -46,6 +51,8 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
   const hasRecommendation = !!component.recommendedMeasurement;
   const canExpand = hasRecommendation && !!onToggleExpansion;
   const showExpansion = hasRecommendation && isExpanded;
+  const hasNutrition =
+    component.calories != null || component.protein != null;
 
   const recommendedMeasurementAmount =
     component.recommendedMeasurement?.amount;
@@ -65,6 +72,19 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
     const amountString = amount != null ? `${amount}` : "";
     return `${amountString} ${unit}`.trim();
   }, [recommendedMeasurementAmount, recommendedMeasurementUnit]);
+
+  const nutritionLabel = useMemo(() => {
+    const parts: string[] = [];
+    if (component.calories != null) {
+      parts.push(`${Math.round(component.calories)} kcal`);
+    }
+    if (component.protein != null) {
+      parts.push(
+        `${Math.round(component.protein)}g ${t("componentRow.nutrition.protein")}`
+      );
+    }
+    return parts.join(" • ");
+  }, [component.calories, component.protein, t]);
 
   const ignorePressRef = useRef(false);
   const resetIgnoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -198,6 +218,19 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
                         >
                           {component.name}
                         </AppText>
+                        {hasNutrition ? (
+                          <AppText
+                            role="Caption"
+                            color="secondary"
+                            style={
+                              component.isStale
+                                ? styles.nutritionSubtitleStale
+                                : styles.nutritionSubtitle
+                            }
+                          >
+                            {nutritionLabel}
+                          </AppText>
+                        ) : null}
                       </View>
                       <Animated.View
                         layout={easeLayout}
@@ -342,6 +375,9 @@ export const ComponentRow = React.memo(ComponentRowComponent, (prev, next) => {
     prevComp.name === nextComp.name &&
     prevComp.amount === nextComp.amount &&
     prevComp.unit === nextComp.unit &&
+    prevComp.calories === nextComp.calories &&
+    prevComp.protein === nextComp.protein &&
+    prevComp.isStale === nextComp.isStale &&
     recommendationsEqual &&
     prev.onTap === next.onTap &&
     prev.onToggleExpansion === next.onToggleExpansion &&

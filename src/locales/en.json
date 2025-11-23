@@ -179,6 +179,10 @@
           "saveAnyway": "Save anyway"
         }
       },
+      "error": {
+        "title": "Recalculation failed",
+        "reestimationFailed": "We couldn't recalculate your macros. Please check your connection and try again."
+      },
       "paywall": {
         "title": "Recalculate with Pro",
         "body": "Get updated macros after changing ingredients.",
@@ -728,7 +732,7 @@
     }
   },
   "macrosCard": {
-    "sectionTitle": "MACROS",
+    "sectionTitle": "TOTAL NUTRITION",
     "staleChip": "Needs update",
     "staleMessage": "Values reflect previous ingredients and amounts."
   },
@@ -801,6 +805,9 @@
       "approx": "≈",
       "estimateSuffix": ":",
       "setButton": "Set {{amount}} {{unit}}"
+    },
+    "nutrition": {
+      "protein": "protein"
     }
   },
   "swipeActions": {
