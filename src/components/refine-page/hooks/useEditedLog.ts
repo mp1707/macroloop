@@ -2,8 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import type { FoodComponent, FoodLog } from "@/types/models";
 import type { AppState } from "@/store/useAppStore";
 
+// Extended FoodComponent with UI-only stale indicator (not persisted or sent to API)
+export type EditableFoodComponent = FoodComponent & {
+  isStale?: boolean;
+};
+
 // Extended FoodLog type that includes baseline components for V2 refinement
-export type EditedFoodLog = FoodLog & {
+export type EditedFoodLog = Omit<FoodLog, "foodComponents"> & {
+  // Food components with optional UI-only stale indicator
+  foodComponents: EditableFoodComponent[];
   // Baseline components from last AI estimate (for consistent refinements)
   // When editing, these preserve the original values to send as base* fields
   baselineFoodComponents?: FoodComponent[];
@@ -72,7 +79,7 @@ export const useEditedLog = ({
   );
 
   const updateComponents = useCallback(
-    (updater: (components: FoodComponent[]) => FoodComponent[]) => {
+    (updater: (components: EditableFoodComponent[]) => EditableFoodComponent[]) => {
       setEditedLogState((prev) => {
         if (!prev) return prev;
         const currentComponents = prev.foodComponents || [];
@@ -124,6 +131,7 @@ export const useEditedLog = ({
           amount,
           unit: unit as FoodComponent["unit"],
           recommendedMeasurement: undefined,
+          isStale: true,
         };
         return next;
       });
@@ -142,11 +150,13 @@ export const useEditedLog = ({
         } else {
           // Preserve existing macro values when editing (only name/amount/unit change)
           // Drop outdated recommendations so the UI doesn't suggest stale measurements
+          // Mark component as stale since macros need recalculation
           const existingComponent = components[pendingComponentEdit.index];
           next[pendingComponentEdit.index] = {
             ...existingComponent,
             ...pendingComponentEdit.component,
             recommendedMeasurement: undefined,
+            isStale: true,
           };
         }
         return next;

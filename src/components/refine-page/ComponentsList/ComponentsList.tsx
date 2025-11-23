@@ -10,14 +10,19 @@ import { ComponentRow } from "./ComponentRow";
 import Animated, { Easing, Layout } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 
+// Extended FoodComponent with UI-only stale indicator
+type EditableFoodComponent = FoodComponent & {
+  isStale?: boolean;
+};
+
 const easeLayout = Layout.duration(220).easing(Easing.inOut(Easing.quad));
 
 interface ComponentsListProps {
-  components: FoodComponent[];
-  onPressItem: (index: number, comp: FoodComponent) => void;
+  components: EditableFoodComponent[];
+  onPressItem: (index: number, comp: EditableFoodComponent) => void;
   onDeleteItem: (index: number) => void;
   onAddPress: () => void;
-  onAcceptRecommendation: (index: number, comp: FoodComponent) => void;
+  onAcceptRecommendation: (index: number, comp: EditableFoodComponent) => void;
   disabled?: boolean;
   headerAction?: React.ReactNode;
 }
@@ -39,7 +44,7 @@ export const ComponentsList: React.FC<ComponentsListProps> = ({
 
   // Simplified: handleRowTap now only opens the edit modal
   const handleRowTap = useCallback(
-    (index: number, comp: FoodComponent) => {
+    (index: number, comp: EditableFoodComponent) => {
       onPressItem(index, comp);
     },
     [onPressItem]
@@ -51,7 +56,7 @@ export const ComponentsList: React.FC<ComponentsListProps> = ({
   }, []);
 
   const handleAcceptRecommendation = useCallback(
-    (index: number, comp: FoodComponent) => {
+    (index: number, comp: EditableFoodComponent) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       // First collapse the expansion to trigger animation

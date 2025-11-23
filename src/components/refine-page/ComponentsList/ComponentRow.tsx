@@ -19,14 +19,19 @@ import { createStyles } from "./ComponentsList.styles";
 import type { FoodComponent } from "@/types/models";
 import { useTranslation } from "react-i18next";
 
+// Extended FoodComponent with UI-only stale indicator
+type EditableFoodComponent = FoodComponent & {
+  isStale?: boolean;
+};
+
 interface ComponentRowProps {
-  component: FoodComponent;
+  component: EditableFoodComponent;
   index: number;
   isExpanded: boolean;
-  onTap: (index: number, comp: FoodComponent) => void;
+  onTap: (index: number, comp: EditableFoodComponent) => void;
   onToggleExpansion?: (index: number) => void;
   onDelete: (index: number) => void;
-  onAcceptRecommendation: (index: number, comp: FoodComponent) => void;
+  onAcceptRecommendation: (index: number, comp: EditableFoodComponent) => void;
 }
 
 const easeLayout = Layout.duration(220).easing(Easing.inOut(Easing.quad));
@@ -217,7 +222,11 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
                           <AppText
                             role="Caption"
                             color="secondary"
-                            style={styles.nutritionSubtitle}
+                            style={
+                              component.isStale
+                                ? styles.nutritionSubtitleStale
+                                : styles.nutritionSubtitle
+                            }
                           >
                             {nutritionLabel}
                           </AppText>
@@ -368,6 +377,7 @@ export const ComponentRow = React.memo(ComponentRowComponent, (prev, next) => {
     prevComp.unit === nextComp.unit &&
     prevComp.calories === nextComp.calories &&
     prevComp.protein === nextComp.protein &&
+    prevComp.isStale === nextComp.isStale &&
     recommendationsEqual &&
     prev.onTap === next.onTap &&
     prev.onToggleExpansion === next.onToggleExpansion &&

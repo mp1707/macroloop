@@ -88,6 +88,11 @@ export const createStyles = (colors: Colors, theme: Theme) =>
     nutritionSubtitle: {
       marginTop: theme.spacing.xs,
     },
+    nutritionSubtitleStale: {
+      marginTop: theme.spacing.xs,
+      textDecorationLine: "line-through",
+      opacity: 0.6,
+    },
     amountText: {
       marginRight: theme.spacing.sm,
     },
