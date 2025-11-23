@@ -141,11 +141,12 @@ export const useEditedLog = ({
           next.push(pendingComponentEdit.component);
         } else {
           // Preserve existing macro values when editing (only name/amount/unit change)
-          // This ensures per-component macros aren't lost if user saves without re-estimating
+          // Drop outdated recommendations so the UI doesn't suggest stale measurements
           const existingComponent = components[pendingComponentEdit.index];
           next[pendingComponentEdit.index] = {
-            ...existingComponent, // Preserve calories, protein, carbs, fat, recommendedMeasurement
-            ...pendingComponentEdit.component, // Override name, amount, unit
+            ...existingComponent,
+            ...pendingComponentEdit.component,
+            recommendedMeasurement: undefined,
           };
         }
         return next;
