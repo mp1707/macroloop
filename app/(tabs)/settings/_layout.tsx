@@ -35,14 +35,6 @@ export default function SettingsLayout() {
         }}
       />
       <Stack.Screen
-        name="design"
-        options={{
-          title: t("settings.design.header"),
-          headerLargeTitle: isIOS,
-          headerLargeTitleShadowVisible: false,
-        }}
-      />
-      <Stack.Screen
         name="language"
         options={{
           title: t("settings.language.header"),
@@ -54,6 +46,14 @@ export default function SettingsLayout() {
         name="data-cleanup"
         options={{
           title: t("settings.dataCleanup.header"),
+          headerLargeTitle: isIOS,
+          headerLargeTitleShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="changelog"
+        options={{
+          title: t("settings.changelog.header"),
           headerLargeTitle: isIOS,
           headerLargeTitleShadowVisible: false,
         }}

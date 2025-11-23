@@ -851,30 +851,44 @@
             },
             "error": {
               "title": "Restore failed",
-              "message": "Please try again."
+              "message": "Please again."
             }
           }
         }
       },
-      "appearance": {
-        "label": "APPEARANCE",
+      "general": {
+        "label": "GENERAL",
         "rows": {
-          "darkMode": {
-            "title": "Dark Mode",
-            "subtitle": "Choose your appearance."
-          },
           "language": {
             "title": "Language",
             "subtitle": "Choose the app language."
           },
-          "design": {
-            "title": "Design",
-            "subtitle": "Customize the look and feel."
+          "changelog": {
+            "title": "What’s New",
+            "subtitle": "New features and improvements."
+          },
+          "copyAppLink": {
+            "title": "Recommend App",
+            "subtitle": "Copy the AppStore link to share MacroLoop.",
+            "toast": {
+              "successTitle": "Link copied",
+              "successSubtitle": "Thanks for sharing MacroLoop.",
+              "errorTitle": "Copy failed",
+              "errorSubtitle": "Please try again."
+            }
+          },
+          "rateApp": {
+            "title": "Rate MacroLoop",
+            "subtitle": "Leave a review in the App Store :)",
+            "toast": {
+              "errorTitle": "Can’t open App Store",
+              "errorSubtitle": "Please try again later."
+            }
           }
         }
       },
       "tracking": {
-        "label": "TRACKING",
+        "label": "NUTRITION GOALS",
         "rows": {
           "calculateTargets": {
             "title": "Calculate for me",
@@ -901,7 +915,7 @@
           "privacy": "Privacy Policy",
           "terms": "Terms of Use"
         },
-        "linkError": "Couldn’t open link"
+        "linkError": "Couldn't open link"
       },
       "developer": {
         "label": "DEVELOPER",
@@ -965,9 +979,9 @@
         "optionLabel": "{{option}} language"
       }
     },
-    "design": {
-      "header": "Design",
-      "placeholder": "Coming soon"
+    "changelog": {
+      "header": "Changelog",
+      "emptyState": "No changelog entries yet."
     },
     "dataCleanup": {
       "header": "Delete old logs",
