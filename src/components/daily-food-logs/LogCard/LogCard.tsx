@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { View, Pressable } from "react-native";
+import { View, Pressable, Alert } from "react-native";
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -18,7 +18,6 @@ import { Favorite, FoodLog } from "@/types/models";
 import { useTheme } from "@/theme";
 import { Card } from "@/components/Card";
 import { AppText } from "@/components";
-import { ContextMenu, ContextMenuItem } from "@/components/shared/ContextMenu";
 import { useAppStore } from "@/store/useAppStore";
 import { isNavLocked, lockNav } from "@/utils/navigationLock";
 import { createStyles } from "./LogCard.styles";
@@ -345,51 +344,75 @@ const LogCardInner: React.FC<LogCardProps> = ({
     setUseAnimatedVariant(false);
   }, [isLoading]);
 
-  const [menuVisible, setMenuVisible] = useState(false);
   const { favorites } = useAppStore();
   const isFavorite = useMemo(
     () => favorites.some((f) => f.id === (foodLog as any).id),
     [favorites, foodLog]
   );
 
-  const items: ContextMenuItem[] = useMemo(() => {
+  const lastOpenRef = useRef<number>(0);
+  const handleLongPress = useCallback(async () => {
+    if (isNavLocked()) return; // prevent if a navigation/tap just triggered
+    const now = Date.now();
+    if (now - lastOpenRef.current < 600) return; // throttle multiple opens
+    lastOpenRef.current = now;
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
+    // Prevent a follow-up tap from firing when the long-press menu opens
+    lockNav(400);
+
+    // Build alert buttons based on context menu preset
+    const buttons: { text: string; onPress?: () => void; style?: "cancel" | "destructive" | "default" }[] = [];
+
     if (contextMenuPreset === "favorites") {
-      const arr: ContextMenuItem[] = [];
-      arr.push({
-        label: t("logCard.contextMenu.createLog"),
+      buttons.push({
+        text: t("logCard.contextMenu.createLog"),
         onPress: () => onLogAgain?.(foodLog),
       });
-      arr.push({
-        label: t("logCard.contextMenu.removeFromFavorites"),
-        destructive: true,
+      buttons.push({
+        text: t("logCard.contextMenu.removeFromFavorites"),
+        style: "destructive",
         onPress: () => onRemoveFromFavorites?.(foodLog),
       });
-      return arr;
-    }
-
-    const arr: ContextMenuItem[] = [];
-    arr.push({
-      label: t("logCard.contextMenu.logAgain"),
-      onPress: () => onLogAgain?.(foodLog),
-    });
-    if (onSaveToFavorites || onRemoveFromFavorites) {
-      arr.push({
-        label: isFavorite
-          ? t("logCard.contextMenu.removeFromFavorites")
-          : t("logCard.contextMenu.saveToFavorites"),
-        onPress: () =>
-          isFavorite
-            ? onRemoveFromFavorites?.(foodLog)
-            : onSaveToFavorites?.(foodLog),
+    } else {
+      buttons.push({
+        text: t("logCard.contextMenu.logAgain"),
+        onPress: () => onLogAgain?.(foodLog),
+      });
+      if (onSaveToFavorites || onRemoveFromFavorites) {
+        buttons.push({
+          text: isFavorite
+            ? t("logCard.contextMenu.removeFromFavorites")
+            : t("logCard.contextMenu.saveToFavorites"),
+          onPress: () =>
+            isFavorite
+              ? onRemoveFromFavorites?.(foodLog)
+              : onSaveToFavorites?.(foodLog),
+        });
+      }
+      buttons.push({
+        text: t("common.edit"),
+        onPress: () => onEdit?.(foodLog),
+      });
+      buttons.push({
+        text: t("common.delete"),
+        style: "destructive",
+        onPress: () => onDelete?.(foodLog),
       });
     }
-    arr.push({ label: t("common.edit"), onPress: () => onEdit?.(foodLog) });
-    arr.push({
-      label: t("common.delete"),
-      destructive: true,
-      onPress: () => onDelete?.(foodLog),
+
+    // Add cancel button
+    buttons.push({
+      text: t("common.cancel"),
+      style: "cancel",
     });
-    return arr;
+
+    Alert.alert(
+      foodLog.title || t("logCard.fallbackTitle"),
+      undefined,
+      buttons
+    );
   }, [
     contextMenuPreset,
     foodLog,
@@ -402,68 +425,32 @@ const LogCardInner: React.FC<LogCardProps> = ({
     t,
   ]);
 
-  const lastOpenRef = useRef<number>(0);
-  const handleLongPress = useCallback(async () => {
-    if (isNavLocked()) return; // prevent if a navigation/tap just triggered
-    if (menuVisible) return; // already open
-    const now = Date.now();
-    if (now - lastOpenRef.current < 600) return; // throttle multiple opens
-    lastOpenRef.current = now;
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch {}
-    // Prevent a follow-up tap from firing when the long-press menu opens
-    lockNav(400);
-    setMenuVisible(true);
-  }, [menuVisible]);
-
   if (!isLoading && !hasEverBeenLoadingRef.current) {
     return (
-      <>
-        <StaticLogCard
-          foodLog={foodLog}
-          isLoading={false}
-          onLongPress={handleLongPress}
-        />
-        <ContextMenu
-          visible={menuVisible}
-          items={items}
-          onClose={() => setMenuVisible(false)}
-        />
-      </>
-    );
-  }
-
-  if (useAnimatedVariant) {
-    return (
-      <>
-        <AnimatedLogCard
-          foodLog={foodLog}
-          isLoading={isLoading}
-          onLongPress={handleLongPress}
-        />
-        <ContextMenu
-          visible={menuVisible}
-          items={items}
-          onClose={() => setMenuVisible(false)}
-        />
-      </>
-    );
-  }
-
-  return (
-    <>
       <StaticLogCard
         foodLog={foodLog}
         isLoading={false}
         onLongPress={handleLongPress}
       />
-      <ContextMenu
-        visible={menuVisible}
-        items={items}
-        onClose={() => setMenuVisible(false)}
+    );
+  }
+
+  if (useAnimatedVariant) {
+    return (
+      <AnimatedLogCard
+        foodLog={foodLog}
+        isLoading={isLoading}
+        onLongPress={handleLongPress}
       />
-    </>
+    );
+  }
+
+  return (
+    <StaticLogCard
+      foodLog={foodLog}
+      isLoading={false}
+      onLongPress={handleLongPress}
+    />
   );
 };
 
