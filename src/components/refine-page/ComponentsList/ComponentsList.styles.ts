@@ -85,6 +85,9 @@ export const createStyles = (colors: Colors, theme: Theme) =>
       flexShrink: 1,
       minWidth: 0,
     },
+    nutritionSubtitle: {
+      marginTop: theme.spacing.xs,
+    },
     amountText: {
       marginRight: theme.spacing.sm,
     },

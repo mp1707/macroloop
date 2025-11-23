@@ -732,7 +732,7 @@
     }
   },
   "macrosCard": {
-    "sectionTitle": "MACROS",
+    "sectionTitle": "TOTAL NUTRITION",
     "staleChip": "Needs update",
     "staleMessage": "Values reflect previous ingredients and amounts."
   },
@@ -805,6 +805,9 @@
       "approx": "≈",
       "estimateSuffix": ":",
       "setButton": "Set {{amount}} {{unit}}"
+    },
+    "nutrition": {
+      "protein": "protein"
     }
   },
   "swipeActions": {

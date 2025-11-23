@@ -730,7 +730,7 @@
     }
   },
   "macrosCard": {
-    "sectionTitle": "MAKRONÄHRSTOFFE",
+    "sectionTitle": "NÄHRWERTE GESAMT",
     "staleChip": "Aktualisierung nötig",
     "staleMessage": "Werte basieren auf vorherigen Zutaten und Mengen."
   },
@@ -803,6 +803,9 @@
       "approx": "≈",
       "estimateSuffix": ":",
       "setButton": "{{amount}} {{unit}} übernehmen"
+    },
+    "nutrition": {
+      "protein": "Protein"
     }
   },
   "swipeActions": {

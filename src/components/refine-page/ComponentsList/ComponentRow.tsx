@@ -46,6 +46,8 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
   const hasRecommendation = !!component.recommendedMeasurement;
   const canExpand = hasRecommendation && !!onToggleExpansion;
   const showExpansion = hasRecommendation && isExpanded;
+  const hasNutrition =
+    component.calories != null || component.protein != null;
 
   const recommendedMeasurementAmount =
     component.recommendedMeasurement?.amount;
@@ -65,6 +67,19 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
     const amountString = amount != null ? `${amount}` : "";
     return `${amountString} ${unit}`.trim();
   }, [recommendedMeasurementAmount, recommendedMeasurementUnit]);
+
+  const nutritionLabel = useMemo(() => {
+    const parts: string[] = [];
+    if (component.calories != null) {
+      parts.push(`${Math.round(component.calories)} kcal`);
+    }
+    if (component.protein != null) {
+      parts.push(
+        `${Math.round(component.protein)}g ${t("componentRow.nutrition.protein")}`
+      );
+    }
+    return parts.join(" • ");
+  }, [component.calories, component.protein, t]);
 
   const ignorePressRef = useRef(false);
   const resetIgnoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -198,6 +213,15 @@ const ComponentRowComponent: React.FC<ComponentRowProps> = ({
                         >
                           {component.name}
                         </AppText>
+                        {hasNutrition ? (
+                          <AppText
+                            role="Caption"
+                            color="secondary"
+                            style={styles.nutritionSubtitle}
+                          >
+                            {nutritionLabel}
+                          </AppText>
+                        ) : null}
                       </View>
                       <Animated.View
                         layout={easeLayout}
@@ -342,6 +366,8 @@ export const ComponentRow = React.memo(ComponentRowComponent, (prev, next) => {
     prevComp.name === nextComp.name &&
     prevComp.amount === nextComp.amount &&
     prevComp.unit === nextComp.unit &&
+    prevComp.calories === nextComp.calories &&
+    prevComp.protein === nextComp.protein &&
     recommendationsEqual &&
     prev.onTap === next.onTap &&
     prev.onToggleExpansion === next.onToggleExpansion &&
