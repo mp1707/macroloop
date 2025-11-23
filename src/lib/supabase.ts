@@ -84,6 +84,22 @@ export interface RefinedFoodEstimateResponse {
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+// Normalize unit values from API (handles German "stück" -> "piece")
+const normalizeUnit = (unit: string): FoodComponent["unit"] => {
+  if (unit === "stück") return "piece";
+  return unit as FoodComponent["unit"];
+};
+
+// Normalize food components received from API to ensure consistent unit values
+const normalizeFoodComponents = (
+  components: FoodComponent[]
+): FoodComponent[] => {
+  return components.map((c) => ({
+    ...c,
+    unit: normalizeUnit(c.unit),
+  }));
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: AsyncStorage,
@@ -131,7 +147,11 @@ export const estimateTextBased = async (
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
-  return data as FoodEstimateResponse;
+  // Normalize units (e.g., "stück" -> "piece") for consistent app handling
+  return {
+    ...data,
+    foodComponents: normalizeFoodComponents(data.foodComponents || []),
+  } as FoodEstimateResponse;
 };
 
 // V2 refine estimation - uses per-component baseline stats for consistent refinements
@@ -177,7 +197,11 @@ export const refineEstimation = async (
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
-  return data as RefinedFoodEstimateResponse;
+  // Normalize units (e.g., "stück" -> "piece") for consistent app handling
+  return {
+    ...data,
+    foodComponents: normalizeFoodComponents(data.foodComponents || []),
+  } as RefinedFoodEstimateResponse;
 };
 
 // V2 image estimation - returns per-component nutrition stats
@@ -218,5 +242,9 @@ export const estimateNutritionImageBased = async (
     throw new Error("AI_ESTIMATION_FAILED");
   }
 
-  return data as FoodEstimateResponse;
+  // Normalize units (e.g., "stück" -> "piece") for consistent app handling
+  return {
+    ...data,
+    foodComponents: normalizeFoodComponents(data.foodComponents || []),
+  } as FoodEstimateResponse;
 };

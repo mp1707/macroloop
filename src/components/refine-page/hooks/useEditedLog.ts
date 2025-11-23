@@ -140,7 +140,13 @@ export const useEditedLog = ({
         if (pendingComponentEdit.index === "new") {
           next.push(pendingComponentEdit.component);
         } else {
-          next[pendingComponentEdit.index] = pendingComponentEdit.component;
+          // Preserve existing macro values when editing (only name/amount/unit change)
+          // This ensures per-component macros aren't lost if user saves without re-estimating
+          const existingComponent = components[pendingComponentEdit.index];
+          next[pendingComponentEdit.index] = {
+            ...existingComponent, // Preserve calories, protein, carbs, fat, recommendedMeasurement
+            ...pendingComponentEdit.component, // Override name, amount, unit
+          };
         }
         return next;
       });

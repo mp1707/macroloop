@@ -174,25 +174,47 @@ export default function EditFavorite() {
       return;
     }
 
+    // Debounce rapid clicks (prevent multiple simultaneous requests)
+    if (isEditEstimating) {
+      if (__DEV__) {
+        console.log("⏳ Re-estimation already in progress, ignoring click");
+      }
+      return;
+    }
+
     scrollRef.current?.scrollToEnd({ animated: true });
 
     try {
-      await runEditEstimation(editedFavorite, (next) => {
+      const result = await runEditEstimation(editedFavorite, (next) => {
         replaceEditedFavorite(next);
       });
-      markReestimated();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setRevealKey((key) => key + 1);
+
+      // Only update UI if we got a result (not cancelled)
+      if (result) {
+        markReestimated();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setRevealKey((key) => key + 1);
+      }
     } catch (error) {
-      // Optional: silence for now; toasts handled elsewhere
+      // Improved error handling
+      console.error("Re-estimation error:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
+      Alert.alert(
+        t("favorites.edit.error.title"),
+        t("favorites.edit.error.reestimationFailed"),
+        [{ text: t("common.ok"), style: "default" }]
+      );
     }
   }, [
     editedFavorite,
     isPro,
+    isEditEstimating,
     handleShowPaywall,
     runEditEstimation,
     replaceEditedFavorite,
     markReestimated,
+    t,
   ]);
 
   const commitTitleBeforeSave = useCallback(() => {
