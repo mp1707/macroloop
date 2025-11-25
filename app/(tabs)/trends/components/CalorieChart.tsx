@@ -85,20 +85,17 @@ export const CalorieChart: React.FC<CalorieChartProps> = ({
       ? chartConfig.PADDING.top + chartConfig.scaleY(goal)
       : undefined;
 
-  const goalLabelTop =
-    goalLineY !== undefined
-      ? Math.max(
-          0,
-          goalLineY - theme.typography.Caption.fontSize - theme.spacing.xs
-        )
-      : undefined;
-
   return (
     <View style={styles.container}>
-      <Card elevated={true}>
+      <Card elevated={true} padding={theme.spacing.xl}>
         <AppText role="Headline" style={styles.title}>
           {t("trends.chart.title", { days })}
         </AppText>
+        {goal && (
+          <AppText role="Caption" color="secondary" style={styles.goalCaption}>
+            {t("trends.chart.goalLabel", { goal: Math.round(goal) })}
+          </AppText>
+        )}
 
         <View style={styles.chartContainer}>
           <View
@@ -114,6 +111,20 @@ export const CalorieChart: React.FC<CalorieChartProps> = ({
               width={chartConfig.chartWidth}
               height={chartConfig.chartHeight}
             >
+              {/* Dashed goal line rendered beneath the bars */}
+              {goalLineY !== undefined && (
+                <Line
+                  x1={theme.spacing.sm}
+                  y1={goalLineY}
+                  x2={chartConfig.chartWidth - theme.spacing.sm}
+                  y2={goalLineY}
+                  stroke={colors.primaryText}
+                  strokeWidth={1}
+                  strokeDasharray="4 4"
+                  opacity={0.6}
+                />
+              )}
+
               {/* Bars for past days */}
               {dailyData.map((day, index) => {
                 const x =
@@ -167,33 +178,7 @@ export const CalorieChart: React.FC<CalorieChartProps> = ({
                   />
                 );
               })()}
-
-              {/* Dashed goal line now rendered above data */}
-              {goalLineY !== undefined && (
-                <Line
-                  x1={theme.spacing.xs}
-                  y1={goalLineY}
-                  x2={chartConfig.chartWidth - theme.spacing.xs}
-                  y2={goalLineY}
-                  stroke={colors.secondaryText}
-                  strokeWidth={1}
-                  strokeDasharray="4 4"
-                  opacity={0.6}
-                />
-              )}
             </Svg>
-
-            {goalLabelTop !== undefined && (
-              <AppText
-                role="Caption"
-                color="secondary"
-                style={[styles.goalLabel, { top: goalLabelTop }]}
-              >
-                {t("trends.chart.goalLabel", {
-                  goal: Math.round(goal ?? 0),
-                })}
-              </AppText>
-            )}
           </View>
         </View>
       </Card>
@@ -213,9 +198,7 @@ const createStyles = (colors: Colors, theme: Theme) =>
     chartWrapper: {
       position: "relative",
     },
-    goalLabel: {
-      position: "absolute",
-      left: theme.spacing.xs,
-      textAlign: "left",
+    goalCaption: {
+      marginBottom: theme.spacing.md,
     },
   });
