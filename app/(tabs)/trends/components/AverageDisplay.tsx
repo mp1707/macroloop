@@ -74,7 +74,8 @@ const createStyles = (colors: Colors, theme: Theme) =>
     container: {
       paddingTop: theme.spacing.lg,
       paddingHorizontal: theme.spacing.sm,
-      paddingBottom: theme.spacing.md,
+      paddingBottom: theme.spacing.sm,
+      marginBottom: theme.spacing.lg,
       gap: theme.spacing.xs / 2,
     },
     averageRow: {

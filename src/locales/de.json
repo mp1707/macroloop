@@ -1011,7 +1011,8 @@
       "subtitle_today_excluded": "(heute ausgeschlossen)"
     },
     "chart": {
-      "title": "Kalorienverlauf (letzte {{days}} Tage)"
+      "title": "Kalorienverlauf (letzte {{days}} Tage)",
+      "goalLabel": "Ziel ({{goal}} kcal)"
     },
     "macros": {
       "average": "täglicher ⌀"

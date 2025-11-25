@@ -58,10 +58,7 @@ export default function TrendsScreen() {
   return (
     <KeyboardAwareScrollView
       style={styles.scrollView}
-      contentContainerStyle={[
-        styles.contentContainer,
-        { paddingBottom: dynamicBottomPadding },
-      ]}
+      contentContainerStyle={[styles.contentContainer]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
       showsVerticalScrollIndicator={false}

@@ -56,16 +56,21 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
               <macro.Icon
                 size={18}
                 color={macro.color}
+                strokeWidth={1.6}
                 fill={macro.color}
-                strokeWidth={0}
               />
               <AppText role="Caption" color="secondary">
                 {macro.label}
               </AppText>
             </View>
-            <AppText role="Headline" style={styles.value}>
-              {Math.round(macro.value)}g
-            </AppText>
+            <View style={styles.valueRow}>
+              <AppText role="Title2" style={styles.valueNumber}>
+                {Math.round(macro.value)}
+              </AppText>
+              <AppText role="Caption" color="disabled" style={styles.valueUnit}>
+                g
+              </AppText>
+            </View>
             <AppText role="Caption" color="secondary">
               {t("trends.macros.average")}
             </AppText>
@@ -88,7 +93,7 @@ const createStyles = (colors: Colors, theme: Theme) =>
     },
     cardContent: {
       alignItems: "flex-start",
-      gap: theme.spacing.xs,
+      gap: theme.spacing.sm,
     },
     iconRow: {
       flexDirection: "row",
@@ -96,7 +101,15 @@ const createStyles = (colors: Colors, theme: Theme) =>
       gap: theme.spacing.xs,
       marginBottom: theme.spacing.xs / 2,
     },
-    value: {
+    valueRow: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: theme.spacing.xs / 2,
+    },
+    valueNumber: {
       color: colors.primaryText,
+    },
+    valueUnit: {
+      paddingBottom: 2,
     },
   });

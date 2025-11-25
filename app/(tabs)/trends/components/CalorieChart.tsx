@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
-import Svg, { Line, Rect, Defs, Pattern, Text } from "react-native-svg";
+import Svg, { Line, Rect } from "react-native-svg";
 import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useTranslation } from "react-i18next";
@@ -80,6 +80,19 @@ export const CalorieChart: React.FC<CalorieChartProps> = ({
     };
   }, [dailyData, todayData, goal, days, theme.spacing.pageMargins.horizontal]);
 
+  const goalLineY =
+    goal && chartConfig.maxCalories > 0
+      ? chartConfig.PADDING.top + chartConfig.scaleY(goal)
+      : undefined;
+
+  const goalLabelTop =
+    goalLineY !== undefined
+      ? Math.max(
+          0,
+          goalLineY - theme.typography.Caption.fontSize - theme.spacing.xs
+        )
+      : undefined;
+
   return (
     <View style={styles.container}>
       <Card elevated={true}>
@@ -88,85 +101,100 @@ export const CalorieChart: React.FC<CalorieChartProps> = ({
         </AppText>
 
         <View style={styles.chartContainer}>
-          <Svg width={chartConfig.chartWidth} height={chartConfig.chartHeight}>
-            {/* Dashed goal line with label */}
-            {goal && chartConfig.maxCalories > 0 && (
-              <>
+          <View
+            style={[
+              styles.chartWrapper,
+              {
+                width: chartConfig.chartWidth,
+                height: chartConfig.chartHeight,
+              },
+            ]}
+          >
+            <Svg
+              width={chartConfig.chartWidth}
+              height={chartConfig.chartHeight}
+            >
+              {/* Bars for past days */}
+              {dailyData.map((day, index) => {
+                const x =
+                  chartConfig.PADDING.left +
+                  index * (chartConfig.barWidth + chartConfig.BAR_SPACING);
+                const barHeight = day.hasLogs
+                  ? chartConfig.getBarHeight(day.totals.calories)
+                  : 0;
+                const y =
+                  chartConfig.PADDING.top +
+                  chartConfig.contentHeight -
+                  barHeight;
+
+                return (
+                  <Rect
+                    key={day.dateKey}
+                    x={x}
+                    y={y}
+                    width={chartConfig.barWidth}
+                    height={Math.max(barHeight, 0)}
+                    fill={colors.accent}
+                    rx={chartConfig.barRadius}
+                  />
+                );
+              })}
+
+              {/* Today's bar (transparent primary tone) with minimum height */}
+              {(() => {
+                const calculatedHeight = chartConfig.getBarHeight(
+                  todayData.totals.calories
+                );
+                const todayBarHeight = Math.max(calculatedHeight, 12);
+                const x =
+                  chartConfig.PADDING.left +
+                  dailyData.length *
+                    (chartConfig.barWidth + chartConfig.BAR_SPACING);
+                const y =
+                  chartConfig.PADDING.top +
+                  chartConfig.contentHeight -
+                  todayBarHeight;
+
+                return (
+                  <Rect
+                    x={x}
+                    y={y}
+                    width={chartConfig.barWidth}
+                    height={todayBarHeight}
+                    fill={colors.accent}
+                    opacity={0.35}
+                    rx={chartConfig.barRadius}
+                  />
+                );
+              })()}
+
+              {/* Dashed goal line now rendered above data */}
+              {goalLineY !== undefined && (
                 <Line
-                  x1={chartConfig.PADDING.left}
-                  y1={chartConfig.PADDING.top + chartConfig.scaleY(goal)}
-                  x2={chartConfig.chartWidth - chartConfig.PADDING.right}
-                  y2={chartConfig.PADDING.top + chartConfig.scaleY(goal)}
+                  x1={theme.spacing.xs}
+                  y1={goalLineY}
+                  x2={chartConfig.chartWidth - theme.spacing.xs}
+                  y2={goalLineY}
                   stroke={colors.secondaryText}
                   strokeWidth={1}
                   strokeDasharray="4 4"
-                  opacity={0.5}
+                  opacity={0.6}
                 />
-                <Text
-                  x={chartConfig.PADDING.left + 5}
-                  y={chartConfig.PADDING.top + chartConfig.scaleY(goal) - 8}
-                  fill={colors.secondaryText}
-                  fontSize={11}
-                  textAnchor="start"
-                  opacity={0.8}
-                >
-                  Goal ({Math.round(goal)} kcal)
-                </Text>
-              </>
+              )}
+            </Svg>
+
+            {goalLabelTop !== undefined && (
+              <AppText
+                role="Caption"
+                color="secondary"
+                style={[styles.goalLabel, { top: goalLabelTop }]}
+              >
+                {t("trends.chart.goalLabel", {
+                  goal: Math.round(goal ?? 0),
+                })}
+              </AppText>
             )}
-
-            {/* Bars for past days */}
-            {dailyData.map((day, index) => {
-              const x =
-                chartConfig.PADDING.left +
-                index * (chartConfig.barWidth + chartConfig.BAR_SPACING);
-              const barHeight = day.hasLogs
-                ? chartConfig.getBarHeight(day.totals.calories)
-                : 0;
-              const y =
-                chartConfig.PADDING.top + chartConfig.contentHeight - barHeight;
-
-              return (
-                <Rect
-                  key={day.dateKey}
-                  x={x}
-                  y={y}
-                  width={chartConfig.barWidth}
-                  height={Math.max(barHeight, 0)}
-                  fill={colors.accent}
-                  rx={chartConfig.barRadius}
-                />
-              );
-            })}
-
-            {/* Today's bar (solid with reduced opacity) with minimum height */}
-            {(() => {
-              const calculatedHeight = chartConfig.getBarHeight(
-                todayData.totals.calories
-              );
-              const todayBarHeight = Math.max(calculatedHeight, 12);
-              const x =
-                chartConfig.PADDING.left +
-                dailyData.length *
-                  (chartConfig.barWidth + chartConfig.BAR_SPACING);
-              const y =
-                chartConfig.PADDING.top +
-                chartConfig.contentHeight -
-                todayBarHeight;
-
-              return (
-                <Rect
-                  x={x}
-                  y={y}
-                  width={chartConfig.barWidth}
-                  height={todayBarHeight}
-                  fill={colors.subtleBorder}
-                  opacity={0.5}
-                  rx={chartConfig.barRadius}
-                />
-              );
-            })()}
-          </Svg>
+          </View>
         </View>
       </Card>
     </View>
@@ -177,10 +205,17 @@ const createStyles = (colors: Colors, theme: Theme) =>
   StyleSheet.create({
     container: {},
     title: {
-      color: colors.accent,
       marginBottom: theme.spacing.sm,
     },
     chartContainer: {
       alignItems: "center",
+    },
+    chartWrapper: {
+      position: "relative",
+    },
+    goalLabel: {
+      position: "absolute",
+      left: theme.spacing.xs,
+      textAlign: "left",
     },
   });
