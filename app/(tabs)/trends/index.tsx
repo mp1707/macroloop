@@ -9,11 +9,15 @@ import { useTranslation } from "react-i18next";
 import { useTabBarSpacing } from "@/hooks/useTabBarSpacing";
 import { calculateTrendsData } from "./components/trendCalculations";
 import { AverageDisplay } from "./components/AverageDisplay";
-import { CalorieChart } from "./components/CalorieChart";
+import { NutrientTrendChart } from "./components/NutrientTrendChart";
 import { MacroAverageCards } from "./components/MacroAverageCards";
+import type { TrendMetric } from "./components/trendCalculations";
+
+const FAT_BASELINE_PERCENTAGE = 20;
 
 export default function TrendsScreen() {
   const [timePeriod, setTimePeriod] = useState<"week" | "month">("week");
+  const [selectedMetric, setSelectedMetric] = useState<TrendMetric>("calories");
 
   // Store selectors
   const foodLogs = useAppStore((state) => state.foodLogs);
@@ -55,6 +59,92 @@ export default function TrendsScreen() {
     []
   );
 
+  const nutrientMeta = useMemo(
+    () => ({
+      calories: {
+        label: t("nutrients.calories.label"),
+        unit: t("nutrients.calories.unitShort"),
+        color: colors.semantic.calories,
+      },
+      protein: {
+        label: t("nutrients.protein.label"),
+        unit: t("nutrients.protein.unitShort"),
+        color: colors.semantic.protein,
+      },
+      carbs: {
+        label: t("nutrients.carbs.label"),
+        unit: t("nutrients.carbs.unitShort"),
+        color: colors.semantic.carbs,
+      },
+      fat: {
+        label: t("nutrients.fat.label"),
+        unit: t("nutrients.fat.unitShort"),
+        color: colors.semantic.fat,
+      },
+    }),
+    [
+      colors.semantic.calories,
+      colors.semantic.protein,
+      colors.semantic.carbs,
+      colors.semantic.fat,
+      t,
+    ]
+  );
+
+  const selectedMeta = nutrientMeta[selectedMetric];
+  const showGoalDelta =
+    (selectedMetric === "calories" || selectedMetric === "protein") &&
+    typeof dailyTargets?.[selectedMetric] === "number";
+  const shouldShowGoalLine =
+    (selectedMetric === "calories" || selectedMetric === "protein") ||
+    (selectedMetric === "fat" && typeof dailyTargets?.fat === "number");
+  const selectedTarget = shouldShowGoalLine
+    ? dailyTargets?.[selectedMetric]
+    : undefined;
+
+  const chartCaption = useMemo(() => {
+    if (selectedMetric === "fat") {
+      const fatTarget = dailyTargets?.fat;
+      if (typeof fatTarget === "number") {
+        return t("trends.chart.fatBaseline", {
+          value: Math.round(fatTarget),
+          unit: selectedMeta.unit,
+          percentage: FAT_BASELINE_PERCENTAGE,
+        });
+      }
+
+      return t("trends.chart.fatBaselineNoValue", {
+        percentage: FAT_BASELINE_PERCENTAGE,
+      });
+    }
+
+    if (selectedMetric === "carbs") {
+      return t("trends.chart.carbsNoGoal");
+    }
+
+    if (
+      (selectedMetric === "calories" || selectedMetric === "protein") &&
+      typeof selectedTarget === "number"
+    ) {
+      return t("trends.chart.goalLabel", {
+        goal: Math.round(selectedTarget),
+        unit: selectedMeta.unit,
+      });
+    }
+
+    return undefined;
+  }, [
+    dailyTargets?.fat,
+    selectedMetric,
+    selectedMeta,
+    selectedTarget,
+    t,
+  ]);
+
+  const handleMacroSelect = useCallback((metric: TrendMetric) => {
+    setSelectedMetric((prev) => (prev === metric ? "calories" : metric));
+  }, []);
+
   return (
     <KeyboardAwareScrollView
       style={styles.scrollView}
@@ -78,21 +168,35 @@ export default function TrendsScreen() {
 
       {/* Average Display */}
       <AverageDisplay
-        average={trendData.averages.calories}
-        target={dailyTargets?.calories}
+        average={trendData.averages[selectedMetric]}
+        target={showGoalDelta ? selectedTarget : undefined}
         daysWithData={trendData.daysWithData}
+        nutrient={selectedMetric}
+        label={selectedMeta.label}
+        unit={selectedMeta.unit}
+        showGoalDelta={showGoalDelta}
       />
 
-      {/* Calorie Chart */}
-      <CalorieChart
+      {/* Nutrient Chart */}
+      <NutrientTrendChart
         dailyData={trendData.dailyData}
         todayData={trendData.todayData}
-        goal={dailyTargets?.calories}
+        goal={shouldShowGoalLine ? selectedTarget : undefined}
         days={timePeriod === "week" ? 7 : 30}
+        nutrient={selectedMetric}
+        nutrientLabel={selectedMeta.label}
+        color={selectedMeta.color}
+        unit={selectedMeta.unit}
+        showGoalLine={shouldShowGoalLine}
+        caption={chartCaption}
       />
 
       {/* Macro Average Cards */}
-      <MacroAverageCards averages={trendData.averages} />
+      <MacroAverageCards
+        averages={trendData.averages}
+        selectedMetric={selectedMetric}
+        onSelect={handleMacroSelect}
+      />
     </KeyboardAwareScrollView>
   );
 }

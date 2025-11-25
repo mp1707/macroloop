@@ -20,6 +20,8 @@ export interface TrendsData {
   daysWithData: number;
 }
 
+export type TrendMetric = keyof TrendsData["averages"];
+
 /**
  * Generates an array of date keys going back N days from today (excluding today)
  * @param todayKey - Today's date in YYYY-MM-DD format

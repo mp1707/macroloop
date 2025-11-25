@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
@@ -87,10 +86,10 @@ export const usePressAnimation = (options: UsePressAnimationOptions = {}) => {
     if (reduceMotion) {
       scale.value = 1.0; // Instant, no animation
     } else {
-      // Scale back with spring
-      scale.value = withSpring(1.0, {
-        damping: theme.interactions.press.spring.damping,
-        stiffness: theme.interactions.press.spring.stiffness,
+      // Return to idle scale using the standard easing
+      scale.value = withTiming(1.0, {
+        duration: theme.interactions.press.timing.duration,
+        easing: theme.interactions.press.timing.easing,
       });
     }
   }, [disabled, reduceMotion]);

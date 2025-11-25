@@ -1011,8 +1011,11 @@
       "subtitle_today_excluded": "(heute ausgeschlossen)"
     },
     "chart": {
-      "title": "Kalorienverlauf (letzte {{days}} Tage)",
-      "goalLabel": "Ziel ({{goal}} kcal)"
+      "nutrientTitle": "{{nutrient}}verlauf (letzte {{days}} Tage)",
+      "goalLabel": "Ziel ({{goal}} {{unit}})",
+      "fatBaseline": "Grundwert ({{value}} {{unit}}, {{percentage}} % des Kalorienziels)",
+      "fatBaselineNoValue": "Grundwert ({{percentage}} % des Kalorienziels)",
+      "carbsNoGoal": "Für Kohlenhydrate gibt es kein Ziel."
     },
     "macros": {
       "average": "täglicher ⌀"
