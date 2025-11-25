@@ -57,6 +57,7 @@
   "tabs": {
     "logging": "Tagebuch",
     "calendar": "Kalender",
+    "trends": "Verlauf",
     "settings": "Einstellungen",
     "favorites": "Favoriten"
   },
@@ -998,6 +999,22 @@
         "180days": "Älter als 180 Tage löschen",
         "all": "Alle Logs löschen"
       }
+    }
+  },
+  "trends": {
+    "timePeriod": {
+      "week": "Woche",
+      "month": "Monat"
+    },
+    "averageDisplay": {
+      "subtitle": "Ø Tägliche Aufnahme",
+      "subtitle_today_excluded": "(heute ausgeschlossen)"
+    },
+    "chart": {
+      "title": "Kalorienverlauf (letzte {{days}} Tage)"
+    },
+    "macros": {
+      "average": "täglicher ⌀"
     }
   }
 }

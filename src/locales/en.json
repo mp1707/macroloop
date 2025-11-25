@@ -57,6 +57,7 @@
   "tabs": {
     "logging": "Log",
     "calendar": "Calendar",
+    "trends": "Trends",
     "settings": "Settings",
     "favorites": "Favorites"
   },
@@ -1000,6 +1001,22 @@
         "180days": "Delete older than 180 days",
         "all": "Delete all logs"
       }
+    }
+  },
+  "trends": {
+    "timePeriod": {
+      "week": "Week",
+      "month": "Month"
+    },
+    "averageDisplay": {
+      "subtitle": "Avg. Daily Intake",
+      "subtitle_today_excluded": "(today excluded)"
+    },
+    "chart": {
+      "title": "Calorie Trend (last {{days}} days)"
+    },
+    "macros": {
+      "average": "Avg"
     }
   }
 }
