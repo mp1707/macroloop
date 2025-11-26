@@ -727,7 +727,7 @@
       "fat": "{{unit}} {{label}}"
     },
     "nutritionLabels": {
-      "carbs": "Kohlenh."
+      "carbs": "KH"
     }
   },
   "macrosCard": {

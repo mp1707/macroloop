@@ -140,13 +140,12 @@ const createStyles = (colors: Colors, theme: Theme) =>
     },
     cardContent: {
       alignItems: "flex-start",
-      gap: theme.spacing.sm,
     },
     iconRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: theme.spacing.xs,
-      marginBottom: theme.spacing.xs / 2,
+      marginBottom: theme.spacing.sm,
     },
     valueRow: {
       flexDirection: "row",
