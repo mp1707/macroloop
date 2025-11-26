@@ -13,7 +13,7 @@ import { NutrientTrendChart } from "./components/NutrientTrendChart";
 import { MacroAverageCards } from "./components/MacroAverageCards";
 import type { TrendMetric } from "./components/trendCalculations";
 
-const FAT_BASELINE_PERCENTAGE = 20;
+const DEFAULT_FAT_BASELINE_PERCENTAGE = 20;
 
 export default function TrendsScreen() {
   const [timePeriod, setTimePeriod] = useState<"week" | "month">("week");
@@ -96,25 +96,24 @@ export default function TrendsScreen() {
     (selectedMetric === "calories" || selectedMetric === "protein") &&
     typeof dailyTargets?.[selectedMetric] === "number";
   const shouldShowGoalLine =
-    (selectedMetric === "calories" || selectedMetric === "protein") ||
-    (selectedMetric === "fat" && typeof dailyTargets?.fat === "number");
+    selectedMetric === "calories" || selectedMetric === "protein";
   const selectedTarget = shouldShowGoalLine
     ? dailyTargets?.[selectedMetric]
     : undefined;
 
+  let goalRange: { min: number; max: number } | undefined;
+  if (selectedMetric === "fat" && typeof dailyTargets?.calories === "number") {
+    const cals = dailyTargets.calories;
+    goalRange = {
+      min: (cals * 0.2) / 9,
+      max: (cals * 0.35) / 9,
+    };
+  }
+
   const chartCaption = useMemo(() => {
     if (selectedMetric === "fat") {
-      const fatTarget = dailyTargets?.fat;
-      if (typeof fatTarget === "number") {
-        return t("trends.chart.fatBaseline", {
-          value: Math.round(fatTarget),
-          unit: selectedMeta.unit,
-          percentage: FAT_BASELINE_PERCENTAGE,
-        });
-      }
-
       return t("trends.chart.fatBaselineNoValue", {
-        percentage: FAT_BASELINE_PERCENTAGE,
+        percentage: "20-35",
       });
     }
 
@@ -133,13 +132,7 @@ export default function TrendsScreen() {
     }
 
     return undefined;
-  }, [
-    dailyTargets?.fat,
-    selectedMetric,
-    selectedMeta,
-    selectedTarget,
-    t,
-  ]);
+  }, [dailyTargets?.fat, selectedMetric, selectedMeta, selectedTarget, t]);
 
   const handleMacroSelect = useCallback((metric: TrendMetric) => {
     setSelectedMetric((prev) => (prev === metric ? "calories" : metric));
@@ -182,6 +175,7 @@ export default function TrendsScreen() {
         dailyData={trendData.dailyData}
         todayData={trendData.todayData}
         goal={shouldShowGoalLine ? selectedTarget : undefined}
+        goalRange={goalRange}
         days={timePeriod === "week" ? 7 : 30}
         nutrient={selectedMetric}
         nutrientLabel={selectedMeta.label}

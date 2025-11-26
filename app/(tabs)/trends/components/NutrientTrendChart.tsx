@@ -12,6 +12,7 @@ interface NutrientTrendChartProps {
   dailyData: TrendsData["dailyData"];
   todayData: TrendsData["todayData"];
   goal?: number;
+  goalRange?: { min: number; max: number };
   days: 7 | 30;
   nutrient: TrendMetric;
   nutrientLabel: string;
@@ -25,6 +26,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
   dailyData,
   todayData,
   goal,
+  goalRange,
   days,
   nutrient,
   nutrientLabel,
@@ -63,7 +65,12 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     const todayValue = todayData.totals[nutrient];
 
     // Ensure there is at least one value when calculating max
-    const valuesForMax = [goal ?? 0, ...dailyTotals, todayValue];
+    const valuesForMax = [
+      goal ?? 0,
+      goalRange?.max ?? 0,
+      ...dailyTotals,
+      todayValue,
+    ];
     const rawMax = Math.max(...valuesForMax);
     const maxValue = rawMax === 0 ? 0 : rawMax * 1.1;
 
@@ -94,13 +101,20 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     dailyData,
     todayData,
     goal,
+    goalRange,
     days,
     nutrient,
     theme.spacing.pageMargins.horizontal,
   ]);
 
   const handleBarSelect = useCallback(
-    (centerX: number, topY: number, value: number, id: string, dateKey: string) => {
+    (
+      centerX: number,
+      topY: number,
+      value: number,
+      id: string,
+      dateKey: string
+    ) => {
       setSelectedBar((current) => {
         const isSame = current?.id === id;
         const next = isSame ? null : { centerX, topY, value, id, dateKey };
@@ -121,6 +135,12 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     hasGoalLine && typeof goal === "number"
       ? chartConfig.PADDING.top + chartConfig.scaleY(goal)
       : undefined;
+
+  const hasGoalRange =
+    goalRange &&
+    typeof goalRange.min === "number" &&
+    typeof goalRange.max === "number" &&
+    chartConfig.maxValue > 0;
 
   return (
     <View style={styles.container}>
@@ -148,16 +168,68 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
               width={chartConfig.chartWidth}
               height={chartConfig.chartHeight}
             >
-              {goalLineY !== undefined && (
+              {hasGoalRange && goalRange && (
+                <>
+                  <Rect
+                    x={theme.spacing.sm}
+                    y={
+                      chartConfig.PADDING.top +
+                      chartConfig.scaleY(goalRange.max)
+                    }
+                    width={chartConfig.chartWidth - theme.spacing.sm * 2}
+                    height={
+                      chartConfig.scaleY(goalRange.min) -
+                      chartConfig.scaleY(goalRange.max)
+                    }
+                    fill={color}
+                    opacity={0.1}
+                    rx={4}
+                  />
+                  <Line
+                    x1={theme.spacing.sm}
+                    y1={
+                      chartConfig.PADDING.top +
+                      chartConfig.scaleY(goalRange.max)
+                    }
+                    x2={chartConfig.chartWidth - theme.spacing.sm}
+                    y2={
+                      chartConfig.PADDING.top +
+                      chartConfig.scaleY(goalRange.max)
+                    }
+                    stroke={color}
+                    strokeWidth={1}
+                    strokeDasharray="4 4"
+                    opacity={0.3}
+                  />
+                  <Line
+                    x1={theme.spacing.sm}
+                    y1={
+                      chartConfig.PADDING.top +
+                      chartConfig.scaleY(goalRange.min)
+                    }
+                    x2={chartConfig.chartWidth - theme.spacing.sm}
+                    y2={
+                      chartConfig.PADDING.top +
+                      chartConfig.scaleY(goalRange.min)
+                    }
+                    stroke={color}
+                    strokeWidth={1}
+                    strokeDasharray="4 4"
+                    opacity={0.3}
+                  />
+                </>
+              )}
+
+              {!hasGoalRange && goalLineY !== undefined && (
                 <Line
                   x1={theme.spacing.sm}
                   y1={goalLineY}
                   x2={chartConfig.chartWidth - theme.spacing.sm}
                   y2={goalLineY}
-                  stroke={colors.primaryText}
+                  stroke={color}
                   strokeWidth={1}
                   strokeDasharray="4 4"
-                  opacity={0.6}
+                  opacity={0.5}
                 />
               )}
 
