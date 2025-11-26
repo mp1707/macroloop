@@ -13,6 +13,7 @@ import {
   useDerivedValue,
   interpolate,
   Extrapolation,
+  withTiming,
 } from "react-native-reanimated";
 import { ChartConfig, BarData } from "./types";
 import { useTheme } from "@/theme";
@@ -26,6 +27,7 @@ interface ChartCanvasProps {
   progress: SharedValue<number>;
   gesture: React.ComponentProps<typeof GestureDetector>["gesture"];
   showGoalLine?: boolean;
+  activeBarKey?: string | null;
 }
 
 export const ChartCanvas: React.FC<ChartCanvasProps> = ({
@@ -37,6 +39,7 @@ export const ChartCanvas: React.FC<ChartCanvasProps> = ({
   progress,
   gesture,
   showGoalLine,
+  activeBarKey,
 }) => {
   const { theme } = useTheme();
 
@@ -52,6 +55,8 @@ export const ChartCanvas: React.FC<ChartCanvasProps> = ({
     typeof goalRange.min === "number" &&
     typeof goalRange.max === "number" &&
     config.maxValue > 0;
+
+  const hasActiveSelection = !!activeBarKey;
 
   return (
     <GestureDetector gesture={gesture}>
@@ -131,6 +136,8 @@ export const ChartCanvas: React.FC<ChartCanvasProps> = ({
             progress={progress}
             config={config}
             totalBars={bars.length}
+            isActive={activeBarKey === bar.key}
+            hasActiveSelection={hasActiveSelection}
           />
         ))}
       </Canvas>
@@ -143,6 +150,8 @@ interface AnimatedBarProps {
   progress: SharedValue<number>;
   config: ChartConfig;
   totalBars: number;
+  isActive: boolean;
+  hasActiveSelection: boolean;
 }
 
 const AnimatedBar: React.FC<AnimatedBarProps> = ({
@@ -150,6 +159,8 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
   progress,
   config,
   totalBars,
+  isActive,
+  hasActiveSelection,
 }) => {
   const height = useDerivedValue(() => {
     const delayFactor = 0.5;
@@ -172,6 +183,16 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
     return config.PADDING.top + config.contentHeight - height.value;
   });
 
+  const opacity = useDerivedValue(() => {
+    let target = 1;
+    if (hasActiveSelection) {
+      target = isActive ? 1 : 0.3;
+    } else {
+      target = bar.isToday ? 0.35 : 1;
+    }
+    return withTiming(target, { duration: 200 });
+  }, [hasActiveSelection, isActive, bar.isToday]);
+
   return (
     <RoundedRect
       x={bar.x}
@@ -180,7 +201,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
       height={height}
       r={bar.rx}
       color={bar.color}
-      opacity={bar.isToday ? 0.35 : 1}
+      opacity={opacity}
     />
   );
 };

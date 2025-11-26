@@ -3,6 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { AppText } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { formatDisplayDate } from "@/utils/dateHelpers";
+import type { TrendMetric } from "../trendCalculations";
 
 interface ChartTooltipProps {
   activeBar: {
@@ -15,6 +16,8 @@ interface ChartTooltipProps {
   color: string;
   unit: string;
   gap?: number;
+  nutrient?: TrendMetric;
+  calorieGoal?: number;
 }
 
 export const ChartTooltip: React.FC<ChartTooltipProps> = ({
@@ -23,6 +26,8 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   color,
   unit,
   gap,
+  nutrient,
+  calorieGoal,
 }) => {
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
@@ -45,6 +50,17 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   // Height = activeBar.topY - (topPosition + tooltipSize.height)
   const lineTop = topPosition + tooltipSize.height;
   const lineHeight = Math.max(0, activeBar.topY - lineTop);
+
+  const renderValue = () => {
+    const baseText = `${Math.round(activeBar.value)} ${unit}`;
+    
+    if (nutrient === "fat" && calorieGoal && calorieGoal > 0) {
+      const percentage = Math.round(((activeBar.value * 9) / calorieGoal) * 100);
+      return `${baseText} (${percentage}%)`;
+    }
+    
+    return baseText;
+  };
 
   return (
     <View pointerEvents="none" style={styles.tooltipOverlay}>
@@ -85,7 +101,7 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
           {formatDisplayDate(activeBar.dateKey)}
         </AppText>
         <AppText role="Caption" style={styles.tooltipText}>
-          {`${Math.round(activeBar.value)} ${unit}`}
+          {renderValue()}
         </AppText>
       </View>
     </View>

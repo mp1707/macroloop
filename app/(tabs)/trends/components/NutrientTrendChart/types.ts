@@ -12,6 +12,7 @@ export interface NutrientTrendChartProps {
   unit: string;
   showGoalLine?: boolean;
   caption?: string;
+  calorieGoal?: number;
 }
 
 export interface ChartConfig {

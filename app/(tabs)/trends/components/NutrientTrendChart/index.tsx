@@ -92,6 +92,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
                 progress={progress}
                 gesture={gesture}
                 showGoalLine={showGoalLine}
+                activeBarKey={activeBar?.dateKey}
              />
 
             {activeBar && (
@@ -100,6 +101,8 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
                 chartWidth={config.chartWidth}
                 color={color}
                 unit={unit}
+                nutrient={nutrient}
+                calorieGoal={props.calorieGoal}
               />
             )}
           </View>

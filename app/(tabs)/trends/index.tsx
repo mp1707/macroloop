@@ -210,6 +210,7 @@ export default function TrendsScreen() {
             unit={selectedMeta.unit}
             showGoalLine={shouldShowGoalLine}
             caption={chartCaption}
+            calorieGoal={dailyTargets?.calories}
           />
 
           {/* Macro Average Cards */}
