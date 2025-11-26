@@ -140,6 +140,7 @@ const ManualInputScreen = () => {
                 onChange={setProtein}
                 maxCalories={calories}
                 caloriesPerGram={4}
+                totalCaloriesForPercentage={calories}
               />
 
               {/* Fat Slider */}
@@ -151,6 +152,7 @@ const ManualInputScreen = () => {
                 onChange={setFat}
                 maxCalories={calories - proteinCalories}
                 caloriesPerGram={9}
+                totalCaloriesForPercentage={calories}
               />
 
               {/* Carbs Display (Auto-calculated) */}
