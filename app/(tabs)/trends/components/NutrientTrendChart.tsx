@@ -23,7 +23,7 @@ import {
   Easing,
   SharedValue,
 } from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
+import { runOnJS } from "react-native-worklets";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 
 interface NutrientTrendChartProps {
@@ -57,6 +57,13 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const [selectedBar, setSelectedBar] = useState<{
+    centerX: number;
+    topY: number;
+    value: number;
+    id: string;
+    dateKey: string;
+  } | null>(null);
+  const [draggedBar, setDraggedBar] = useState<{
     centerX: number;
     topY: number;
     value: number;
@@ -153,12 +160,47 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     []
   );
 
+  const handleDragSelect = useCallback(
+    (
+      centerX: number,
+      topY: number,
+      value: number,
+      id: string,
+      dateKey: string
+    ) => {
+      setDraggedBar((current) => {
+        if (current?.id === id) return current;
+        Haptics.selectionAsync().catch(() => undefined);
+        return { centerX, topY, value, id, dateKey };
+      });
+    },
+    []
+  );
+
+  const handleDragEnd = useCallback(
+    (
+      centerX: number,
+      topY: number,
+      value: number,
+      id: string,
+      dateKey: string
+    ) => {
+      setSelectedBar({ centerX, topY, value, id, dateKey });
+    },
+    []
+  );
+
+  const clearDrag = useCallback(() => {
+    setDraggedBar(null);
+  }, []);
+
   useEffect(() => {
     setSelectedBar(null);
+    setDraggedBar(null);
   }, [dailyData, todayData, nutrient]);
 
-  const tapGesture = Gesture.Tap().onStart((e) => {
-    const x = e.x;
+  const getBarDataFromX = (x: number) => {
+    "worklet";
     const {
       PADDING,
       barWidth,
@@ -168,7 +210,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
       maxValue,
     } = chartConfig;
 
-    if (x < PADDING.left) return;
+    if (x < PADDING.left) return null;
 
     // Calculate rough index
     const relativeX = x - PADDING.left;
@@ -176,44 +218,95 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     const index = Math.floor(relativeX / step);
 
     if (index >= 0 && index < totalBars) {
-      // Check if click is within bar width (optional, usually better to be generous)
-      // But let's just select the bar corresponding to the slot
-      const barStart = index * step;
-      if (
-        relativeX >= barStart &&
-        relativeX <= barStart + barWidth + BAR_SPACING / 2
-      ) {
-        // Generous hit area
-        // It's a hit
-        const isToday = index === dailyData.length;
-        const data = isToday ? todayData : dailyData[index];
-        const value = data.totals[nutrient];
+      // Relaxed hit detection for smoother swiping
+      // If we are in the slot, we select the bar
+      const isToday = index === dailyData.length;
+      const data = isToday ? todayData : dailyData[index];
+      const value = data.totals[nutrient];
 
-        // Recalculate position for tooltip
-        const finalX = PADDING.left + index * step;
-        const centerX = finalX + barWidth / 2;
-        
-        // INLINED logic from getBarHeight
-        const barHeight = maxValue === 0 ? 0 : (value / maxValue) * contentHeight;
-        
-        // Ensure minimum visual height for today bar logic if needed, matching render logic
-        const visualHeight = isToday
-          ? Math.max(barHeight, 12)
-          : Math.max(barHeight, 0);
+      // Center of the bar
+      const finalX = PADDING.left + index * step;
+      const centerX = finalX + barWidth / 2;
 
-        const y = PADDING.top + contentHeight - visualHeight;
+      const barHeight = maxValue === 0 ? 0 : (value / maxValue) * contentHeight;
 
-        scheduleOnRN(
-          handleBarSelect,
-          centerX,
-          y,
-          value,
-          data.dateKey,
+      // Ensure minimum visual height matching render logic
+      const visualHeight = isToday
+        ? Math.max(barHeight, 12)
+        : Math.max(barHeight, 0);
+
+      const y = PADDING.top + contentHeight - visualHeight;
+
+      return {
+        centerX,
+        topY: y,
+        value,
+        id: data.dateKey,
+        dateKey: data.dateKey,
+      };
+    }
+    return null;
+  };
+
+  const tapGesture = Gesture.Tap()
+    .maxDeltaX(10)
+    .onEnd((e) => {
+      const data = getBarDataFromX(e.x);
+      if (data) {
+        runOnJS(handleBarSelect)(
+          data.centerX,
+          data.topY,
+          data.value,
+          data.id,
           data.dateKey
         );
       }
-    }
-  });
+    });
+
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10])
+    .failOffsetY([-10, 10])
+    .onStart((e) => {
+      const data = getBarDataFromX(e.x);
+      if (data) {
+        runOnJS(handleDragSelect)(
+          data.centerX,
+          data.topY,
+          data.value,
+          data.id,
+          data.dateKey
+        );
+      }
+    })
+    .onUpdate((e) => {
+      const data = getBarDataFromX(e.x);
+      if (data) {
+        runOnJS(handleDragSelect)(
+          data.centerX,
+          data.topY,
+          data.value,
+          data.id,
+          data.dateKey
+        );
+      }
+    })
+    .onEnd((e) => {
+      const data = getBarDataFromX(e.x);
+      if (data) {
+        runOnJS(handleDragEnd)(
+          data.centerX,
+          data.topY,
+          data.value,
+          data.id,
+          data.dateKey
+        );
+      }
+    })
+    .onFinalize(() => {
+      runOnJS(clearDrag)();
+    });
+
+  const composedGesture = Gesture.Race(panGesture, tapGesture);
 
   const hasGoalLine =
     showGoalLine && typeof goal === "number" && chartConfig.maxValue > 0;
@@ -322,6 +415,10 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     );
   };
 
+  // Determine which bar's tooltip to show
+  // draggedBar takes precedence over selectedBar
+  const activeBar = draggedBar || selectedBar;
+
   return (
     <View style={styles.container}>
       <Card elevated={true} padding={theme.spacing.xl}>
@@ -344,7 +441,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
               },
             ]}
           >
-            <GestureDetector gesture={tapGesture}>
+            <GestureDetector gesture={composedGesture}>
               <Canvas
                 style={{
                   width: chartConfig.chartWidth,
@@ -432,24 +529,24 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
             </GestureDetector>
 
             {/* Tooltip Overlay */}
-            {selectedBar && (
+            {activeBar && (
               <View pointerEvents="none" style={styles.tooltipOverlay}>
                 {tooltipSize.height > 0 && (
                   <View
                     style={{
                       position: "absolute",
-                      left: selectedBar.centerX,
+                      left: activeBar.centerX,
                       top:
                         getTooltipTop(
-                          selectedBar.topY,
+                          activeBar.topY,
                           tooltipSize.height,
                           theme.spacing.sm
                         ) + tooltipSize.height,
                       height: Math.max(
                         0,
-                        selectedBar.topY -
+                        activeBar.topY -
                           (getTooltipTop(
-                            selectedBar.topY,
+                            activeBar.topY,
                             tooltipSize.height,
                             theme.spacing.sm
                           ) +
@@ -468,13 +565,13 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
                     styles.tooltip,
                     {
                       left: getTooltipLeft(
-                        selectedBar.centerX,
+                        activeBar.centerX,
                         tooltipSize.width,
                         chartConfig.chartWidth,
                         theme.spacing.sm
                       ),
                       top: getTooltipTop(
-                        selectedBar.topY,
+                        activeBar.topY,
                         tooltipSize.height,
                         theme.spacing.sm
                       ),
@@ -492,10 +589,10 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
                     style={[styles.tooltipDot, { backgroundColor: color }]}
                   />
                   <AppText role="Caption" style={styles.tooltipDate}>
-                    {formatDisplayDate(selectedBar.dateKey)}
+                    {formatDisplayDate(activeBar.dateKey)}
                   </AppText>
                   <AppText role="Caption" style={styles.tooltipText}>
-                    {`${Math.round(selectedBar.value)} ${unit}`}
+                    {`${Math.round(activeBar.value)} ${unit}`}
                   </AppText>
                 </View>
               </View>
