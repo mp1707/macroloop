@@ -11,6 +11,7 @@ export interface AnimatedPressableProps extends Omit<PressableProps, "style"> {
   hapticIntensity?: "light" | "medium" | "heavy";
   disableHaptics?: boolean;
   style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
   accessibilityRole?: "button" | "link" | "none";
   accessibilityHint?: string;
@@ -45,6 +46,7 @@ export const AnimatedPressable = ({
   hapticIntensity = "light",
   disableHaptics = false,
   style,
+  containerStyle,
   accessibilityLabel,
   accessibilityRole = "button",
   accessibilityHint,
@@ -64,6 +66,7 @@ export const AnimatedPressable = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled}
+      style={containerStyle}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={accessibilityRole}
       accessibilityHint={accessibilityHint}

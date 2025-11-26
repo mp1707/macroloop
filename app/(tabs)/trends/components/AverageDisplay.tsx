@@ -140,6 +140,7 @@ const createStyles = (colors: Colors, theme: Theme) =>
     averageRow: {
       flexDirection: "row",
       alignItems: "center",
+      flexWrap: "wrap",
       gap: theme.spacing.sm,
     },
     averageNumber: {

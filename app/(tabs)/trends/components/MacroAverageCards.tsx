@@ -22,17 +22,10 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
-  const baseSlots: TrendMetric[] = useMemo(
-    () => ["protein", "carbs", "fat"],
+  const metrics: TrendMetric[] = useMemo(
+    () => ["calories", "protein", "carbs", "fat"],
     []
   );
-
-  const displayedMetrics = useMemo(() => {
-    if (selectedMetric === "calories") {
-      return baseSlots;
-    }
-    return baseSlots.map((m) => (m === selectedMetric ? "calories" : m));
-  }, [selectedMetric, baseSlots]);
 
   const getMetricConfig = (metric: TrendMetric) => {
     switch (metric) {
@@ -73,44 +66,60 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
 
   return (
     <View style={styles.container}>
-      {displayedMetrics.map((metric) => {
+      {metrics.map((metric) => {
         const config = getMetricConfig(metric);
+        const isSelected = selectedMetric === metric;
+
         return (
           <View key={metric} style={styles.cardWrapper}>
             <AnimatedPressable
               onPress={() => onSelect(metric)}
+              containerStyle={styles.pressable}
               style={styles.pressable}
               accessibilityLabel={config.label}
               accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
             >
-              <Card elevated={true} style={[styles.card]}>
+              <Card
+                elevated={isSelected}
+                style={[
+                  styles.card,
+                  {
+                    borderColor: isSelected
+                      ? config.color
+                      : colors.secondaryBackground,
+                  },
+                ]}
+              >
                 <View style={styles.cardContent}>
-                  <View style={styles.iconRow}>
+                  <View style={styles.headerRow}>
                     <config.Icon
-                      size={18}
+                      size={14}
                       color={config.color}
-                      strokeWidth={1.6}
                       fill={config.color}
+                      strokeWidth={2}
                     />
-                    <AppText role="Caption" color="secondary">
+                    <AppText
+                      role="Caption"
+                      color="secondary"
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      style={styles.label}
+                    >
                       {config.label}
                     </AppText>
                   </View>
                   <View style={styles.valueRow}>
-                    <AppText role="Title2" style={styles.valueNumber}>
+                    <AppText
+                      role="Body"
+                      style={[styles.valueNumber, { fontWeight: "700" }]}
+                    >
                       {Math.round(config.value)}
                     </AppText>
-                    <AppText
-                      role="Caption"
-                      color="disabled"
-                      style={styles.valueUnit}
-                    >
+                    <AppText role="Body" color="secondary">
                       {config.unit}
                     </AppText>
                   </View>
-                  <AppText role="Caption" color="secondary">
-                    {t("trends.macros.average")}
-                  </AppText>
                 </View>
               </Card>
             </AnimatedPressable>
@@ -127,7 +136,6 @@ const createStyles = (colors: Colors, theme: Theme) =>
       flexDirection: "row",
       gap: theme.spacing.sm,
       paddingBottom: theme.spacing.lg,
-      flex: 1,
     },
     cardWrapper: {
       flex: 1,
@@ -137,25 +145,36 @@ const createStyles = (colors: Colors, theme: Theme) =>
     },
     card: {
       flex: 1,
+      paddingVertical: theme.spacing.sm,
+      paddingHorizontal: theme.spacing.sm,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2,
+      borderColor: "transparent",
+      minHeight: 85,
     },
     cardContent: {
-      alignItems: "flex-start",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 0,
+      width: "100%",
     },
-    iconRow: {
+    headerRow: {
       flexDirection: "row",
       alignItems: "center",
-      gap: theme.spacing.xs,
-      marginBottom: theme.spacing.sm,
+      gap: 4,
+      marginBottom: 2,
     },
     valueRow: {
       flexDirection: "row",
-      alignItems: "flex-end",
-      gap: theme.spacing.xs / 2,
+      alignItems: "baseline",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      gap: 2,
     },
     valueNumber: {
       color: colors.primaryText,
+      textAlign: "center",
     },
-    valueUnit: {
-      paddingBottom: 2,
-    },
+    label: {},
   });
