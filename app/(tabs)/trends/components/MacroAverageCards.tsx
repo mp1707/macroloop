@@ -106,7 +106,7 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
                       adjustsFontSizeToFit
                       style={styles.label}
                     >
-                      {config.label}
+                      {metric === "calories" ? config.unit : config.label}
                     </AppText>
                   </View>
                   <View style={styles.valueRow}>
@@ -116,9 +116,11 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
                     >
                       {Math.round(config.value)}
                     </AppText>
-                    <AppText role="Body" color="secondary">
-                      {config.unit}
-                    </AppText>
+                    {metric !== "calories" && (
+                      <AppText role="Body" color="secondary">
+                        {config.unit}
+                      </AppText>
+                    )}
                   </View>
                 </View>
               </Card>
