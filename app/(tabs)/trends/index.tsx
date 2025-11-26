@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Host, Picker } from "@expo/ui/swift-ui";
@@ -6,7 +6,6 @@ import * as Haptics from "expo-haptics";
 import { useAppStore } from "@/store/useAppStore";
 import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
 import { useTranslation } from "react-i18next";
-import { useTabBarSpacing } from "@/hooks/useTabBarSpacing";
 import { calculateTrendsData } from "./components/trendCalculations";
 import { AverageDisplay } from "./components/AverageDisplay";
 import { NutrientTrendChart } from "./components/NutrientTrendChart";
@@ -15,15 +14,26 @@ import type { TrendMetric } from "./components/trendCalculations";
 import { useSegments } from "expo-router";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 
-const DEFAULT_FAT_BASELINE_PERCENTAGE = 20;
+const FAT_BASELINE_RANGE = { min: 0.2, max: 0.35 };
+const FAT_BASELINE_LABEL = `${Math.round(
+  FAT_BASELINE_RANGE.min * 100
+)}-${Math.round(FAT_BASELINE_RANGE.max * 100)}`;
 
 export default function TrendsScreen() {
   const [timePeriod, setTimePeriod] = useState<"week" | "month">("week");
   const [selectedMetric, setSelectedMetric] = useState<TrendMetric>("calories");
 
   const segments = useSegments();
-  // Assuming structure is (tabs)/trends/index or similar, check if 'trends' is in segments
-  const isFocused = segments.includes("trends");
+  const isFocused = useMemo(() => {
+    if (!segments.length) {
+      return false;
+    }
+    const tabsIndex = segments.lastIndexOf("(tabs)");
+    if (tabsIndex === -1) {
+      return segments[segments.length - 1] === "trends";
+    }
+    return segments[tabsIndex + 1] === "trends";
+  }, [segments]);
 
   // Store selectors
   const foodLogs = useAppStore((state) => state.foodLogs);
@@ -32,7 +42,6 @@ export default function TrendsScreen() {
   // Theme and localization
   const { colors, theme, colorScheme } = useTheme();
   const { t } = useTranslation();
-  const { dynamicBottomPadding } = useTabBarSpacing();
 
   const styles = useMemo(
     () => createStyles(colors, theme, colorScheme),
@@ -40,15 +49,14 @@ export default function TrendsScreen() {
   );
 
   // Calculate trends data
-  const trendData = useMemo(
-    () =>
-      calculateTrendsData(
-        foodLogs,
-        timePeriod === "week" ? 7 : 30,
-        dailyTargets
-      ),
-    [foodLogs, timePeriod, dailyTargets]
-  );
+  const daysToShow = timePeriod === "week" ? 7 : 30;
+
+  const trendData = useMemo(() => {
+    if (!isFocused) {
+      return null;
+    }
+    return calculateTrendsData(foodLogs, daysToShow);
+  }, [foodLogs, daysToShow, isFocused]);
 
   // Time period picker options
   const pickerOptions = useMemo(
@@ -98,6 +106,7 @@ export default function TrendsScreen() {
   );
 
   const selectedMeta = nutrientMeta[selectedMetric];
+  const selectedUnit = selectedMeta.unit;
   const showGoalDelta =
     (selectedMetric === "calories" || selectedMetric === "protein") &&
     typeof dailyTargets?.[selectedMetric] === "number";
@@ -111,15 +120,15 @@ export default function TrendsScreen() {
   if (selectedMetric === "fat" && typeof dailyTargets?.calories === "number") {
     const cals = dailyTargets.calories;
     goalRange = {
-      min: (cals * 0.2) / 9,
-      max: (cals * 0.35) / 9,
+      min: (cals * FAT_BASELINE_RANGE.min) / 9,
+      max: (cals * FAT_BASELINE_RANGE.max) / 9,
     };
   }
 
   const chartCaption = useMemo(() => {
     if (selectedMetric === "fat") {
       return t("trends.chart.fatBaselineNoValue", {
-        percentage: "20-35",
+        percentage: FAT_BASELINE_LABEL,
       });
     }
 
@@ -133,27 +142,32 @@ export default function TrendsScreen() {
     ) {
       return t("trends.chart.goalLabel", {
         goal: Math.round(selectedTarget),
-        unit: selectedMeta.unit,
+        unit: selectedUnit,
       });
     }
 
     return undefined;
-  }, [dailyTargets?.fat, selectedMetric, selectedMeta, selectedTarget, t]);
+  }, [selectedMetric, selectedTarget, selectedUnit, t]);
 
   const handleMacroSelect = useCallback((metric: TrendMetric) => {
     setSelectedMetric((prev) => (prev === metric ? "calories" : metric));
   }, []);
 
+  const visibleTrendData = isFocused ? trendData : null;
+
   return (
     <KeyboardAwareScrollView
       style={styles.scrollView}
-      contentContainerStyle={[styles.contentContainer]}
+      contentContainerStyle={[
+        styles.contentContainer,
+        { paddingBottom: theme.spacing.xl },
+      ]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
       showsVerticalScrollIndicator={false}
       bottomOffset={theme.spacing.lg}
     >
-      {isFocused && (
+      {visibleTrendData ? (
         <Animated.View
           entering={FadeIn.duration(300)}
           layout={LinearTransition}
@@ -173,23 +187,23 @@ export default function TrendsScreen() {
 
           {/* Average Display */}
           <AverageDisplay
-            average={trendData.averages[selectedMetric]}
+            average={visibleTrendData.averages[selectedMetric]}
             target={showGoalDelta ? selectedTarget : undefined}
-            daysWithData={trendData.daysWithData}
+            daysWithData={visibleTrendData.daysWithData}
             nutrient={selectedMetric}
             label={selectedMeta.label}
             unit={selectedMeta.unit}
             showGoalDelta={showGoalDelta}
-            days={timePeriod === "week" ? 7 : 30}
+            days={daysToShow}
           />
 
           {/* Nutrient Chart */}
           <NutrientTrendChart
-            dailyData={trendData.dailyData}
-            todayData={trendData.todayData}
+            dailyData={visibleTrendData.dailyData}
+            todayData={visibleTrendData.todayData}
             goal={shouldShowGoalLine ? selectedTarget : undefined}
             goalRange={goalRange}
-            days={timePeriod === "week" ? 7 : 30}
+            days={daysToShow}
             nutrient={selectedMetric}
             nutrientLabel={selectedMeta.label}
             color={selectedMeta.color}
@@ -200,12 +214,12 @@ export default function TrendsScreen() {
 
           {/* Macro Average Cards */}
           <MacroAverageCards
-            averages={trendData.averages}
+            averages={visibleTrendData.averages}
             selectedMetric={selectedMetric}
             onSelect={handleMacroSelect}
           />
         </Animated.View>
-      )}
+      ) : null}
     </KeyboardAwareScrollView>
   );
 }
@@ -224,9 +238,7 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
       gap: theme.spacing.sm,
       paddingHorizontal: theme.spacing.md,
     },
-    pickerContainer: {
-      paddingHorizontal: theme.spacing.sm,
-    },
+    pickerContainer: {},
     animatedContainer: {
       gap: theme.spacing.sm,
     },

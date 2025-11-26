@@ -1,4 +1,4 @@
-import type { FoodLog, DailyTargets } from "@/types/models";
+import type { FoodLog } from "@/types/models";
 import { getTodayKey, formatDateKey } from "@/utils/dateHelpers";
 
 export interface TrendsData {
@@ -49,57 +49,78 @@ function generateDateRange(todayKey: string, days: number): string[] {
  *
  * @param foodLogs - Array of all food logs from the store
  * @param days - Number of days to analyze (7 or 30)
- * @param dailyTargets - Optional user's daily nutrition targets
  * @returns Comprehensive trends data including averages, daily data, and today's data
  */
 export function calculateTrendsData(
   foodLogs: FoodLog[],
-  days: 7 | 30,
-  _dailyTargets?: DailyTargets
+  days: 7 | 30
 ): TrendsData {
   const todayKey = getTodayKey();
 
   // Generate date range: [today - days, today - 1] (excluding today)
   const dateKeys = generateDateRange(todayKey, days);
 
-  // Calculate daily totals using same logic as selectDailyTotals from selectors.ts
-  const dailyData = dateKeys.map((dateKey) => {
-    const logsForDay = foodLogs.filter((log) => log.logDate === dateKey);
-    const hasLogs = logsForDay.length > 0;
-
-    const totals = logsForDay.reduce(
-      (acc, log) => {
-        // Account for percentageEaten (defaults to 100 if not set)
-        const percentage = (log.percentageEaten ?? 100) / 100;
-        return {
-          calories: acc.calories + (log.calories || 0) * percentage,
-          protein: acc.protein + (log.protein || 0) * percentage,
-          carbs: acc.carbs + (log.carbs || 0) * percentage,
-          fat: acc.fat + (log.fat || 0) * percentage,
-        };
-      },
-      { calories: 0, protein: 0, carbs: 0, fat: 0 }
-    );
-
-    return { dateKey, hasLogs, totals };
+  const createEmptyTotals = () => ({
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
   });
 
-  // Calculate today's totals separately (shown as hatched bar, not included in averages)
-  const todayLogs = foodLogs.filter((log) => log.logDate === todayKey);
+  const dateTotalsMap = new Map<
+    string,
+    { totals: ReturnType<typeof createEmptyTotals>; hasLogs: boolean }
+  >();
+  dateKeys.forEach((dateKey) => {
+    dateTotalsMap.set(dateKey, { totals: createEmptyTotals(), hasLogs: false });
+  });
+
+  const todayTotals = createEmptyTotals();
+  const relevantDates = new Set([...dateKeys, todayKey]);
+
+  foodLogs.forEach((log) => {
+    if (!log.logDate || !relevantDates.has(log.logDate)) {
+      return;
+    }
+
+    const percentage = (log.percentageEaten ?? 100) / 100;
+    const calories = (log.calories || 0) * percentage;
+    const protein = (log.protein || 0) * percentage;
+    const carbs = (log.carbs || 0) * percentage;
+    const fat = (log.fat || 0) * percentage;
+
+    if (log.logDate === todayKey) {
+      todayTotals.calories += calories;
+      todayTotals.protein += protein;
+      todayTotals.carbs += carbs;
+      todayTotals.fat += fat;
+      return;
+    }
+
+    const entry = dateTotalsMap.get(log.logDate);
+    if (!entry) {
+      return;
+    }
+
+    entry.totals.calories += calories;
+    entry.totals.protein += protein;
+    entry.totals.carbs += carbs;
+    entry.totals.fat += fat;
+    entry.hasLogs = true;
+  });
+
+  const dailyData = dateKeys.map((dateKey) => {
+    const entry = dateTotalsMap.get(dateKey);
+    return {
+      dateKey,
+      hasLogs: entry?.hasLogs ?? false,
+      totals: entry?.totals ?? createEmptyTotals(),
+    };
+  });
+
   const todayData = {
     dateKey: todayKey,
-    totals: todayLogs.reduce(
-      (acc, log) => {
-        const percentage = (log.percentageEaten ?? 100) / 100;
-        return {
-          calories: acc.calories + (log.calories || 0) * percentage,
-          protein: acc.protein + (log.protein || 0) * percentage,
-          carbs: acc.carbs + (log.carbs || 0) * percentage,
-          fat: acc.fat + (log.fat || 0) * percentage,
-        };
-      },
-      { calories: 0, protein: 0, carbs: 0, fat: 0 }
-    ),
+    totals: todayTotals,
   };
 
   // Calculate averages EXCLUDING days with no logs

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { Info } from "lucide-react-native";
@@ -6,13 +6,6 @@ import { AppText } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useTranslation } from "react-i18next";
 import type { TrendMetric } from "./trendCalculations";
-import {
-  useSharedValue,
-  withTiming,
-  Easing,
-  useAnimatedReaction,
-} from "react-native-reanimated";
-import { runOnJS } from "react-native-worklets";
 
 type SemanticBadges = NonNullable<Colors["semanticBadges"]>;
 
@@ -49,42 +42,6 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({
     }
     return `${rounded}${unit} ${label}`;
   };
-
-  const [displayValue, setDisplayValue] = useState(formatValue(average));
-  const animatedValue = useSharedValue(average);
-  const lastUpdate = useSharedValue(0);
-
-  const updateDisplay = (val: number) => {
-    setDisplayValue(formatValue(val));
-  };
-
-  useEffect(() => {
-    // Animate to the new average value
-    animatedValue.value = withTiming(
-      average,
-      {
-        duration: 800,
-        easing: Easing.out(Easing.exp),
-      },
-      (finished) => {
-        if (finished) {
-          runOnJS(updateDisplay)(average);
-        }
-      }
-    );
-  }, [average, animatedValue]);
-
-  useAnimatedReaction(
-    () => Math.round(animatedValue.value),
-    (currentVal, previousVal) => {
-      const now = Date.now();
-      if (currentVal !== previousVal && now - lastUpdate.value > 50) {
-        lastUpdate.value = now;
-        runOnJS(updateDisplay)(currentVal);
-      }
-    },
-    [nutrient, unit, label] // Dependencies for the reaction closure
-  );
 
   // Calculate difference from target
   const diff = typeof target === "number" ? average - target : 0;
@@ -145,7 +102,7 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({
       </View>
       <View style={styles.averageRow}>
         <AppText role="Title1" style={styles.averageNumber}>
-          {displayValue}
+          {formattedValue}
         </AppText>
         {shouldShowBadge && (
           <View style={[styles.badge, { backgroundColor: badgeBackground }]}>
