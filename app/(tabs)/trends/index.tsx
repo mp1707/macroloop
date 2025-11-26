@@ -212,7 +212,7 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
       paddingHorizontal: theme.spacing.md,
     },
     pickerContainer: {
-      marginBottom: theme.spacing.lg,
+      marginBottom: theme.spacing.md,
     },
     animatedContainer: {
       gap: theme.spacing.sm,

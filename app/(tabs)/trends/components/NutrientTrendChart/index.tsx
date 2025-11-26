@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import { Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
@@ -15,6 +15,8 @@ import { useChartGestures } from "./useChartGestures";
 import { ChartCanvas } from "./ChartCanvas";
 import { ChartTooltip } from "./ChartTooltip";
 import { ChartHeader } from "./ChartHeader";
+import { useAppStore } from "@/store/useAppStore";
+import { useSafeRouter } from "@/hooks/useSafeRouter";
 
 export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => {
   const {
@@ -37,6 +39,8 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
 
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
+  const { setSelectedDate } = useAppStore();
+  const router = useSafeRouter();
 
   const { config, bars } = useChartConfig({
     dailyData,
@@ -56,6 +60,14 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
   });
 
   const progress = useSharedValue(0);
+
+  const handleDateSelect = useCallback(
+    (dateKey: string) => {
+      setSelectedDate(dateKey);
+      router.navigate("/(tabs)");
+    },
+    [setSelectedDate, router]
+  );
 
   useEffect(() => {
     progress.value = 0;
@@ -112,6 +124,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
                 unit={unit}
                 nutrient={nutrient}
                 calorieGoal={props.calorieGoal}
+                onDateSelect={handleDateSelect}
               />
             )}
           </View>

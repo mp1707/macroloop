@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { AppText } from "@/components";
+import { AnimatedPressable } from "@/components/shared/AnimatedPressable";
 import { useTheme, Colors, Theme } from "@/theme";
-import { formatDisplayDate } from "@/utils/dateHelpers";
+import { formatDate } from "@/utils/dateHelpers";
 import type { TrendMetric } from "../trendCalculations";
 
 interface ChartTooltipProps {
@@ -18,6 +20,7 @@ interface ChartTooltipProps {
   gap?: number;
   nutrient?: TrendMetric;
   calorieGoal?: number;
+  onDateSelect?: (dateKey: string) => void;
 }
 
 export const ChartTooltip: React.FC<ChartTooltipProps> = ({
@@ -28,12 +31,22 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   gap,
   nutrient,
   calorieGoal,
+  onDateSelect,
 }) => {
   const { colors, theme } = useTheme();
+  const { t, i18n } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const [tooltipSize, setTooltipSize] = useState({ width: 0, height: 0 });
-  
+
   const effectiveGap = gap ?? theme.spacing.sm;
+
+  const handlePress = () => {
+    if (onDateSelect) {
+      onDateSelect(activeBar.dateKey);
+    }
+  };
+
+  const formattedDate = formatDate(activeBar.dateKey, { t, locale: i18n.language });
 
   const topPosition = getTooltipTop(activeBar.topY, tooltipSize.height, effectiveGap);
   const leftPosition = getTooltipLeft(
@@ -63,9 +76,10 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
   };
 
   return (
-    <View pointerEvents="none" style={styles.tooltipOverlay}>
+    <View style={styles.tooltipOverlay}>
       {tooltipSize.height > 0 && (
         <View
+          pointerEvents="none"
           style={{
             position: "absolute",
             left: activeBar.centerX,
@@ -79,31 +93,41 @@ export const ChartTooltip: React.FC<ChartTooltipProps> = ({
           }}
         />
       )}
-      <View
+      <AnimatedPressable
+        onPress={handlePress}
+        hapticIntensity="light"
+        accessibilityLabel={`${formattedDate} ${renderValue()}`}
+        accessibilityHint={t("calendar.a11y.selectDate")}
+        accessibilityRole="button"
+        containerStyle={{
+          position: "absolute",
+          left: leftPosition,
+          top: topPosition,
+        }}
         style={[
           styles.tooltip,
           {
-            left: leftPosition,
-            top: topPosition,
             opacity: tooltipSize.width === 0 ? 0 : 1, // Hide until measured
           },
         ]}
         onLayout={(event) => {
           const { width, height } = event.nativeEvent.layout;
           setTooltipSize((prev) => {
-             if (prev.width === width && prev.height === height) return prev;
-             return { width, height };
+            if (prev.width === width && prev.height === height) return prev;
+            return { width, height };
           });
         }}
       >
-        <View style={[styles.tooltipDot, { backgroundColor: color }]} />
-        <AppText role="Caption" style={styles.tooltipDate}>
-          {formatDisplayDate(activeBar.dateKey)}
-        </AppText>
-        <AppText role="Caption" style={styles.tooltipText}>
-          {renderValue()}
-        </AppText>
-      </View>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.xs }}>
+          <View style={[styles.tooltipDot, { backgroundColor: color }]} />
+          <AppText role="Caption" style={styles.tooltipDate}>
+            {formattedDate}
+          </AppText>
+          <AppText role="Caption" style={styles.tooltipText}>
+            {renderValue()}
+          </AppText>
+        </View>
+      </AnimatedPressable>
     </View>
   );
 };
@@ -141,10 +165,6 @@ const createStyles = (colors: Colors, theme: Theme) =>
       ...StyleSheet.absoluteFillObject,
     },
     tooltip: {
-      position: "absolute",
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.spacing.xs,
       backgroundColor: colors.secondaryBackground,
       paddingHorizontal: theme.spacing.sm,
       paddingVertical: theme.spacing.xs,

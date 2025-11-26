@@ -64,70 +64,86 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
     }
   };
 
+  const renderCard = (metric: TrendMetric) => {
+    const config = getMetricConfig(metric);
+    const isSelected = selectedMetric === metric;
+
+    return (
+      <View key={metric} style={styles.cardWrapper}>
+        <AnimatedPressable
+          onPress={() => onSelect(metric)}
+          containerStyle={styles.pressable}
+          style={styles.pressable}
+          accessibilityLabel={config.label}
+          accessibilityRole="button"
+          accessibilityState={{ selected: isSelected }}
+        >
+          <Card
+            elevated={isSelected}
+            style={[
+              styles.card,
+              {
+                borderColor: isSelected
+                  ? config.color
+                  : colors.secondaryBackground,
+              },
+            ]}
+          >
+            <View style={styles.cardContent}>
+              {/* Row 1 - Header: [Icon] Label · Ø/Tag · {timeframe} */}
+              <View style={styles.headerRow}>
+                <config.Icon
+                  size={18}
+                  color={config.color}
+                  fill={config.color}
+                  strokeWidth={0}
+                />
+                <AppText
+                  role="Caption"
+                  color="primary"
+                  numberOfLines={1}
+                  style={styles.headerLabel}
+                >
+                  {config.label}
+                </AppText>
+                <AppText role="Caption" color="secondary" numberOfLines={1}>
+                  {" · Ø/Tag"}
+                </AppText>
+              </View>
+
+              {/* Row 2 - Primary Value: value + unit on same baseline */}
+              <View style={styles.valueRow}>
+                <AppText role="Title2" style={styles.valueNumber}>
+                  {Math.round(config.value)}
+                </AppText>
+                <AppText
+                  role="Caption"
+                  color="secondary"
+                  style={styles.unitText}
+                >
+                  {config.unit}
+                </AppText>
+              </View>
+
+              {/* Row 3 - Context: Progress bar placeholder (implementation depends on goal data) */}
+              {/* For now, leaving space for future progress bar + delta pill */}
+            </View>
+          </Card>
+        </AnimatedPressable>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
-      {metrics.map((metric) => {
-        const config = getMetricConfig(metric);
-        const isSelected = selectedMetric === metric;
-
-        return (
-          <View key={metric} style={styles.cardWrapper}>
-            <AnimatedPressable
-              onPress={() => onSelect(metric)}
-              containerStyle={styles.pressable}
-              style={styles.pressable}
-              accessibilityLabel={config.label}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isSelected }}
-            >
-              <Card
-                elevated={isSelected}
-                style={[
-                  styles.card,
-                  {
-                    borderColor: isSelected
-                      ? config.color
-                      : colors.secondaryBackground,
-                  },
-                ]}
-              >
-                <View style={styles.cardContent}>
-                  <View style={styles.headerRow}>
-                    <config.Icon
-                      size={14}
-                      color={config.color}
-                      fill={config.color}
-                      strokeWidth={2}
-                    />
-                    <AppText
-                      role="Caption"
-                      color="secondary"
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      style={styles.label}
-                    >
-                      {metric === "calories" ? config.unit : config.label}
-                    </AppText>
-                  </View>
-                  <View style={styles.valueRow}>
-                    <AppText
-                      role="Body"
-                      style={[styles.valueNumber, { fontWeight: "700" }]}
-                    >
-                      {Math.round(config.value)}
-                    </AppText>
-                    {metric !== "calories" && (
-                      <AppText role="Body" color="secondary">
-                        {config.unit}
-                      </AppText>
-                    )}
-                  </View>
-                </View>
-              </Card>
-            </AnimatedPressable>
-          </View>
-        );
-      })}
+      <View style={styles.row}>
+        {renderCard("calories")}
+        {renderCard("protein")}
+      </View>
+      <View style={styles.row}>
+        {renderCard("carbs")}
+        {renderCard("fat")}
+      </View>
     </View>
   );
 };
@@ -135,9 +151,12 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
 const createStyles = (colors: Colors, theme: Theme) =>
   StyleSheet.create({
     container: {
-      flexDirection: "row",
       gap: theme.spacing.sm,
       paddingBottom: theme.spacing.lg,
+    },
+    row: {
+      flexDirection: "row",
+      gap: theme.spacing.sm,
     },
     cardWrapper: {
       flex: 1,
@@ -147,36 +166,37 @@ const createStyles = (colors: Colors, theme: Theme) =>
     },
     card: {
       flex: 1,
-      paddingVertical: theme.spacing.sm,
-      paddingHorizontal: theme.spacing.sm,
-      alignItems: "center",
-      justifyContent: "center",
+      padding: theme.spacing.md,
+      minHeight: theme.accessibility.touchTargets.minimum,
       borderWidth: 2,
       borderColor: "transparent",
-      minHeight: 85,
     },
     cardContent: {
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 0,
+      gap: theme.spacing.sm,
       width: "100%",
+      alignItems: "flex-start",
     },
     headerRow: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 4,
-      marginBottom: 2,
+      gap: theme.spacing.xs,
+      width: "100%",
+    },
+    headerLabel: {
+      color: colors.primaryText,
+    },
+    timeframeText: {
+      flex: 1,
     },
     valueRow: {
       flexDirection: "row",
       alignItems: "baseline",
-      justifyContent: "center",
-      flexWrap: "wrap",
-      gap: 2,
+      gap: theme.spacing.xs,
     },
     valueNumber: {
       color: colors.primaryText,
-      textAlign: "center",
     },
-    label: {},
+    unitText: {
+      lineHeight: undefined,
+    },
   });
