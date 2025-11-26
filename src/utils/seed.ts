@@ -6,7 +6,7 @@ import { formatDateToLocalString, parseDateKey } from "@/utils/dateHelpers";
 
 /**
  * Seeds the app with randomized test food logs for the last 120 days
- * Each day gets 15 random food logs from the test data
+ * Each day gets logs totaling roughly 2000-3000 calories
  */
 export const seedFoodLogs = (): void => {
   const seededLogs: FoodLog[] = [];
@@ -20,9 +20,9 @@ export const seedFoodLogs = (): void => {
     // Use local-safe date key (YYYY-MM-DD)
     const logDate = formatDateToLocalString(currentDate);
 
-    // Get a random number betwen 4 and 15 logs per day
-    const randomNumberOfLogs = Math.floor(Math.random() * 12) + 4;
-    const dailyLogs = getRandomFoodLogs(randomNumberOfLogs, logDate);
+    // Target random calories between 2000 and 3000
+    const targetCalories = Math.floor(Math.random() * 1000) + 2000;
+    const dailyLogs = getRandomFoodLogs(targetCalories, logDate);
     seededLogs.push(...dailyLogs);
   }
 
@@ -31,15 +31,26 @@ export const seedFoodLogs = (): void => {
 };
 
 /**
- * Gets a specified number of random food logs for a given date
+ * Gets random food logs for a given date that sum up to roughly the target calories
  */
-const getRandomFoodLogs = (count: number, logDate: string): FoodLog[] => {
+const getRandomFoodLogs = (
+  targetCalories: number,
+  logDate: string
+): FoodLog[] => {
   const logs: FoodLog[] = [];
+  let currentCalories = 0;
+
   // Construct a local midnight base time for the given logDate
   const { year, month, day } = parseDateKey(logDate);
   const baseTime = new Date(year, month - 1, day, 0, 0, 0, 0);
 
-  for (let i = 0; i < count; i++) {
+  // Safety break to prevent infinite loops
+  let attempts = 0;
+  const maxAttempts = 50;
+
+  while (currentCalories < targetCalories && attempts < maxAttempts) {
+    attempts++;
+
     // Pick a random test food log
     const randomIndex = Math.floor(Math.random() * testFoodLogs.length);
     const testLog = testFoodLogs[randomIndex];
@@ -60,6 +71,7 @@ const getRandomFoodLogs = (count: number, logDate: string): FoodLog[] => {
     };
 
     logs.push(foodLog);
+    currentCalories += foodLog.calories;
   }
 
   // Sort logs by creation time for more realistic ordering
