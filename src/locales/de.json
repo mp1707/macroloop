@@ -1019,6 +1019,10 @@
     },
     "macros": {
       "average": "täglicher ⌀"
+    },
+    "explainer": {
+      "title": "So berechnen wir deinen Durchschnitt",
+      "body": "Dieser Wert zeigt deinen Durchschnitt der letzten {{days}} Tage – ohne heute.\n\nDa der heutige Tag oft noch nicht abgeschlossen ist, schließen wir ihn aus, um den Trend nicht zu verfälschen. Wenn du deinen heutigen Fortschritt sehen möchtest, wirf einen Blick in dein Tagebuch."
     }
   }
 }

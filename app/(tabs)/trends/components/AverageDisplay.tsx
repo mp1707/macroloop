@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { Info } from "lucide-react-native";
 import { AppText } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useTranslation } from "react-i18next";
@@ -15,6 +17,7 @@ interface AverageDisplayProps {
   label: string;
   unit: string;
   showGoalDelta: boolean;
+  days: number;
 }
 
 export const AverageDisplay: React.FC<AverageDisplayProps> = ({
@@ -25,10 +28,12 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({
   label,
   unit,
   showGoalDelta,
+  days,
 }) => {
   const { colors, theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
+  const router = useRouter();
 
   // Calculate difference from target
   const diff = typeof target === "number" ? average - target : 0;
@@ -48,7 +53,6 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({
     showGoalDelta && typeof target === "number" && daysWithData > 0 && diff !== 0;
 
   const sectionHeading = t("trends.averageDisplay.subtitle");
-  const captionText = t("trends.averageDisplay.subtitle_today_excluded");
 
   const nutrientBadgeColors = colors.semanticBadges?.[
     nutrient as keyof SemanticBadges
@@ -65,11 +69,30 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({
   const badgeBackground = badgeColorConfig?.background || colors.subtleBackground;
   const badgeTextColor = badgeColorConfig?.text || colors.secondaryText;
 
+  const handleOpenExplainer = () => {
+    router.push({
+      pathname: "/explainer-trends",
+      params: {
+        formattedValue,
+        days: days.toString(),
+      },
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <AppText role="Caption" style={styles.sectionHeader}>
-        {sectionHeading}
-      </AppText>
+    <Pressable
+      onPress={handleOpenExplainer}
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.containerPressed,
+      ]}
+    >
+      <View style={styles.headerRow}>
+        <AppText role="Caption" style={styles.sectionHeader}>
+          {sectionHeading}
+        </AppText>
+        <Info size={14} color={colors.secondaryText} />
+      </View>
       <View style={styles.averageRow}>
         <AppText role="Title1" style={styles.averageNumber}>
           {formattedValue}
@@ -88,10 +111,7 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({
           </View>
         )}
       </View>
-      <AppText role="Caption" color="secondary" style={styles.caption}>
-        {captionText}
-      </AppText>
-    </View>
+    </Pressable>
   );
 };
 
@@ -103,6 +123,15 @@ const createStyles = (colors: Colors, theme: Theme) =>
       paddingBottom: theme.spacing.sm,
       marginBottom: theme.spacing.lg,
       gap: theme.spacing.xs / 2,
+    },
+    containerPressed: {
+      opacity: 0.6,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: theme.spacing.xs,
+      alignSelf: "flex-start",
     },
     averageRow: {
       flexDirection: "row",
@@ -127,8 +156,5 @@ const createStyles = (colors: Colors, theme: Theme) =>
       letterSpacing: 0.6,
       color: colors.secondaryText,
       textTransform: "uppercase",
-    },
-    caption: {
-      marginTop: theme.spacing.xs / 2,
     },
   });

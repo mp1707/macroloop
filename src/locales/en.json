@@ -1021,6 +1021,10 @@
     },
     "macros": {
       "average": "Avg"
+    },
+    "explainer": {
+      "title": "How we calculate your average",
+      "body": "This value shows your average over the last {{days}} days—excluding today.\n\nWe leave out today because it’s often incomplete, which would skew the trend. To check your progress for the current day, just switch over to your log."
     }
   }
 }

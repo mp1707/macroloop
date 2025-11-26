@@ -168,6 +168,7 @@ export default function TrendsScreen() {
         label={selectedMeta.label}
         unit={selectedMeta.unit}
         showGoalDelta={showGoalDelta}
+        days={timePeriod === "week" ? 7 : 30}
       />
 
       {/* Nutrient Chart */}
