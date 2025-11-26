@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { AppText, Card } from "@/components";
+import { Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useTranslation } from "react-i18next";
 import {
@@ -14,6 +14,7 @@ import { useChartConfig } from "./useChartConfig";
 import { useChartGestures } from "./useChartGestures";
 import { ChartCanvas } from "./ChartCanvas";
 import { ChartTooltip } from "./ChartTooltip";
+import { ChartHeader } from "./ChartHeader";
 
 export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => {
   const {
@@ -27,11 +28,14 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
     color,
     unit,
     showGoalLine = true,
-    caption,
+    average,
+    target,
+    daysWithData,
+    showGoalDelta,
+    captionText,
   } = props;
 
   const { colors, theme } = useTheme();
-  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
   const { config, bars } = useChartConfig({
@@ -64,14 +68,19 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
   return (
     <View style={styles.container}>
       <Card elevated={true} padding={theme.spacing.xl}>
-        <AppText role="Headline" style={styles.title}>
-          {t("trends.chart.nutrientTitle", { nutrient: nutrientLabel, days })}
-        </AppText>
-        {caption && (
-          <AppText role="Caption" color="secondary" style={styles.goalCaption}>
-            {caption}
-          </AppText>
-        )}
+        <ChartHeader
+          average={average}
+          target={target}
+          daysWithData={daysWithData}
+          nutrient={nutrient}
+          label={nutrientLabel}
+          unit={unit}
+          showGoalDelta={showGoalDelta}
+          days={days}
+          goal={goal}
+          showGoalLine={showGoalLine}
+          captionText={captionText}
+        />
 
         <View style={styles.chartContainer}>
           <View
@@ -115,16 +124,10 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
 const createStyles = (colors: Colors, theme: Theme) =>
   StyleSheet.create({
     container: {},
-    title: {
-      marginBottom: theme.spacing.sm,
-    },
     chartContainer: {
       alignItems: "center",
     },
     chartWrapper: {
       position: "relative",
-    },
-    goalCaption: {
-      marginBottom: theme.spacing.md,
     },
   });

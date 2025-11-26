@@ -5,7 +5,13 @@ import type { NutrientTrendChartProps, ChartConfig, BarData } from "./types";
 
 type UseChartConfigProps = Pick<
   NutrientTrendChartProps,
-  "dailyData" | "todayData" | "goal" | "goalRange" | "days" | "nutrient" | "color"
+  | "dailyData"
+  | "todayData"
+  | "goal"
+  | "goalRange"
+  | "days"
+  | "nutrient"
+  | "color"
 >;
 
 export const useChartConfig = ({
@@ -24,7 +30,7 @@ export const useChartConfig = ({
     const chartWidth = screenWidth - theme.spacing.pageMargins.horizontal * 2;
     const chartHeight = 180;
 
-    const PADDING = { left: 16, right: 16, top: 24, bottom: 0 };
+    const PADDING = { left: 24, right: 24, top: 16, bottom: 0 };
     const contentWidth = chartWidth - PADDING.left - PADDING.right;
     const contentHeight = chartHeight - PADDING.top - PADDING.bottom;
 
@@ -85,12 +91,9 @@ export const useChartConfig = ({
     for (let i = 0; i < dailyData.length; i++) {
       const day = dailyData[i];
       const x =
-        config.PADDING.left +
-        i * (config.barWidth + config.BAR_SPACING);
+        config.PADDING.left + i * (config.barWidth + config.BAR_SPACING);
       const value = day.totals[nutrient];
-      const targetHeight = day.hasLogs
-        ? config.getBarHeight(value)
-        : 0;
+      const targetHeight = day.hasLogs ? config.getBarHeight(value) : 0;
       result.push({
         key: day.dateKey,
         x,

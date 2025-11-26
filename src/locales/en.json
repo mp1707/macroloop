@@ -1014,10 +1014,12 @@
     },
     "chart": {
       "nutrientTitle": "{{nutrient}} Trend (last {{days}} days)",
-      "goalLabel": "Goal ({{goal}} {{unit}})",
+      "goalLabel": "Goal: {{goal}} {{unit}}",
+      "averagePerDayLabel": "Avg per day (last {{days}} days)",
       "fatBaseline": "Baseline ({{value}} {{unit}}, {{percentage}}% of kcal goal)",
       "fatBaselineNoValue": "Baseline ({{percentage}}% of kcal goal)",
-      "carbsNoGoal": "Carbs don't have a goal."
+      "carbsNoGoal": "Carbs don't have a goal.",
+      "fatBaselineSimple": "Recommended baseline (20-35% of kcal goal)"
     },
     "macros": {
       "average": "Avg"

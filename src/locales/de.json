@@ -1012,10 +1012,12 @@
     },
     "chart": {
       "nutrientTitle": "{{nutrient}}verlauf (letzte {{days}} Tage)",
-      "goalLabel": "Ziel ({{goal}} {{unit}})",
+      "goalLabel": "Ziel: {{goal}} {{unit}}",
+      "averagePerDayLabel": "Ø pro Tag (letzte {{days}} Tage)",
       "fatBaseline": "Grundwert ({{value}} {{unit}}, {{percentage}} % des Kalorienziels)",
       "fatBaselineNoValue": "Grundwert ({{percentage}} % des Kalorienziels)",
-      "carbsNoGoal": "Für Kohlenhydrate gibt es kein Ziel."
+      "carbsNoGoal": "Für Kohlenhydrate gibt es kein Ziel.",
+      "fatBaselineSimple": "Empfohlener Grundwert (20-35% des Kalorienziels)"
     },
     "macros": {
       "average": "täglicher ⌀"

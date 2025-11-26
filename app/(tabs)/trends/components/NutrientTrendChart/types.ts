@@ -11,8 +11,13 @@ export interface NutrientTrendChartProps {
   color: string;
   unit: string;
   showGoalLine?: boolean;
-  caption?: string;
   calorieGoal?: number;
+  // New props for integrated header
+  average: number;
+  target?: number;
+  daysWithData: number;
+  showGoalDelta: boolean;
+  captionText?: string; // For fat baseline or carbs no-goal message
 }
 
 export interface ChartConfig {

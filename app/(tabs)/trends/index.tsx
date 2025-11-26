@@ -7,7 +7,6 @@ import { useAppStore } from "@/store/useAppStore";
 import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
 import { useTranslation } from "react-i18next";
 import { calculateTrendsData } from "./components/trendCalculations";
-import { AverageDisplay } from "./components/AverageDisplay";
 import { NutrientTrendChart } from "./components/NutrientTrendChart";
 import { MacroAverageCards } from "./components/MacroAverageCards";
 import type { TrendMetric } from "./components/trendCalculations";
@@ -117,37 +116,18 @@ export default function TrendsScreen() {
     : undefined;
 
   let goalRange: { min: number; max: number } | undefined;
+  let captionText: string | undefined;
+
   if (selectedMetric === "fat" && typeof dailyTargets?.calories === "number") {
     const cals = dailyTargets.calories;
     goalRange = {
       min: (cals * FAT_BASELINE_RANGE.min) / 9,
       max: (cals * FAT_BASELINE_RANGE.max) / 9,
     };
+    captionText = t("trends.chart.fatBaselineSimple");
+  } else if (selectedMetric === "carbs") {
+    captionText = t("trends.chart.carbsNoGoal");
   }
-
-  const chartCaption = useMemo(() => {
-    if (selectedMetric === "fat") {
-      return t("trends.chart.fatBaselineNoValue", {
-        percentage: FAT_BASELINE_LABEL,
-      });
-    }
-
-    if (selectedMetric === "carbs") {
-      return t("trends.chart.carbsNoGoal");
-    }
-
-    if (
-      (selectedMetric === "calories" || selectedMetric === "protein") &&
-      typeof selectedTarget === "number"
-    ) {
-      return t("trends.chart.goalLabel", {
-        goal: Math.round(selectedTarget),
-        unit: selectedUnit,
-      });
-    }
-
-    return undefined;
-  }, [selectedMetric, selectedTarget, selectedUnit, t]);
 
   const handleMacroSelect = useCallback((metric: TrendMetric) => {
     setSelectedMetric((prev) => (prev === metric ? "calories" : metric));
@@ -185,18 +165,6 @@ export default function TrendsScreen() {
             </Host>
           </View>
 
-          {/* Average Display */}
-          <AverageDisplay
-            average={visibleTrendData.averages[selectedMetric]}
-            target={showGoalDelta ? selectedTarget : undefined}
-            daysWithData={visibleTrendData.daysWithData}
-            nutrient={selectedMetric}
-            label={selectedMeta.label}
-            unit={selectedMeta.unit}
-            showGoalDelta={showGoalDelta}
-            days={daysToShow}
-          />
-
           {/* Nutrient Chart */}
           <NutrientTrendChart
             dailyData={visibleTrendData.dailyData}
@@ -209,8 +177,12 @@ export default function TrendsScreen() {
             color={selectedMeta.color}
             unit={selectedMeta.unit}
             showGoalLine={shouldShowGoalLine}
-            caption={chartCaption}
             calorieGoal={dailyTargets?.calories}
+            average={visibleTrendData.averages[selectedMetric]}
+            target={showGoalDelta ? selectedTarget : undefined}
+            daysWithData={visibleTrendData.daysWithData}
+            showGoalDelta={showGoalDelta}
+            captionText={captionText}
           />
 
           {/* Macro Average Cards */}
@@ -235,11 +207,13 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
           : colors.tertiaryBackground,
     },
     contentContainer: {
-      paddingTop: theme.spacing.xl,
+      paddingTop: theme.spacing.md,
       gap: theme.spacing.sm,
       paddingHorizontal: theme.spacing.md,
     },
-    pickerContainer: {},
+    pickerContainer: {
+      marginBottom: theme.spacing.lg,
+    },
     animatedContainer: {
       gap: theme.spacing.sm,
     },
