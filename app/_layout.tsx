@@ -62,7 +62,7 @@ function ThemedStack() {
         }}
       />
       <Stack.Screen
-        name="calendarOverview"
+        name="calendar-modal"
         options={{
           presentation: "modal",
           headerShown: false,

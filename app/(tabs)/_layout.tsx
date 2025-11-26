@@ -75,25 +75,6 @@ export default function TabsLayout() {
         <Label selectedStyle={{ color: colors.accent }}>Favorites</Label>
       </NativeTabs.Trigger> */}
 
-      <NativeTabs.Trigger name="calendar">
-        <Icon
-          src={{
-            default: (
-              <VectorIcon
-                family={MaterialCommunityIcons}
-                name="calendar-outline"
-              />
-            ),
-            selected: (
-              <VectorIcon family={MaterialCommunityIcons} name="calendar" />
-            ),
-          }}
-          selectedColor={colors.accent}
-        />
-        <Label selectedStyle={{ color: colors.accent }}>
-          {t("tabs.calendar")}
-        </Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="trends">
         <Icon
           src={{

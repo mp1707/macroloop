@@ -14,4 +14,11 @@ export const createStyles = (colors: Colors, theme: Theme) =>
     headerTitle: {
       color: colors.primaryText,
     },
+    dateButton: {
+      minHeight: 44,
+      justifyContent: "center",
+    },
+    dateButtonPressed: {
+      opacity: 0.6,
+    },
   });

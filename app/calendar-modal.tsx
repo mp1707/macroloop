@@ -6,9 +6,8 @@ import React, {
   useEffect,
 } from "react";
 import { View, Dimensions, StyleSheet, ViewToken } from "react-native";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
+import { FlatList } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
-import { useNavigation, useRouter } from "expo-router";
 import { Colors, ColorScheme, Theme, useTheme } from "@/theme";
 import { useAppStore } from "@/store/useAppStore";
 import { CalendarGrid } from "@/components/shared/DatePicker/components/CalendarGrid";
@@ -18,12 +17,11 @@ import {
   useOptimizedNutritionData,
   generateMonthKeys,
 } from "@/hooks/useOptimizedNutritionData";
-import {
-  formatMonthYearDay,
-  getTodayKey,
-  parseDateKey,
-} from "@/utils/dateHelpers";
+import { getTodayKey, formatMonthYear } from "@/utils/dateHelpers";
 import { useTranslation } from "react-i18next";
+import { HeaderButton } from "@/components/shared/HeaderButton";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
+import { useSafeRouter } from "@/hooks/useSafeRouter";
 
 interface MonthData {
   year: number;
@@ -40,17 +38,17 @@ const getMonthKeyFromDateKey = (dateKey: string) => {
   return `${year}-${parseInt(month, 10)}`;
 };
 
-export default function CalendarTabScreen() {
+export default function CalendarModalScreen() {
   const { colors, theme, colorScheme } = useTheme();
   const styles = useMemo(
     () => createStyles(colors, theme, colorScheme),
     [colors, theme, colorScheme]
   );
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { selectedDate, setSelectedDate, foodLogs, dailyTargets } =
     useAppStore();
-  const navigation = useNavigation();
-  const router = useRouter();
+  const router = useSafeRouter();
+  const hasLiquidGlass = isLiquidGlassAvailable();
   const [visibleMonth, setVisibleMonth] = useState<{
     year: number;
     month: number;
@@ -194,14 +192,6 @@ export default function CalendarTabScreen() {
     setVisibleMonth({ year: selectedYear, month: selectedMonth });
   }, [initialMonthKey, scheduleHydration, selectedYear, selectedMonth]);
 
-  // Update header title based on selected date
-  useEffect(() => {
-    const { year, month, day } = parseDateKey(selectedDate);
-    navigation.setOptions({
-      title: formatMonthYearDay(year, month, day, i18n.language),
-    });
-  }, [selectedDate, navigation, i18n.language]);
-
   // Generate relevant month keys for optimized nutrition data calculation
   const relevantMonths = useMemo(() => {
     return generateMonthKeys(currentYear, currentMonth, 24);
@@ -218,7 +208,7 @@ export default function CalendarTabScreen() {
     (dateKey: string) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setSelectedDate(dateKey);
-      router.navigate("/(tabs)");
+      router.back();
     },
     [setSelectedDate, router]
   );
@@ -241,9 +231,9 @@ export default function CalendarTabScreen() {
       });
       setSelectedDate(today);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      router.navigate("/(tabs)");
+      router.back();
     }
-  }, [monthsData, setSelectedDate]);
+  }, [monthsData, setSelectedDate, router]);
 
   useEffect(() => {
     if (!selectedMonthKey || !monthsIndexMap.has(selectedMonthKey)) {
@@ -332,7 +322,28 @@ export default function CalendarTabScreen() {
   );
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerTitle}>
+          <AppText role="Title1">
+            {visibleMonth
+              ? formatMonthYear(visibleMonth.year, visibleMonth.month)
+              : ""}
+          </AppText>
+        </View>
+        <View style={styles.closeButton}>
+          <HeaderButton
+            imageProps={{
+              systemName: "xmark",
+            }}
+            buttonProps={{
+              onPress: () => router.back(),
+              color: hasLiquidGlass ? undefined : colors.tertiaryBackground,
+            }}
+          />
+        </View>
+      </View>
+
       <View style={styles.calendarContainer}>
         <FlatList<MonthData>
           ref={flatListRef}
@@ -369,7 +380,7 @@ export default function CalendarTabScreen() {
           </AnimatedPressable>
         </View>
       )}
-    </ScrollView>
+    </View>
   );
 }
 
@@ -377,10 +388,25 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor:
-        colorScheme === "dark"
-          ? colors.primaryBackground
-          : colors.tertiaryBackground,
+      backgroundColor: colors.primaryBackground,
+    },
+    header: {
+      paddingTop: theme.spacing.xxl + theme.spacing.lg,
+      paddingHorizontal: theme.spacing.md,
+      paddingBottom: theme.spacing.lg,
+      zIndex: 10,
+      alignItems: "center",
+    },
+    headerTitle: {
+      position: "absolute",
+      top: theme.spacing.lg,
+      left: theme.spacing.md,
+    },
+    closeButton: {
+      position: "absolute",
+      top: theme.spacing.md,
+      right: theme.spacing.md,
+      zIndex: 15,
     },
     calendarContainer: {
       flex: 1,
