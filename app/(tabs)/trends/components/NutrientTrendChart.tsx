@@ -1,12 +1,30 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
-import Svg, { Line, Rect } from "react-native-svg";
+import {
+  Canvas,
+  Rect,
+  Line,
+  RoundedRect,
+  DashPathEffect,
+  vec,
+} from "@shopify/react-native-skia";
 import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
 import type { TrendMetric, TrendsData } from "./trendCalculations";
 import { formatDisplayDate } from "@/utils/dateHelpers";
+import {
+  useSharedValue,
+  withTiming,
+  useDerivedValue,
+  interpolate,
+  Extrapolation,
+  Easing,
+  SharedValue,
+} from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 
 interface NutrientTrendChartProps {
   dailyData: TrendsData["dailyData"];
@@ -47,6 +65,16 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
   } | null>(null);
   const [tooltipSize, setTooltipSize] = useState({ width: 0, height: 0 });
 
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = 0;
+    progress.value = withTiming(1, {
+      duration: 800,
+      easing: Easing.out(Easing.quad),
+    });
+  }, [dailyData, nutrient]);
+
   const chartConfig = useMemo(() => {
     const screenWidth = Dimensions.get("window").width;
     const chartWidth = screenWidth - theme.spacing.pageMargins.horizontal * 2;
@@ -64,7 +92,6 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     const dailyTotals = dailyData.map((day) => day.totals[nutrient]);
     const todayValue = todayData.totals[nutrient];
 
-    // Ensure there is at least one value when calculating max
     const valuesForMax = [
       goal ?? 0,
       goalRange?.max ?? 0,
@@ -96,6 +123,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
       maxValue,
       scaleY,
       getBarHeight,
+      totalBars,
     };
   }, [
     dailyData,
@@ -129,6 +157,64 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     setSelectedBar(null);
   }, [dailyData, todayData, nutrient]);
 
+  const tapGesture = Gesture.Tap().onStart((e) => {
+    const x = e.x;
+    const {
+      PADDING,
+      barWidth,
+      BAR_SPACING,
+      totalBars,
+      contentHeight,
+      maxValue,
+    } = chartConfig;
+
+    if (x < PADDING.left) return;
+
+    // Calculate rough index
+    const relativeX = x - PADDING.left;
+    const step = barWidth + BAR_SPACING;
+    const index = Math.floor(relativeX / step);
+
+    if (index >= 0 && index < totalBars) {
+      // Check if click is within bar width (optional, usually better to be generous)
+      // But let's just select the bar corresponding to the slot
+      const barStart = index * step;
+      if (
+        relativeX >= barStart &&
+        relativeX <= barStart + barWidth + BAR_SPACING / 2
+      ) {
+        // Generous hit area
+        // It's a hit
+        const isToday = index === dailyData.length;
+        const data = isToday ? todayData : dailyData[index];
+        const value = data.totals[nutrient];
+
+        // Recalculate position for tooltip
+        const finalX = PADDING.left + index * step;
+        const centerX = finalX + barWidth / 2;
+        
+        // INLINED logic from getBarHeight
+        const barHeight = maxValue === 0 ? 0 : (value / maxValue) * contentHeight;
+        
+        // Ensure minimum visual height for today bar logic if needed, matching render logic
+        const visualHeight = isToday
+          ? Math.max(barHeight, 12)
+          : Math.max(barHeight, 0);
+
+        const y = PADDING.top + contentHeight - visualHeight;
+
+        scheduleOnRN(
+          handleBarSelect,
+          centerX,
+          y,
+          value,
+          data.dateKey,
+          data.dateKey
+        );
+      }
+    }
+  });
+
   const hasGoalLine =
     showGoalLine && typeof goal === "number" && chartConfig.maxValue > 0;
   const goalLineY =
@@ -141,6 +227,100 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
     typeof goalRange.min === "number" &&
     typeof goalRange.max === "number" &&
     chartConfig.maxValue > 0;
+
+  // Prepare bar data for rendering
+  const renderBars = useMemo(() => {
+    const bars = [];
+    // Daily bars
+    for (let i = 0; i < dailyData.length; i++) {
+      const day = dailyData[i];
+      const x =
+        chartConfig.PADDING.left +
+        i * (chartConfig.barWidth + chartConfig.BAR_SPACING);
+      const targetHeight = day.hasLogs
+        ? chartConfig.getBarHeight(day.totals[nutrient])
+        : 0;
+      bars.push({
+        key: day.dateKey,
+        x,
+        targetHeight: Math.max(targetHeight, 0),
+        width: chartConfig.barWidth,
+        color: color,
+        rx: chartConfig.barRadius,
+        isToday: false,
+        index: i,
+      });
+    }
+    // Today bar
+    const x =
+      chartConfig.PADDING.left +
+      dailyData.length * (chartConfig.barWidth + chartConfig.BAR_SPACING);
+    const calculatedHeight = chartConfig.getBarHeight(
+      todayData.totals[nutrient]
+    );
+    const todayBarHeight = Math.max(calculatedHeight, 12);
+    bars.push({
+      key: todayData.dateKey,
+      x,
+      targetHeight: todayBarHeight,
+      width: chartConfig.barWidth,
+      color: color,
+      rx: chartConfig.barRadius,
+      isToday: true,
+      index: dailyData.length,
+    });
+    return bars;
+  }, [dailyData, todayData, chartConfig, nutrient, color]);
+
+  const AnimatedBar = ({
+    bar,
+    progress,
+  }: {
+    bar: (typeof renderBars)[0];
+    progress: SharedValue<number>;
+  }) => {
+    const height = useDerivedValue(() => {
+      // Staggered animation
+      // Duration of whole animation is 800ms
+      // We want a cascade.
+      // Start time for this bar: index * 0.03 (normalized 0-1?)
+      // Let's say total items ~30. 30 * 0.02 = 0.6.
+      // We can map progress (0-1) to bar progress.
+
+      const totalItems = renderBars.length;
+      const delayFactor = 0.5; // Fraction of time spent initiating bars
+      const barDuration = 0.5; // Fraction of time for one bar to grow
+
+      // This is a simple approximation
+      const start = (bar.index / totalItems) * delayFactor;
+      const end = start + barDuration;
+
+      const localProgress = interpolate(
+        progress.value,
+        [start, end],
+        [0, 1],
+        Extrapolation.CLAMP
+      );
+
+      return localProgress * bar.targetHeight;
+    });
+
+    const y = useDerivedValue(() => {
+      return chartConfig.PADDING.top + chartConfig.contentHeight - height.value;
+    });
+
+    return (
+      <RoundedRect
+        x={bar.x}
+        y={y}
+        width={bar.width}
+        height={height}
+        r={bar.rx}
+        color={bar.color}
+        opacity={bar.isToday ? 0.35 : 1}
+      />
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -164,149 +344,94 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
               },
             ]}
           >
-            <Svg
-              width={chartConfig.chartWidth}
-              height={chartConfig.chartHeight}
-            >
-              {hasGoalRange && goalRange && (
-                <>
-                  <Rect
-                    x={theme.spacing.sm}
-                    y={
-                      chartConfig.PADDING.top +
-                      chartConfig.scaleY(goalRange.max)
-                    }
-                    width={chartConfig.chartWidth - theme.spacing.sm * 2}
-                    height={
-                      chartConfig.scaleY(goalRange.min) -
-                      chartConfig.scaleY(goalRange.max)
-                    }
-                    fill={color}
-                    opacity={0.1}
-                    rx={4}
-                  />
+            <GestureDetector gesture={tapGesture}>
+              <Canvas
+                style={{
+                  width: chartConfig.chartWidth,
+                  height: chartConfig.chartHeight,
+                }}
+              >
+                {/* Goal Range */}
+                {hasGoalRange && goalRange && (
+                  <>
+                    <Rect
+                      x={theme.spacing.sm}
+                      y={
+                        chartConfig.PADDING.top +
+                        chartConfig.scaleY(goalRange.max)
+                      }
+                      width={chartConfig.chartWidth - theme.spacing.sm * 2}
+                      height={
+                        chartConfig.scaleY(goalRange.min) -
+                        chartConfig.scaleY(goalRange.max)
+                      }
+                      color={color}
+                      opacity={0.1}
+                    />
+                    <Line
+                      p1={vec(
+                        theme.spacing.sm,
+                        chartConfig.PADDING.top +
+                          chartConfig.scaleY(goalRange.max)
+                      )}
+                      p2={vec(
+                        chartConfig.chartWidth - theme.spacing.sm,
+                        chartConfig.PADDING.top +
+                          chartConfig.scaleY(goalRange.max)
+                      )}
+                      color={color}
+                      style="stroke"
+                      strokeWidth={1}
+                      opacity={0.3}
+                    >
+                      <DashPathEffect intervals={[4, 4]} />
+                    </Line>
+                    <Line
+                      p1={vec(
+                        theme.spacing.sm,
+                        chartConfig.PADDING.top +
+                          chartConfig.scaleY(goalRange.min)
+                      )}
+                      p2={vec(
+                        chartConfig.chartWidth - theme.spacing.sm,
+                        chartConfig.PADDING.top +
+                          chartConfig.scaleY(goalRange.min)
+                      )}
+                      color={color}
+                      style="stroke"
+                      strokeWidth={1}
+                      opacity={0.3}
+                    >
+                      <DashPathEffect intervals={[4, 4]} />
+                    </Line>
+                  </>
+                )}
+
+                {/* Goal Line */}
+                {!hasGoalRange && goalLineY !== undefined && (
                   <Line
-                    x1={theme.spacing.sm}
-                    y1={
-                      chartConfig.PADDING.top +
-                      chartConfig.scaleY(goalRange.max)
-                    }
-                    x2={chartConfig.chartWidth - theme.spacing.sm}
-                    y2={
-                      chartConfig.PADDING.top +
-                      chartConfig.scaleY(goalRange.max)
-                    }
-                    stroke={color}
+                    p1={vec(theme.spacing.sm, goalLineY)}
+                    p2={vec(
+                      chartConfig.chartWidth - theme.spacing.sm,
+                      goalLineY
+                    )}
+                    color={color}
+                    style="stroke"
                     strokeWidth={1}
-                    strokeDasharray="4 4"
-                    opacity={0.3}
-                  />
-                  <Line
-                    x1={theme.spacing.sm}
-                    y1={
-                      chartConfig.PADDING.top +
-                      chartConfig.scaleY(goalRange.min)
-                    }
-                    x2={chartConfig.chartWidth - theme.spacing.sm}
-                    y2={
-                      chartConfig.PADDING.top +
-                      chartConfig.scaleY(goalRange.min)
-                    }
-                    stroke={color}
-                    strokeWidth={1}
-                    strokeDasharray="4 4"
-                    opacity={0.3}
-                  />
-                </>
-              )}
+                    opacity={0.5}
+                  >
+                    <DashPathEffect intervals={[4, 4]} />
+                  </Line>
+                )}
 
-              {!hasGoalRange && goalLineY !== undefined && (
-                <Line
-                  x1={theme.spacing.sm}
-                  y1={goalLineY}
-                  x2={chartConfig.chartWidth - theme.spacing.sm}
-                  y2={goalLineY}
-                  stroke={color}
-                  strokeWidth={1}
-                  strokeDasharray="4 4"
-                  opacity={0.5}
-                />
-              )}
+                {/* Bars */}
+                {renderBars.map((bar) => (
+                  <AnimatedBar key={bar.key} bar={bar} progress={progress} />
+                ))}
+              </Canvas>
+            </GestureDetector>
 
-              {dailyData.map((day, index) => {
-                const x =
-                  chartConfig.PADDING.left +
-                  index * (chartConfig.barWidth + chartConfig.BAR_SPACING);
-                const barHeight = day.hasLogs
-                  ? chartConfig.getBarHeight(day.totals[nutrient])
-                  : 0;
-                const y =
-                  chartConfig.PADDING.top +
-                  chartConfig.contentHeight -
-                  barHeight;
-                const centerX = x + chartConfig.barWidth / 2;
-                const value = day.totals[nutrient];
-
-                return (
-                  <Rect
-                    key={day.dateKey}
-                    x={x}
-                    y={y}
-                    width={chartConfig.barWidth}
-                    height={Math.max(barHeight, 0)}
-                    fill={color}
-                    rx={chartConfig.barRadius}
-                    onPress={() =>
-                      handleBarSelect(
-                        centerX,
-                        y,
-                        value,
-                        day.dateKey,
-                        day.dateKey
-                      )
-                    }
-                  />
-                );
-              })}
-
-              {(() => {
-                const calculatedHeight = chartConfig.getBarHeight(
-                  todayData.totals[nutrient]
-                );
-                const todayBarHeight = Math.max(calculatedHeight, 12);
-                const x =
-                  chartConfig.PADDING.left +
-                  dailyData.length *
-                    (chartConfig.barWidth + chartConfig.BAR_SPACING);
-                const y =
-                  chartConfig.PADDING.top +
-                  chartConfig.contentHeight -
-                  todayBarHeight;
-                const centerX = x + chartConfig.barWidth / 2;
-                const value = todayData.totals[nutrient];
-
-                return (
-                  <Rect
-                    x={x}
-                    y={y}
-                    width={chartConfig.barWidth}
-                    height={todayBarHeight}
-                    fill={color}
-                    opacity={0.35}
-                    rx={chartConfig.barRadius}
-                    onPress={() =>
-                      handleBarSelect(
-                        centerX,
-                        y,
-                        value,
-                        todayData.dateKey,
-                        todayData.dateKey
-                      )
-                    }
-                  />
-                );
-              })()}
-            </Svg>
+            {/* Tooltip Overlay */}
             {selectedBar && (
               <View pointerEvents="none" style={styles.tooltipOverlay}>
                 <View
@@ -409,6 +534,14 @@ const createStyles = (colors: Colors, theme: Theme) =>
       borderRadius: theme.spacing.md,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
     },
     tooltipDate: {
       color: colors.secondaryText,

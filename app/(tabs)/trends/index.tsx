@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Host, Picker } from "@expo/ui/swift-ui";
@@ -12,12 +12,18 @@ import { AverageDisplay } from "./components/AverageDisplay";
 import { NutrientTrendChart } from "./components/NutrientTrendChart";
 import { MacroAverageCards } from "./components/MacroAverageCards";
 import type { TrendMetric } from "./components/trendCalculations";
+import { useSegments } from "expo-router";
+import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 
 const DEFAULT_FAT_BASELINE_PERCENTAGE = 20;
 
 export default function TrendsScreen() {
   const [timePeriod, setTimePeriod] = useState<"week" | "month">("week");
   const [selectedMetric, setSelectedMetric] = useState<TrendMetric>("calories");
+
+  const segments = useSegments();
+  // Assuming structure is (tabs)/trends/index or similar, check if 'trends' is in segments
+  const isFocused = segments.includes("trends");
 
   // Store selectors
   const foodLogs = useAppStore((state) => state.foodLogs);
@@ -147,51 +153,59 @@ export default function TrendsScreen() {
       showsVerticalScrollIndicator={false}
       bottomOffset={theme.spacing.lg}
     >
-      {/* Time Period Picker */}
-      <View style={styles.pickerContainer}>
-        <Host matchContents colorScheme={colorScheme}>
-          <Picker
-            options={pickerOptions}
-            selectedIndex={timePeriod === "week" ? 0 : 1}
-            onOptionSelected={handlePeriodChange}
-            variant="segmented"
+      {isFocused && (
+        <Animated.View
+          entering={FadeIn.duration(300)}
+          layout={LinearTransition}
+          style={styles.animatedContainer}
+        >
+          {/* Time Period Picker */}
+          <View style={styles.pickerContainer}>
+            <Host matchContents colorScheme={colorScheme}>
+              <Picker
+                options={pickerOptions}
+                selectedIndex={timePeriod === "week" ? 0 : 1}
+                onOptionSelected={handlePeriodChange}
+                variant="segmented"
+              />
+            </Host>
+          </View>
+
+          {/* Average Display */}
+          <AverageDisplay
+            average={trendData.averages[selectedMetric]}
+            target={showGoalDelta ? selectedTarget : undefined}
+            daysWithData={trendData.daysWithData}
+            nutrient={selectedMetric}
+            label={selectedMeta.label}
+            unit={selectedMeta.unit}
+            showGoalDelta={showGoalDelta}
+            days={timePeriod === "week" ? 7 : 30}
           />
-        </Host>
-      </View>
 
-      {/* Average Display */}
-      <AverageDisplay
-        average={trendData.averages[selectedMetric]}
-        target={showGoalDelta ? selectedTarget : undefined}
-        daysWithData={trendData.daysWithData}
-        nutrient={selectedMetric}
-        label={selectedMeta.label}
-        unit={selectedMeta.unit}
-        showGoalDelta={showGoalDelta}
-        days={timePeriod === "week" ? 7 : 30}
-      />
+          {/* Nutrient Chart */}
+          <NutrientTrendChart
+            dailyData={trendData.dailyData}
+            todayData={trendData.todayData}
+            goal={shouldShowGoalLine ? selectedTarget : undefined}
+            goalRange={goalRange}
+            days={timePeriod === "week" ? 7 : 30}
+            nutrient={selectedMetric}
+            nutrientLabel={selectedMeta.label}
+            color={selectedMeta.color}
+            unit={selectedMeta.unit}
+            showGoalLine={shouldShowGoalLine}
+            caption={chartCaption}
+          />
 
-      {/* Nutrient Chart */}
-      <NutrientTrendChart
-        dailyData={trendData.dailyData}
-        todayData={trendData.todayData}
-        goal={shouldShowGoalLine ? selectedTarget : undefined}
-        goalRange={goalRange}
-        days={timePeriod === "week" ? 7 : 30}
-        nutrient={selectedMetric}
-        nutrientLabel={selectedMeta.label}
-        color={selectedMeta.color}
-        unit={selectedMeta.unit}
-        showGoalLine={shouldShowGoalLine}
-        caption={chartCaption}
-      />
-
-      {/* Macro Average Cards */}
-      <MacroAverageCards
-        averages={trendData.averages}
-        selectedMetric={selectedMetric}
-        onSelect={handleMacroSelect}
-      />
+          {/* Macro Average Cards */}
+          <MacroAverageCards
+            averages={trendData.averages}
+            selectedMetric={selectedMetric}
+            onSelect={handleMacroSelect}
+          />
+        </Animated.View>
+      )}
     </KeyboardAwareScrollView>
   );
 }
@@ -212,5 +226,8 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
     },
     pickerContainer: {
       paddingHorizontal: theme.spacing.sm,
+    },
+    animatedContainer: {
+      gap: theme.spacing.sm,
     },
   });

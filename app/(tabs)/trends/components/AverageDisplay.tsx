@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { Info } from "lucide-react-native";
@@ -6,6 +6,13 @@ import { AppText } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useTranslation } from "react-i18next";
 import type { TrendMetric } from "./trendCalculations";
+import {
+  useSharedValue,
+  withTiming,
+  Easing,
+  useAnimatedReaction,
+} from "react-native-reanimated";
+import { runOnJS } from "react-native-worklets";
 
 type SemanticBadges = NonNullable<Colors["semanticBadges"]>;
 
@@ -35,38 +42,81 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const router = useRouter();
 
+  const formatValue = (val: number) => {
+    const rounded = Math.round(val);
+    if (nutrient === "calories") {
+      return `${rounded} ${unit}`;
+    }
+    return `${rounded}${unit} ${label}`;
+  };
+
+  const [displayValue, setDisplayValue] = useState(formatValue(average));
+  const animatedValue = useSharedValue(average);
+  const lastUpdate = useSharedValue(0);
+
+  const updateDisplay = (val: number) => {
+    setDisplayValue(formatValue(val));
+  };
+
+  useEffect(() => {
+    // Animate to the new average value
+    animatedValue.value = withTiming(
+      average,
+      {
+        duration: 800,
+        easing: Easing.out(Easing.exp),
+      },
+      (finished) => {
+        if (finished) {
+          runOnJS(updateDisplay)(average);
+        }
+      }
+    );
+  }, [average, animatedValue]);
+
+  useAnimatedReaction(
+    () => Math.round(animatedValue.value),
+    (currentVal, previousVal) => {
+      const now = Date.now();
+      if (currentVal !== previousVal && now - lastUpdate.value > 50) {
+        lastUpdate.value = now;
+        runOnJS(updateDisplay)(currentVal);
+      }
+    },
+    [nutrient, unit, label] // Dependencies for the reaction closure
+  );
+
   // Calculate difference from target
   const diff = typeof target === "number" ? average - target : 0;
   const isOverTarget = diff > 0;
   const absDiff = Math.abs(Math.round(diff));
 
-  const formattedValue = useMemo(() => {
-    const roundedAverage = Math.round(average);
-    if (nutrient === "calories") {
-      return `${roundedAverage} ${unit}`;
-    }
-
-    return `${roundedAverage}${unit} ${label}`;
-  }, [average, nutrient, unit, label]);
+  const formattedValue = useMemo(
+    () => formatValue(average),
+    [average, nutrient, unit, label]
+  );
 
   const shouldShowBadge =
-    showGoalDelta && typeof target === "number" && daysWithData > 0 && diff !== 0;
+    showGoalDelta &&
+    typeof target === "number" &&
+    daysWithData > 0 &&
+    diff !== 0;
 
   const sectionHeading = t("trends.averageDisplay.subtitle");
 
-  const nutrientBadgeColors = colors.semanticBadges?.[
-    nutrient as keyof SemanticBadges
-  ];
+  const nutrientBadgeColors =
+    colors.semanticBadges?.[nutrient as keyof SemanticBadges];
 
   const badgeColorConfig = isOverTarget
     ? nutrient === "calories"
       ? colors.semanticBadges?.carbs
       : nutrientBadgeColors
     : nutrient === "calories"
-      ? colors.semanticBadges?.calories
-      : nutrientBadgeColors;
+    ? colors.semanticBadges?.calories
+    : nutrientBadgeColors;
 
-  const badgeBackground = badgeColorConfig?.background || colors.subtleBackground;
+  const badgeBackground =
+    badgeColorConfig?.background || colors.subtleBackground;
   const badgeTextColor = badgeColorConfig?.text || colors.secondaryText;
 
   const handleOpenExplainer = () => {
@@ -95,12 +145,10 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({
       </View>
       <View style={styles.averageRow}>
         <AppText role="Title1" style={styles.averageNumber}>
-          {formattedValue}
+          {displayValue}
         </AppText>
         {shouldShowBadge && (
-          <View
-            style={[styles.badge, { backgroundColor: badgeBackground }]}
-          >
+          <View style={[styles.badge, { backgroundColor: badgeBackground }]}>
             <AppText
               role="Caption"
               style={[styles.badgeText, { color: badgeTextColor }]}
@@ -120,8 +168,7 @@ const createStyles = (colors: Colors, theme: Theme) =>
     container: {
       paddingTop: theme.spacing.lg,
       paddingHorizontal: theme.spacing.sm,
-      paddingBottom: theme.spacing.sm,
-      marginBottom: theme.spacing.lg,
+      paddingBottom: theme.spacing.md,
       gap: theme.spacing.xs / 2,
     },
     containerPressed: {
@@ -140,6 +187,8 @@ const createStyles = (colors: Colors, theme: Theme) =>
     },
     averageNumber: {
       color: colors.primaryText,
+      padding: 0, // Reset padding for TextInput
+      margin: 0, // Reset margin for TextInput
     },
     badge: {
       paddingHorizontal: theme.spacing.sm + theme.spacing.xs,

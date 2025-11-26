@@ -14,10 +14,10 @@ import {
   SharedValue,
   useSharedValue,
   useAnimatedReaction,
-  runOnJS,
   withDelay,
   withSpring,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { useTheme } from "@/theme";
 import { hexToRgb, rgbToHex, adjustColor, interpolateColor } from "@/utils/colorUtils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -358,7 +358,7 @@ const AnimatedRingLayer: React.FC<AnimatedRingLayerProps> = ({
   useAnimatedReaction(
     () => progress.value,
     (value) => {
-      runOnJS(updateFromRatio)(value);
+      scheduleOnRN(updateFromRatio, value);
     },
     [updateFromRatio]
   );
