@@ -17,6 +17,7 @@ interface MacroSliderProps {
   maxCalories: number;
   caloriesPerGram: number;
   step?: number;
+  totalCaloriesForPercentage?: number;
 }
 
 export const MacroSlider = ({
@@ -28,6 +29,7 @@ export const MacroSlider = ({
   maxCalories,
   caloriesPerGram,
   step = 5,
+  totalCaloriesForPercentage,
 }: MacroSliderProps) => {
   const { colors, theme: themeObj } = useTheme();
   const styles = createStyles(colors, themeObj);
@@ -35,8 +37,15 @@ export const MacroSlider = ({
 
   const maxGrams = Math.floor(maxCalories / caloriesPerGram);
   const calories = grams * caloriesPerGram;
+  const percentageDenominator =
+    typeof totalCaloriesForPercentage === "number" &&
+    totalCaloriesForPercentage > 0
+      ? totalCaloriesForPercentage
+      : maxCalories;
   const percentage =
-    maxCalories > 0 ? Math.round((calories / maxCalories) * 100) : 0;
+    percentageDenominator > 0
+      ? Math.round((calories / percentageDenominator) * 100)
+      : 0;
 
   const clampGrams = (value: number): number => {
     const clamped = Math.max(0, Math.min(value, maxGrams));
