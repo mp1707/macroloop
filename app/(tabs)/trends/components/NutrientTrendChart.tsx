@@ -434,6 +434,35 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = ({
             {/* Tooltip Overlay */}
             {selectedBar && (
               <View pointerEvents="none" style={styles.tooltipOverlay}>
+                {tooltipSize.height > 0 && (
+                  <View
+                    style={{
+                      position: "absolute",
+                      left: selectedBar.centerX,
+                      top:
+                        getTooltipTop(
+                          selectedBar.topY,
+                          tooltipSize.height,
+                          theme.spacing.sm
+                        ) + tooltipSize.height,
+                      height: Math.max(
+                        0,
+                        selectedBar.topY -
+                          (getTooltipTop(
+                            selectedBar.topY,
+                            tooltipSize.height,
+                            theme.spacing.sm
+                          ) +
+                            tooltipSize.height)
+                      ),
+                      width: 1,
+                      borderLeftWidth: 1,
+                      borderColor: colors.border,
+                      borderStyle: "dashed",
+                      transform: [{ translateX: -0.5 }],
+                    }}
+                  />
+                )}
                 <View
                   style={[
                     styles.tooltip,
