@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { BicepsFlexed, Zap, Droplet } from "lucide-react-native";
+import { BicepsFlexed, Zap, Droplet, Flame } from "lucide-react-native";
 import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,7 @@ import { AnimatedPressable } from "@/components/shared/AnimatedPressable";
 import type { TrendMetric, TrendsData } from "./trendCalculations";
 
 interface MacroAverageCardsProps {
-  averages: Pick<TrendsData["averages"], "protein" | "carbs" | "fat">;
+  averages: TrendsData["averages"];
   selectedMetric: TrendMetric;
   onSelect: (metric: TrendMetric) => void;
 }
@@ -22,99 +22,90 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
-  const macros = useMemo(
-    () =>
-      [
-        {
-          key: "protein",
+  const baseSlots: TrendMetric[] = useMemo(
+    () => ["protein", "carbs", "fat"],
+    []
+  );
+
+  const displayedMetrics = useMemo(() => {
+    if (selectedMetric === "calories") {
+      return baseSlots;
+    }
+    return baseSlots.map((m) => (m === selectedMetric ? "calories" : m));
+  }, [selectedMetric, baseSlots]);
+
+  const getMetricConfig = (metric: TrendMetric) => {
+    switch (metric) {
+      case "calories":
+        return {
+          Icon: Flame,
+          label: t("nutrients.calories.label"),
+          color: colors.semantic.calories,
+          value: averages.calories,
+          unit: t("nutrients.calories.unitShort"),
+        };
+      case "protein":
+        return {
           Icon: BicepsFlexed,
           label: t("nutrients.protein.label"),
           color: colors.semantic.protein,
-          surfaceColor: colors.semanticSurfaces.protein,
           value: averages.protein,
-        },
-        {
-          key: "carbs",
+          unit: t("nutrients.protein.unitShort"),
+        };
+      case "carbs":
+        return {
           Icon: Zap,
           label: t("logCard.nutritionLabels.carbs"),
           color: colors.semantic.carbs,
-          surfaceColor: colors.semanticSurfaces.carbs,
           value: averages.carbs,
-        },
-        {
-          key: "fat",
+          unit: t("nutrients.carbs.unitShort"),
+        };
+      case "fat":
+        return {
           Icon: Droplet,
           label: t("nutrients.fat.label"),
           color: colors.semantic.fat,
-          surfaceColor: colors.semanticSurfaces.fat,
           value: averages.fat,
-        },
-      ] satisfies Array<{
-        key: Exclude<TrendMetric, "calories">;
-        Icon: typeof BicepsFlexed;
-        label: string;
-        color: string;
-        surfaceColor: string;
-        value: number;
-      }>,
-    [
-      averages,
-      colors.semantic.protein,
-      colors.semantic.carbs,
-      colors.semantic.fat,
-      colors.semanticSurfaces.protein,
-      colors.semanticSurfaces.carbs,
-      colors.semanticSurfaces.fat,
-      t,
-    ]
-  );
+          unit: t("nutrients.fat.unitShort"),
+        };
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {macros.map((macro) => {
-        const isSelected = selectedMetric === macro.key;
+      {displayedMetrics.map((metric) => {
+        const config = getMetricConfig(metric);
         return (
-          <View key={macro.key} style={styles.cardWrapper}>
+          <View key={metric} style={styles.cardWrapper}>
             <AnimatedPressable
-              onPress={() => onSelect(macro.key)}
+              onPress={() => onSelect(metric)}
               style={styles.pressable}
-              accessibilityLabel={macro.label}
+              accessibilityLabel={config.label}
               accessibilityRole="button"
-              accessibilityState={{ selected: isSelected }}
             >
-              <Card
-                elevated={true}
-                style={[
-                  styles.card,
-                  isSelected && {
-                    backgroundColor: macro.surfaceColor,
-                    borderColor: macro.color,
-                    borderWidth: 1.5,
-                  },
-                ]}
-              >
+              <Card elevated={true} style={[styles.card]}>
                 <View style={styles.cardContent}>
                   <View style={styles.iconRow}>
-                    <macro.Icon
+                    <config.Icon
                       size={18}
-                      color={macro.color}
+                      color={config.color}
                       strokeWidth={1.6}
-                      fill={macro.color}
+                      fill={config.color}
                     />
                     <AppText role="Caption" color="secondary">
-                      {macro.label}
+                      {config.label}
                     </AppText>
                   </View>
                   <View style={styles.valueRow}>
                     <AppText role="Title2" style={styles.valueNumber}>
-                      {Math.round(macro.value)}
+                      {Math.round(config.value)}
                     </AppText>
                     <AppText
                       role="Caption"
                       color="disabled"
                       style={styles.valueUnit}
                     >
-                      g
+                      {config.unit}
                     </AppText>
                   </View>
                   <AppText role="Caption" color="secondary">
