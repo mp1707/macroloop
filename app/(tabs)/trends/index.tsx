@@ -130,7 +130,7 @@ export default function TrendsScreen() {
   }
 
   const handleMacroSelect = useCallback((metric: TrendMetric) => {
-    setSelectedMetric((prev) => (prev === metric ? "calories" : metric));
+    setSelectedMetric(metric);
   }, []);
 
   const visibleTrendData = isFocused ? trendData : null;

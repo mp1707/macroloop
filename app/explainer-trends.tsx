@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 import { HeaderButton } from "@/components/shared/HeaderButton";
@@ -14,7 +13,6 @@ export default function ExplainerTrendsScreen() {
   const styles = useMemo(() => createStyles(theme, colors), [theme, colors]);
   const router = useRouter();
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const hasLiquidGlass = isLiquidGlassAvailable();
 
   const params = useLocalSearchParams<{
@@ -30,9 +28,7 @@ export default function ExplainerTrendsScreen() {
 
   return (
     <View style={styles.container}>
-      <View
-        style={[styles.header, { paddingTop: insets.top + theme.spacing.sm }]}
-      >
+      <View style={[styles.header, { paddingTop: theme.spacing.sm }]}>
         <View style={styles.closeButton}>
           <HeaderButton
             imageProps={{

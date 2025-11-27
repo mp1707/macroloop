@@ -92,6 +92,14 @@ function ThemedStack() {
           headerShown: false,
           gestureEnabled: true,
         }}
+      />{" "}
+      <Stack.Screen
+        name="explainer-trends"
+        options={{
+          presentation: "modal",
+          headerShown: false,
+          gestureEnabled: true,
+        }}
       />
       <Stack.Screen
         name="paywall"
