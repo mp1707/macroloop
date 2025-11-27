@@ -49,4 +49,7 @@ export const createStyles = (
       marginHorizontal: 2,
       backgroundColor: colors.accent,
     },
+    portionSliderSection: {
+      paddingHorizontal: theme.spacing.lg,
+    },
   });

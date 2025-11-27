@@ -92,6 +92,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
           goal={goal}
           showGoalLine={showGoalLine}
           captionText={captionText}
+          calorieGoal={props.calorieGoal}
         />
 
         <View style={styles.chartContainer}>

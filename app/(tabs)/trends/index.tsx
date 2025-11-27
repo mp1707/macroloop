@@ -190,6 +190,7 @@ export default function TrendsScreen() {
             averages={visibleTrendData.averages}
             selectedMetric={selectedMetric}
             onSelect={handleMacroSelect}
+            dailyTargets={dailyTargets}
           />
         </Animated.View>
       ) : null}

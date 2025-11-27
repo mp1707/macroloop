@@ -19,7 +19,6 @@ export const createEstimationLog = (logData: EstimationInput): FoodLog => {
     carbs: 0,
     fat: 0,
     isEstimating: true,
-    percentageEaten: 100,
   };
 };
 

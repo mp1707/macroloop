@@ -85,11 +85,11 @@ export const useCreateHandlers = ({
         createdAt: new Date().toISOString(),
         isEstimating: false,
         id: generateFoodLogId(),
-        percentageEaten: favorite.percentageEaten ?? 100,
+        percentageEaten: draft?.percentageEaten ?? 100,
       });
       router.back();
     },
-    [addFoodLog, selectedDate, router]
+    [addFoodLog, selectedDate, router, draft]
   );
 
   const handleSwitchToCamera = useCallback(async () => {
@@ -125,6 +125,14 @@ export const useCreateHandlers = ({
     await stopRecording();
   }, [stopRecording]);
 
+  const handlePercentageChange = useCallback(
+    (percentage: number) => {
+      if (!draftId) return;
+      updateDraft(draftId, { percentageEaten: percentage });
+    },
+    [draftId, updateDraft]
+  );
+
   return {
     handleCancel,
     handleOpenExplainer,
@@ -135,5 +143,6 @@ export const useCreateHandlers = ({
     handleSwitchToCamera,
     handleSwitchToRecording,
     handleStopRecording,
+    handlePercentageChange,
   };
 };

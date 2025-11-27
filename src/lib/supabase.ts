@@ -126,6 +126,14 @@ export const estimateTextBased = async (
 
   if (!response.ok) {
     const errorText = await response.text();
+
+    // Check for rate limit (429 status)
+    if (response.status === 429) {
+      console.error("Rate limit exceeded:", response.status, errorText);
+      throw new Error("AI_ESTIMATION_RATE_LIMIT");
+    }
+
+    // Generic error for other failures
     console.error("AI estimation HTTP error:", response.status, errorText);
     throw new Error("AI_ESTIMATION_FAILED");
   }
@@ -176,6 +184,14 @@ export const refineEstimation = async (
 
   if (!response.ok) {
     const errorText = await response.text();
+
+    // Check for rate limit (429 status)
+    if (response.status === 429) {
+      console.error("Rate limit exceeded:", response.status, errorText);
+      throw new Error("AI_ESTIMATION_RATE_LIMIT");
+    }
+
+    // Generic error for other failures
     console.error("AI estimation HTTP error:", response.status, errorText);
     throw new Error("AI_ESTIMATION_FAILED");
   }
@@ -205,15 +221,18 @@ export const estimateNutritionImageBased = async (
     console.log("Image estimation V2 request:", request);
   }
 
-  const response = await fetch(`${supabaseUrl}/functions/v1/imageEstimation2`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${supabaseAnonKey}`,
-      apikey: supabaseAnonKey,
-    },
-    body: JSON.stringify(request),
-  });
+  const response = await fetch(
+    `${supabaseUrl}/functions/v1/imageEstimationDEV`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify(request),
+    }
+  );
 
   if (__DEV__) {
     console.log("Image estimation V2 response status:", response.status);
@@ -221,6 +240,14 @@ export const estimateNutritionImageBased = async (
 
   if (!response.ok) {
     const errorText = await response.text();
+
+    // Check for rate limit (429 status)
+    if (response.status === 429) {
+      console.error("Rate limit exceeded:", response.status, errorText);
+      throw new Error("AI_ESTIMATION_RATE_LIMIT");
+    }
+
+    // Generic error for other failures
     console.error("Image estimation HTTP error:", response.status, errorText);
     throw new Error("AI_ESTIMATION_FAILED");
   }

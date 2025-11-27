@@ -148,9 +148,13 @@ COMPONENT NAMING
   - Good: "grilled chicken breast", "cooked white rice", "apple", "walnuts", "tomato sauce".
   - Avoid serving-format details not relevant for macros:
     * NOT "walnuts (chopped)", NOT "smoked pork loin (slices)".
-  - Avoid ambiguous multi-options:
-    * Good: "yogurt sauce"
-    * Bad: "cream/yogurt sauce (white, in separate bowl)".
+- "name" MUST NOT contain:
+  - Numbers or units (g, ml, servings, portions, cups, slices, etc.).
+  - Words or phrases about portions or totals such as "per portion", "per serving", "for 4 portions", "total 300 g", "insgesamt 300 g".
+  - Long explanatory text, e.g. anything in parentheses describing amounts or serving logic.
+- Keep "name" short and generic (typically 2–5 words).
+  - Good: "steamed green beans"
+  - Bad: "steamed green beans (300 g total, 75 g per portion)".
 - For recipes:
   - Prefer common dish names when possible (e.g. "spaghetti bolognese", "chicken curry").
   - For complex recipes, break into a few main components: e.g. "pasta", "bolognese sauce", "grated parmesan".
@@ -171,11 +175,30 @@ QUANTITY ESTIMATION
   - Plate size, bowl size, cutlery, hand size.
   - Visible packaging or portion indications.
   - Typical serving sizes for that dish or component.
-- If the user text specifies a portion (e.g. “ate half the pizza”, “2 slices of bread”, “100g rice”):
-  - Follow the text even if the image shows a different amount.
-  - Example: Image shows a whole bagel; text: "ate half":
-    - Analyze a half bagel and set a matching "generatedTitle": e.g. "🥯 Half Bagel".
-- For "piece" components:
+
+RECIPE SERVINGS VS. USER PORTION
+- Many recipes write things like "serves 4", "for 2 portions", "makes 8 slices".
+- These labels describe the recipe yield, NOT what the user personally ate.
+- Unless the user text explicitly describes their own intake ("I ate 1 portion", "I ate half of the recipe", "I ate one slice"):
+  - Treat all listed ingredient amounts as the TOTAL RECIPE.
+  - Estimate "amount" and macros for the FULL RECIPE yield, not per portion.
+  - NEVER divide ingredient amounts or macros by the number of servings printed in the recipe.
+- Example:
+  - Recipe text: "Serves 4. 300 g green beans."
+  - Components:
+    - name: "steamed green beans"
+    - amount: 300
+    - unit: "g"
+    - macros for the full 300 g, NOT for 75 g per person.
+
+USER-SPECIFIC PORTION TEXT
+- If the user text clearly states what THEY ate (e.g. "ate half the pizza", "ate one serving", "ate 2 slices of the cake"):
+  - Follow the user text and analyze only that portion.
+  - Example: image is a full pizza, text: "I ate a quarter":
+    - Analyze one quarter of the pizza.
+    - Title could be "🍕 Quarter Pizza".
+
+For "piece" components:
   - "amount" = integer count of pieces.
   - Also provide a realistic "recommendedMeasurement" for the entire component (all pieces).
 
@@ -460,11 +483,15 @@ BENENNUNG DER KOMPONENTEN
 - "name" enthält nur die für Nährwerte relevante Beschreibung:
   - Gut: "gegrillte Hähnchenbrust", "gekochter Reis", "Apfel", "Walnüsse", "Tomatensauce".
   - Vermeide Servierdetails: NICHT "Walnüsse (gehackt)", NICHT "geräucherte Schweinelende (Scheiben)".
-- Vermeide unklare Mehrfachangaben:
-  - Gut: "Joghurtsauce"
-  - Schlecht: "Sahne-/Joghurtsauce (weiß, in extra Schale)".
+- In "name" dürfen KEINE
+  - Zahlen oder Einheiten (g, ml, Portionen, Scheiben, Tassen usw.),
+  - Portionshinweise ("pro Portion", "pro Person", "für 4 Portionen", "insgesamt 300 g"),
+  - langen erklärenden Zusätze in Klammern stehen.
+- Halte "name" kurz und allgemein (typisch 2–5 Wörter).
+  - Gut: "gedämpfte grüne Bohnen"
+  - Schlecht: "gedämpfte grüne Bohnen (300 g insgesamt, pro Portion 75 g)".
 - Bei Rezepten:
-  - Nutze bekannte Gerichtsnamen, wenn möglich: z. B. "Spaghetti Bolognese", "Hähnchen-Curry".
+  - Nutze bekannte Gerichtsnamen, wenn möglich, z. B. "Spaghetti Bolognese", "Hähnchen-Curry".
   - Bei komplexen Rezepten: in wenige Hauptkomponenten aufteilen, z. B. "Nudeln", "Bolognese-Sauce", "geriebener Hartkäse".
 
 EINHEITEN & NORMALISIERUNG
@@ -485,13 +512,28 @@ MENGENSCHÄTZUNG
   - Besteck-/Handgröße,
   - sichtbarer Verpackung (z. B. 500-g-Beutel Nudeln),
   - typischen Portionsgrößen in Deutschland/EU.
-- Wenn der Text eine Portion angibt (z. B. „Hälfte der Pizza gegessen“, „2 Scheiben Brot“, „100 g Reis“):
-  - Richte dich nach dem Text, auch wenn das Bild abweicht.
-  - Beispiel: Bild zeigt ganzen Bagel, Text: „halben Bagel gegessen“:
-    - Analysiere einen halben Bagel und wähle einen passenden generatedTitle, z. B. "🥯 Halber Bagel".
-- Für "stück"-Komponenten:
-  - "amount" = Anzahl der Stücke (Ganzzahl),
-  - "recommendedMeasurement" = realistische Gramm- oder ml-Angabe für die gesamte Komponente (alle Stücke zusammen).
+
+REZEPTPORTIONEN VS. VERZEHRTE MENGE
+- Viele Rezepte enthalten Angaben wie "für 4 Portionen", "ergibt 2 Portionen", "reicht für 3 Personen".
+- Diese Angaben beschreiben die REZEPTMENGE, NICHT was die Nutzerin tatsächlich gegessen hat.
+- Solange der Nutzertext NICHT ausdrücklich beschreibt, wie viel gegessen wurde ("habe 1 Portion gegessen", "habe die Hälfte gegessen", "1 Stück gegessen"):
+  - Behandle alle Zutatenmengen als GESAMTES REZEPT.
+  - Schätze "amount" und Makros IMMER für das GESAMTE REZEPT, NICHT pro Portion.
+  - Teile Zutatenmengen oder Nährwerte NIEMALS durch die angegebene Portionszahl des Rezepts.
+- Beispiel:
+  - Rezept: "für 4 Portionen. 300 g grüne Bohnen."
+  - Komponente:
+    - name: "gedämpfte grüne Bohnen"
+    - amount: 300
+    - unit: "g"
+    - Makros für 300 g, NICHT für 75 g pro Person.
+
+NUTZER-SPEZIFISCHE PORTION
+- Wenn der Nutzertext klar beschreibt, was tatsächlich gegessen wurde (z. B. „halbe Pizza gegessen“, „1 Portion gegessen“, „2 Stück Kuchen gegessen“):
+  - Richte dich nach dieser Angabe und analysiere genau diese Menge.
+  - Beispiel: Bild zeigt ganze Pizza, Text: "Viertel gegessen":
+    - Analysiere ein Viertel der Pizza.
+    - generatedTitle könnte "🍕 Viertel Pizza" sein.
 
 REGELN FÜR "recommendedMeasurement"
 - "recommendedMeasurement" ist für jede foodComponent ERFORDERLICH, darf aber null sein.
@@ -738,23 +780,21 @@ function buildUserPrompt(lang, title, description) {
     return `Analysiere dieses Essensbild und schätze den Nährwert ab.
 - Zerlege das Bild (ggf. mit Titel/Beschreibung) in foodComponents.
 - Für JEDE foodComponent musst du eigene Nährwerte (calories, protein, carbs, fat) für GENAU die ausgegebene Menge angeben.
+- Behandle Zutatenmengen in Rezepten immer als GESAMTES REZEPT, auch wenn dort steht "für 4 Portionen" o. Ä. Passe nur dann auf eine kleinere Portion an, wenn der Benutzerkontext ausdrücklich beschreibt, wie viel die Person gegessen hat (z. B. "ich habe 1 Portion gegessen", "ich habe die Hälfte gegessen").
 - Wenn du die Einheit "stück" verwendest, füge ZUSÄTZLICH "recommendedMeasurement" mit exakter Gesamtmenge + Einheit für alle Stücke zusammen hinzu (z. B. g oder ml).
 - Wenn sowohl das Bild als auch der Text eindeutig keinen Bezug zu Essen, gib "generatedTitle": "🚫 kein Essen" und eine leere Liste "foodComponents" zurück.
 
-Benutzerkontext:
-Titel: ${t}
-Beschreibung: ${d}`;
+Benutzerkontext: ${t} ${d}`;
   }
   // EN default
   return `Analyze this food image and estimate its nutritional content.
 - Break the image (with optional title/description) into foodComponents.
 - For EACH foodComponent you must provide its own macros (calories, protein, carbs, fat) for the EXACT amount you output.
+- Always treat recipe ingredient amounts as the TOTAL RECIPE, even if the recipe says things like "serves 4" or "for 2 portions". Only adjust to a smaller portion if the user context explicitly says what they ate (e.g. "I ate one portion", "I ate half").
 - If you use "piece" as a unit, ALSO include recommendedMeasurement with an exact total amount+unit for all pieces combined (e.g., g or ml).
 - If both the image and the text clearly do not relate to any food, return "generatedTitle": "🚫 not food" and an empty "foodComponents" list.
 
-User context:
-Title: ${t}
-Description: ${d}`;
+User context: ${t} ${d}`;
 }
 // Main handler
 Deno.serve(async (req) => {

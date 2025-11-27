@@ -191,12 +191,21 @@ export default function Edit() {
       console.error("Re-estimation error:", error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
-      // Show user-friendly error
-      Alert.alert(
-        t("editLog.error.title"),
-        t("editLog.error.reestimationFailed"),
-        [{ text: t("common.ok"), style: "default" }]
-      );
+      // Check if it's a rate limit error
+      if (error instanceof Error && error.message === "AI_ESTIMATION_RATE_LIMIT") {
+        Alert.alert(
+          t("errors.api.rateLimit.title"),
+          t("errors.api.rateLimit.message"),
+          [{ text: t("common.ok"), style: "default" }]
+        );
+      } else {
+        // Show user-friendly error
+        Alert.alert(
+          t("editLog.error.title"),
+          t("editLog.error.reestimationFailed"),
+          [{ text: t("common.ok"), style: "default" }]
+        );
+      }
     }
   }, [
     editedLog,
@@ -480,7 +489,7 @@ export default function Edit() {
                     value={percentageEaten}
                     min={0}
                     max={100}
-                    steps={9}
+                    steps={19}
                     color={colors.accent}
                     onValueChange={(value) => {
                       updatePercentageEaten(Math.round(value));

@@ -37,6 +37,7 @@ export const useCreationStore = create<CreationState>((set, get) => ({
       carbs: 0,
       fat: 0,
       isEstimating: false,
+      percentageEaten: 100,
     };
     set((state) => ({ draftsById: { ...state.draftsById, [id]: draft } }));
     return id;

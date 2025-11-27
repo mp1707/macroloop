@@ -61,7 +61,6 @@ export const createStyles = (
     },
     scrollContent: {
       paddingBottom: theme.spacing.xxl,
-      paddingTop: theme.spacing.lg,
       flexGrow: 1,
     },
     content: {
@@ -162,6 +161,7 @@ export default function Create() {
     handleSwitchToCamera,
     handleSwitchToRecording,
     handleStopRecording: handleStopRecordingBase,
+    handlePercentageChange,
   } = useCreateHandlers({
     router,
     draft,
@@ -279,6 +279,7 @@ export default function Create() {
                 isRecording={isRecording}
                 volumeLevel={volumeLevel}
                 onStopRecording={handleStopRecordingBase}
+                onPercentageChange={handlePercentageChange}
               />
             </ScrollView>
           )}

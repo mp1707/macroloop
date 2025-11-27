@@ -39,6 +39,12 @@
     "network": {
       "title": "Hoppla, etwas ist schiefgelaufen",
       "message": "Bitte versuche es später noch einmal."
+    },
+    "api": {
+      "rateLimit": {
+        "title": "Langsam, langsam! 🐌",
+        "message": "Du loggst zu schnell. Mach kurz Pause und versuch's gleich nochmal."
+      }
     }
   },
   "dates": {
@@ -245,6 +251,10 @@
     "favorites": {
       "title": "Favoriten",
       "accessibilityLabel": "Favoriten-Mahlzeit {{title}} protokollieren"
+    },
+    "percentageEaten": {
+      "title": "Verzehrte Portion",
+      "value": "{{percentage}}%"
     },
     "image": {
       "title": "Dein Bild"
@@ -1017,7 +1027,8 @@
       "fatBaseline": "Grundwert ({{value}} {{unit}}, {{percentage}} % des Kalorienziels)",
       "fatBaselineNoValue": "Grundwert ({{percentage}} % des Kalorienziels)",
       "carbsNoGoal": "Für Kohlenhydrate gibt es kein Ziel.",
-      "fatBaselineSimple": "Empfohlener Grundwert (20-35% des Kalorienziels)"
+      "fatBaselineSimple": "Empfohlener Grundwert (20-35% des Kalorienziels)",
+      "vsGoal": "vs. Ziel"
     },
     "macros": {
       "average": "täglicher ⌀"

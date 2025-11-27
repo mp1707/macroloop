@@ -200,11 +200,20 @@ export default function EditFavorite() {
       console.error("Re-estimation error:", error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
-      Alert.alert(
-        t("favorites.edit.error.title"),
-        t("favorites.edit.error.reestimationFailed"),
-        [{ text: t("common.ok"), style: "default" }]
-      );
+      // Check if it's a rate limit error
+      if (error instanceof Error && error.message === "AI_ESTIMATION_RATE_LIMIT") {
+        Alert.alert(
+          t("errors.api.rateLimit.title"),
+          t("errors.api.rateLimit.message"),
+          [{ text: t("common.ok"), style: "default" }]
+        );
+      } else {
+        Alert.alert(
+          t("favorites.edit.error.title"),
+          t("favorites.edit.error.reestimationFailed"),
+          [{ text: t("common.ok"), style: "default" }]
+        );
+      }
     }
   }, [
     editedFavorite,
@@ -456,7 +465,7 @@ export default function EditFavorite() {
                     value={percentageEaten}
                     min={0}
                     max={100}
-                    steps={9}
+                    steps={19}
                     color={colors.accent}
                     onValueChange={(value) => {
                       updatePercentageEaten(Math.round(value));

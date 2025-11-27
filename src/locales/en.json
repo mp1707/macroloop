@@ -39,6 +39,12 @@
     "network": {
       "title": "Oops, something went wrong",
       "message": "Please try again later."
+    },
+    "api": {
+      "rateLimit": {
+        "title": "Whoa, slow down! 🐌",
+        "message": "You're logging too fast. Take a breather and try again in a moment."
+      }
     }
   },
   "dates": {
@@ -246,6 +252,10 @@
     "favorites": {
       "title": "Favorites",
       "accessibilityLabel": "Log favorite meal {{title}}"
+    },
+    "percentageEaten": {
+      "title": "Portion consumed",
+      "value": "{{percentage}}%"
     },
     "image": {
       "title": "Your photo"
@@ -1019,7 +1029,8 @@
       "fatBaseline": "Baseline ({{value}} {{unit}}, {{percentage}}% of kcal goal)",
       "fatBaselineNoValue": "Baseline ({{percentage}}% of kcal goal)",
       "carbsNoGoal": "Carbs don't have a goal.",
-      "fatBaselineSimple": "Recommended baseline (20-35% of kcal goal)"
+      "fatBaselineSimple": "Recommended baseline (20-35% of kcal goal)",
+      "vsGoal": "vs Goal"
     },
     "macros": {
       "average": "Avg"

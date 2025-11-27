@@ -18,6 +18,7 @@ import { ImageSection } from "@/components/create-page/ImageSection";
 import { CreateActions } from "@/components/create-page/CreateActions";
 import { Waveform } from "@/components/create-page/Waveform/Waveform";
 import { HeaderButton } from "@/components/shared/HeaderButton";
+import { PortionSlider } from "@/components/create-page/PortionSlider";
 import { CREATE_ACCESSORY_HEIGHT } from "@/constants/create";
 import { createStyles } from "./TypingModeView.styles";
 
@@ -36,6 +37,7 @@ interface TypingModeViewProps {
   isRecording: boolean;
   volumeLevel: number;
   onStopRecording: () => void;
+  onPercentageChange: (percentage: number) => void;
 }
 
 export const TypingModeView = ({
@@ -53,6 +55,7 @@ export const TypingModeView = ({
   isRecording,
   volumeLevel,
   onStopRecording,
+  onPercentageChange,
 }: TypingModeViewProps) => {
   const { t } = useTranslation();
   const { theme, colors, colorScheme } = useTheme();
@@ -159,6 +162,13 @@ export const TypingModeView = ({
           </View>
         </Animated.View>
       )}
+
+      <Animated.View layout={slidingLayout} style={styles.portionSliderSection}>
+        <PortionSlider
+          value={draft.percentageEaten ?? 100}
+          onValueChange={onPercentageChange}
+        />
+      </Animated.View>
 
       <Animated.View layout={slidingLayout}>
         <CreateActions

@@ -21,6 +21,7 @@ interface ChartHeaderProps {
   goal?: number;
   showGoalLine?: boolean;
   captionText?: string; // For fat baseline or carbs no-goal message
+  calorieGoal?: number; // For fat percentage calculation
 }
 
 export const ChartHeader: React.FC<ChartHeaderProps> = ({
@@ -35,6 +36,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
   goal,
   showGoalLine = true,
   captionText,
+  calorieGoal,
 }) => {
   const { colors, theme } = useTheme();
   const { t } = useTranslation();
@@ -64,6 +66,15 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
     typeof target === "number" &&
     daysWithData > 0 &&
     diff !== 0;
+
+  // Calculate fat percentage pill for fat nutrient
+  const shouldShowFatPill =
+    nutrient === "fat" &&
+    typeof calorieGoal === "number" &&
+    daysWithData > 0;
+  const fatPercentage = shouldShowFatPill
+    ? Math.round((average * 9 / calorieGoal!) * 100)
+    : 0;
 
   const periodLabel = t("trends.chart.averagePerDayLabel", { days });
 
@@ -128,8 +139,26 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
               role="Caption"
               style={[styles.badgeText, { color: badgeTextColor }]}
             >
-              {isOverTarget ? "+" : "-"}
-              {absDiff} {unit} vs Goal
+              {isOverTarget ? "+ " : "- "}
+              {absDiff} {unit} {t("trends.chart.vsGoal")}
+            </AppText>
+          </View>
+        )}
+        {shouldShowFatPill && (
+          <View
+            style={[
+              styles.pill,
+              {
+                backgroundColor:
+                  colors.semanticSurfaces?.fat || colors.subtleBackground,
+              },
+            ]}
+          >
+            <AppText
+              role="Caption"
+              style={[styles.pillText, { color: colors.semantic.fat }]}
+            >
+              {fatPercentage} %
             </AppText>
           </View>
         )}
@@ -178,6 +207,16 @@ const createStyles = (colors: Colors, theme: Theme) =>
       alignItems: "center",
     },
     badgeText: {
+      fontWeight: "600",
+    },
+    pill: {
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs / 2,
+      borderRadius: 12,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    pillText: {
       fontWeight: "600",
     },
     periodLabel: {

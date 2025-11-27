@@ -136,10 +136,20 @@ export const useEstimation = () => {
         updateFoodLog(incompleteLog.id, completedLog);
       } catch (error) {
         await deleteFoodLog(incompleteLog.id);
-        Alert.alert(
-          t("errors.network.title"),
-          t("errors.network.message")
-        );
+
+        // Check if it's a rate limit error
+        if (error instanceof Error && error.message === "AI_ESTIMATION_RATE_LIMIT") {
+          Alert.alert(
+            t("errors.api.rateLimit.title"),
+            t("errors.api.rateLimit.message")
+          );
+        } else {
+          // Show generic network error
+          Alert.alert(
+            t("errors.network.title"),
+            t("errors.network.message")
+          );
+        }
       }
     },
     [addFoodLog, updateFoodLog, deleteFoodLog, isPro, language, t]

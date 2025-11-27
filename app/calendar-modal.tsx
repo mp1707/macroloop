@@ -412,7 +412,8 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
       flex: 1,
     },
     buttonContainer: {
-      paddingVertical: theme.spacing.lg,
+      flex: 1,
+      justifyContent: "center",
       paddingHorizontal: theme.spacing.md,
       alignItems: "center",
     },
