@@ -18,6 +18,41 @@ interface VersionChangelog {
 
 const CHANGELOG_DATA_EN: VersionChangelog[] = [
   {
+    version: "1.0.5",
+    changes: [
+      {
+        title: "Trends tab",
+        description:
+          "Stay on track with your goals using the new trends tab that visualizes your macro progress over time.",
+      },
+      {
+        title: "Portion slider in creation screen",
+        description:
+          "The consumed portion slider is now directly available in the food log creation screen, not just in the edit screen after logging.",
+      },
+      {
+        title: "Calendar moved to main screen",
+        description:
+          "Calendar tab removed. The calendar is now accessible by tapping the big date on the main screen.",
+      },
+      {
+        title: "AI food logging improvements",
+        description:
+          "Enhanced AI logic to better understand recipes and other notes about food for more accurate logging.",
+      },
+      {
+        title: "Visual bug fixes",
+        description:
+          "Various visual glitches throughout the app have been fixed for a more polished experience.",
+      },
+      {
+        title: "User-friendly error messages",
+        description:
+          "Rate limiting and other errors now display clear, helpful messages instead of technical jargon.",
+      },
+    ],
+  },
+  {
     version: "1.0.4",
     changes: [
       {
@@ -134,6 +169,40 @@ const CHANGELOG_DATA_EN: VersionChangelog[] = [
 
 const CHANGELOG_DATA_DE: VersionChangelog[] = [
   {
+    version: "1.0.5",
+    changes: [
+      {
+        title: "Trends-Tab",
+        description:
+          "Behalte deine Ziele im Blick – der neue Trends-Tab visualisiert deinen Makro-Fortschritt über Zeit.",
+      },
+      {
+        title: "Portionsregler im Eingabebildschirm",
+        description:
+          "Der Verzehrte-Menge-Regler ist jetzt direkt beim Anlegen eines Eintrags verfügbar und nicht erst im Bearbeitungsbildschirm.",
+      },
+      {
+        title: "Kalender auf Hauptbildschirm",
+        description:
+          "Der Kalender-Tab wurde entfernt. Der Kalender wird nun durch Tippen auf das Datum im Hauptbildschirm geöffnet.",
+      },
+      {
+        title: "Verbesserte KI-Logik",
+        description:
+          "Die KI versteht jetzt Rezepte und andere Hinweise zu Lebensmitteln besser, damit das Logging noch präziser wird.",
+      },
+      {
+        title: "Visuelle Fehlerbehebungen",
+        description: "Verschiedene optische Fehler in der App behoben.",
+      },
+      {
+        title: "Benutzerfreundliche Fehlermeldungen",
+        description:
+          "Rate-Limiting zeigt jetzt eine klare Meldung statt nur 'Hoppla, da ist etwas schief gelaufen'.",
+      },
+    ],
+  },
+  {
     version: "1.0.4",
     changes: [
       {
@@ -144,7 +213,7 @@ const CHANGELOG_DATA_DE: VersionChangelog[] = [
       {
         title: "Detailansicht im Zutaten-Split",
         description:
-          "Die Breakdown zeigt jetzt direkt Kalorien und Protein pro Zutat an, damit Anpassungen schneller gelingen.",
+          "Die Detailansicht zeigt jetzt direkt Kalorien und Protein pro Zutat an, damit Anpassungen schneller gelingen.",
       },
       {
         title: "Kalender-Navigation",
@@ -244,9 +313,7 @@ export default function ChangelogScreen() {
   const { t, i18n } = useTranslation();
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
-  const normalizedLanguage = (
-    i18n.resolvedLanguage || i18n.language || "en"
-  )
+  const normalizedLanguage = (i18n.resolvedLanguage || i18n.language || "en")
     .split("-")[0]
     .toLowerCase();
   const changelogData =

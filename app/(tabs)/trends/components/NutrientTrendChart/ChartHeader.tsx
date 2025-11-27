@@ -81,13 +81,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
   const nutrientBadgeColors =
     colors.semanticBadges?.[nutrient as keyof SemanticBadges];
 
-  const badgeColorConfig = isOverTarget
-    ? nutrient === "calories"
-      ? colors.semanticBadges?.carbs
-      : nutrientBadgeColors
-    : nutrient === "calories"
-    ? colors.semanticBadges?.calories
-    : nutrientBadgeColors;
+  const badgeColorConfig = nutrientBadgeColors;
 
   const badgeBackground =
     badgeColorConfig?.background || colors.subtleBackground;

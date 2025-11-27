@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 // Extended FoodComponent with UI-only stale indicator
 type EditableFoodComponent = FoodComponent & {
   isStale?: boolean;
+  _ui_id?: string;
 };
 
 interface ComponentRowProps {

@@ -49,11 +49,13 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
       if (absDiff !== null && diff !== 0) {
         const sign = isOverGoal ? "+" : "-";
 
+        const badgeColors = colors.semanticBadges?.[metric];
+
         pillInfo = {
           text: `${sign}${absDiff}`,
           backgroundColor:
-            colors.semanticSurfaces?.[metric] || colors.subtleBackground,
-          textColor: colors.semantic[metric],
+            badgeColors?.background || colors.subtleBackground,
+          textColor: badgeColors?.text || colors.primaryText,
         };
       }
     }
@@ -159,18 +161,20 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
                 </AppText> */}
               </View>
 
-              {/* Row 2 - Primary Value: value + unit on same baseline with pill */}
+              {/* Row 2 - Primary Value: value + unit on same baseline, pill centered */}
               <View style={styles.valueRow}>
-                <AppText role="Title2" style={styles.valueNumber}>
-                  {Math.round(config.value)}
-                </AppText>
-                <AppText
-                  role="Caption"
-                  color="secondary"
-                  style={styles.unitText}
-                >
-                  {config.unit}
-                </AppText>
+                <View style={styles.valueTextContainer}>
+                  <AppText role="Title2" style={styles.valueNumber}>
+                    {Math.round(config.value)}
+                  </AppText>
+                  <AppText
+                    role="Caption"
+                    color="secondary"
+                    style={styles.unitText}
+                  >
+                    {config.unit}
+                  </AppText>
+                </View>
                 {config.pillInfo && (
                   <View
                     style={[
@@ -252,6 +256,11 @@ const createStyles = (colors: Colors, theme: Theme) =>
       flex: 1,
     },
     valueRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: theme.spacing.xs,
+    },
+    valueTextContainer: {
       flexDirection: "row",
       alignItems: "baseline",
       gap: theme.spacing.xs,

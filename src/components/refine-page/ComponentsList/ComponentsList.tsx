@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 // Extended FoodComponent with UI-only stale indicator
 type EditableFoodComponent = FoodComponent & {
   isStale?: boolean;
+  _ui_id?: string;
 };
 
 const easeLayout = Layout.duration(220).easing(Easing.inOut(Easing.quad));
@@ -99,7 +100,7 @@ export const ComponentsList: React.FC<ComponentsListProps> = ({
       <Animated.View layout={easeLayout} style={styles.listContainer}>
         {components.map((comp, index) => (
           <Animated.View
-            key={`${comp.name}-${index}`}
+            key={comp._ui_id ?? `${comp.name}-${index}`}
             layout={easeLayout}
           >
             <ComponentRow

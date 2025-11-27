@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FoodComponent, FoodLog } from "@/types/models";
 import type { AppState } from "@/store/useAppStore";
+import { generateId } from "@/utils/idGenerator";
 
 // Extended FoodComponent with UI-only stale indicator (not persisted or sent to API)
 export type EditableFoodComponent = FoodComponent & {
   isStale?: boolean;
+  _ui_id?: string;
 };
 
 // Extended FoodLog type that includes baseline components for V2 refinement
@@ -14,6 +16,15 @@ export type EditedFoodLog = Omit<FoodLog, "foodComponents"> & {
   // Baseline components from last AI estimate (for consistent refinements)
   // When editing, these preserve the original values to send as base* fields
   baselineFoodComponents?: FoodComponent[];
+};
+
+const ensureId = (
+  comp: FoodComponent | EditableFoodComponent
+): EditableFoodComponent => {
+  if ("_ui_id" in comp && comp._ui_id) {
+    return comp as EditableFoodComponent;
+  }
+  return { ...comp, _ui_id: generateId("comp") };
 };
 
 export const useEditedLog = ({
@@ -50,6 +61,7 @@ export const useEditedLog = ({
       setEditedLogState({
         ...originalLog,
         baselineFoodComponents: originalLog.foodComponents,
+        foodComponents: originalLog.foodComponents.map(ensureId),
       });
     }
   }, [originalLog, isDirty]);
@@ -59,6 +71,8 @@ export const useEditedLog = ({
       // Preserve baseline if not provided in the update (e.g., from refine response)
       setEditedLogState((prev) => ({
         ...next,
+        // Ensure IDs are present on new components
+        foodComponents: (next.foodComponents || []).map(ensureId),
         // Use baseline from next if provided, otherwise preserve from prev
         baselineFoodComponents:
           next.baselineFoodComponents ?? prev?.baselineFoodComponents,
@@ -79,7 +93,11 @@ export const useEditedLog = ({
   );
 
   const updateComponents = useCallback(
-    (updater: (components: EditableFoodComponent[]) => EditableFoodComponent[]) => {
+    (
+      updater: (
+        components: EditableFoodComponent[]
+      ) => EditableFoodComponent[]
+    ) => {
       setEditedLogState((prev) => {
         if (!prev) return prev;
         const currentComponents = prev.foodComponents || [];
@@ -146,7 +164,7 @@ export const useEditedLog = ({
       updateComponents((components) => {
         const next = [...components];
         if (pendingComponentEdit.index === "new") {
-          next.push(pendingComponentEdit.component);
+          next.push(ensureId(pendingComponentEdit.component));
         } else {
           // Preserve existing macro values when editing (only name/amount/unit change)
           // Drop outdated recommendations so the UI doesn't suggest stale measurements
@@ -155,6 +173,8 @@ export const useEditedLog = ({
           next[pendingComponentEdit.index] = {
             ...existingComponent,
             ...pendingComponentEdit.component,
+            // Preserve ID
+            _ui_id: existingComponent._ui_id,
             recommendedMeasurement: undefined,
             isStale: true,
           };
