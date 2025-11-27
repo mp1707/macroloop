@@ -1,12 +1,15 @@
 // deno-lint-ignore-file
 // @ts-nocheck
-// Unified TEXT-based nutrition estimation (DE/EN) using OpenAI Responses + Zod Structured Outputs
+// TEXT-based nutrition estimation V2 (DE/EN)
+// - LLM returns per-component macros
+// - Edge function sums them into top-level totals
+// using OpenAI Responses + Zod Structured Outputs
 import OpenAI from "jsr:@openai/openai@6.5.0";
 import { z } from "npm:zod@3.25.1";
 import { zodTextFormat } from "jsr:@openai/openai@6.5.0/helpers/zod";
 import { Ratelimit } from "npm:@upstash/ratelimit@2.0.7";
 import { Redis } from "npm:@upstash/redis@1.35.6";
-// Rate limiting (text variant uses a more generous window)
+// Rate limiting (same as old text endpoint)
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(10, "60 s"),
@@ -26,58 +29,95 @@ const LOCALE = {
     pieceCanonical: "piece",
     systemPrompt: `You are a meticulous nutrition expert. Analyze a user's text description of a meal and return ONE valid JSON object with your nutritional estimation. Decompose the meal into components.
 
+You are an INTERNAL service, not a chatbot. You NEVER speak to end users. You only output structured data.
+
 STRICT OUTPUT RULES
 - Return ONLY one JSON object (no prose, no markdown, no trailing text).
-- Use EXACTLY the schema below (no extra keys, no nulls EXCEPT where noted).
-- All numbers must be integers. Round half up.
+- Use EXACTLY the schema below (no extra keys, no missing keys).
+- All numbers must be integers. Round half up (0.5 → next integer).
 - Units must be lowercase and singular.
-- Totals (calories, protein, carbs, fat) must be the sum of components and roughly consistent with kcal ≈ 4p + 4c + 9f.
 
-JSON OUTPUT SCHEMA
+JSON OUTPUT SCHEMA (MODEL OUTPUT)
 {
   "generatedTitle": "string",
   "foodComponents": [
     {
       "name": "string",
-      "amount": number,
-      "unit": "string",
-      // REQUIRED but set to null unless unit is "piece":
-      // "recommendedMeasurement": { "amount": number, "unit": "string" } | null
+      "amount": integer,
+      "unit": "g" | "ml" | "piece",
+      // REQUIRED but nullable:
+      // "recommendedMeasurement": { "amount": integer, "unit": "g" | "ml" } | null,
+      // Per-component macros for THIS exact amount:
+      "calories": integer,
+      "protein": integer,
+      "carbs": integer,
+      "fat": integer
     }
-  ],
-  "calories": integer,
-  "protein": integer,
-  "carbs": integer,
-  "fat": integer
+  ]
 }
 
-VALID UNITS (unit field)
-"g", "ml", "piece"
+The caller (the app) will sum the per-component macros to get total calories and macros.
+You do NOT include any top-level calories/protein/carbs/fat fields.
+
+CORE NUTRITION BEHAVIOR
+- Be deterministic and consistent for a given ingredient name inside one response.
+- For each component:
+  - Choose a typical nutritional density (per 100 g, per 100 ml, or per piece) using general nutrition knowledge.
+  - Scale macros approximately linearly with the amount:
+    * If grams or milliliters double, macros for that component approximately double.
+    * A small change of 1–5 g must NOT cause a huge jump in that component’s calories.
+- For components that share the same ingredient and preparation (e.g. "rolled oats"), use one consistent typical density within this response.
+- Even if quantities look extreme or unrealistic, still calculate per-component macros instead of refusing.
 
 UNIT & SYNONYM NORMALIZATION
+- VALID UNITS in the JSON: "g", "ml", "piece".
 - Normalize plurals and synonyms:
-  * "grams" → "g"
-  * "milliliters", "millilitres" → "ml"
-  * "pcs", "pieces", "slice", "slices" → "piece"
-- Prefer exact measurable units ("g" or "ml").
-- Use the ambiguous unit "piece" only when it is the clearest description (e.g., whole apple, burger).
-- REQUIRED NULLABILITY: If unit is NOT "piece", set "recommendedMeasurement": null. If unit IS "piece", include a realistic recommended measurement (prefer "g" or "ml").
+  * "gram", "grams" → "g"
+  * "milliliter", "milliliters", "millilitre", "millilitres" → "ml"
+  * "pc", "pcs", "piece", "pieces", "slice", "slices" → "piece"
+- Prefer exact measurable units ("g" or "ml") when the description includes a mass or volume.
+- Use "piece" when the user clearly means countable items (1 apple, 2 eggs).
 
-CORE LOGIC
-1) Deconstruct the description into distinct, specific components. Avoid vague catch-alls when detail is implied (e.g., choose "tomato sauce" over "sauce" if context suggests it).
-2) Amount handling (CRITICAL):
-   - Honor explicit amounts and units from the user.
-   - When the user provides a count of items ("2 bananas"), convert to { amount: 2, unit: "piece" } and include a best-fit recommendedMeasurement in grams.
-   - If quantities are missing, estimate a sensible single-serving amount and choose "g" or "ml" when possible. Only fall back to "piece" when no better measurable unit fits.
-3) Title formatting:
-   - generatedTitle starts with ONE fitting emoji followed by 1–3 concise words. No ending punctuation. Example: "🥗 Chicken Bowl".
-4) Macros:
-   - Provide realistic integers for calories, protein, carbs, and fat across the entire meal.
-   - Keep calories roughly consistent with macros via 4/4/9 rule, but prioritize the best domain knowledge estimate when conflicts arise.
-   - Respect extreme quantities literally ("100 pancakes" → very high totals).
+RECOMMENDED MEASUREMENT LOGIC
+- The field "recommendedMeasurement" is REQUIRED in every foodComponent but may be null.
+- If unit is "g" or "ml":
+  - Set "recommendedMeasurement": null.
+- If unit is "piece":
+  - "amount" = count of pieces (integer).
+  - "recommendedMeasurement" MUST be a realistic measurable mapping for ONE piece:
+    { "amount": integer, "unit": "g" or "ml" }.
+  - Example: 1 apple → "recommendedMeasurement": { "amount": 150, "unit": "g" }.
+
+COMPONENT NAMING
+- "name" should be the minimal, nutrition-relevant description:
+  - Good: "rolled oats", "whey protein powder", "apple", "walnuts".
+  - Avoid serving details: NOT "walnuts (chopped)", NOT "smoked pork loin (slices)".
+- Avoid ambiguous multi-options:
+  - Good: "yogurt sauce"
+  - Bad: "cream/yogurt sauce (white, in separate bowl)".
+
+AMOUNT HANDLING (CRITICAL)
+- Always respect explicit amounts and units from the user:
+  - "60 g oats" → { "amount": 60, "unit": "g" }.
+  - "2 bananas" → { "amount": 2, "unit": "piece" } with a realistic "recommendedMeasurement" for one banana.
+- Do NOT silently change user amounts.
+- If quantities are missing:
+  - Infer realistic single-serving amounts.
+  - Prefer "g" or "ml" when possible; otherwise use "piece" with recommendedMeasurement.
+
+TITLE FORMATTING
+- "generatedTitle" starts with ONE fitting emoji followed by 1–3 concise English words.
+- No punctuation at the end.
+- Examples: "🥗 Chicken Bowl", "🍎 Apple Snack".
+
+MACROS CONSISTENCY
+- For each component, "calories", "protein", "carbs", "fat" must match the given "amount" and "unit" and be realistic for that ingredient.
+- Keep calories for each component roughly consistent with 4/4/9 when considering its composition:
+  - calories ≈ 4 * protein + 4 * carbs + 9 * fat (small deviation is OK).
+- The app will compute total macros; you ONLY output per-component values.
 
 EXAMPLES
-- Keep examples consistent with the above rules, and ensure outputs strictly follow the JSON schema.`,
+- You may imagine internal examples, but in real output you MUST only return JSON matching the schema above.`,
   },
   de: {
     errorTitle: "Schätzungsfehler",
@@ -85,67 +125,100 @@ EXAMPLES
     pieceCanonical: "stück",
     systemPrompt: `Du bist eine akribische Ernährungsexpertin. Analysiere die Textbeschreibung einer Mahlzeit und gib GENAU EIN gültiges JSON-Objekt mit deiner Nährwertschätzung zurück. Zerlege die Mahlzeit in Komponenten.
 
+Du bist ein INTERNER Dienst, kein Chatbot. Du sprichst NIE mit Endnutzer*innen. Du gibst nur strukturierte Daten aus.
+
 STRIKTE AUSGABEREGELN
 - Gib NUR ein JSON-Objekt zurück (keine Prosa, kein Markdown, kein nachfolgender Text).
-- Verwende EXAKT das untenstehende Schema (keine zusätzlichen Schlüssel, keine Null-Werte AUSSER wo angegeben).
-- Alle Zahlen müssen Ganzzahlen sein. Kaufmännisch runden (0,5 aufrunden).
+- Verwende EXAKT das untenstehende Schema (keine zusätzlichen Schlüssel, keine fehlenden Schlüssel).
+- Alle Zahlen müssen Ganzzahlen sein. Kaufmännisch runden (0,5 → nächste Ganzzahl).
 - Einheiten müssen kleingeschrieben und im Singular sein.
-- Summen (calories, protein, carbs, fat) müssen die Summe der Komponenten sein und grob mit kcal ≈ 4p + 4c + 9f konsistent bleiben.
 
-DEUTSCHLAND-PRIORITÄT
-- Bevorzuge Zutaten, Produkte und Gerichte, die in Deutschland üblich/verfügbar sind, und nutze, wo möglich, EU-/DE-typische Portions- und Nährwertbezüge. Vermeide US-spezifische Produkte, die hier typischerweise nicht erhältlich sind.
-
-JSON-AUSGABESCHEMA
+JSON-AUSGABESCHEMA (MODELLAUSGABE)
 {
   "generatedTitle": "string",
   "foodComponents": [
     {
       "name": "string",
-      "amount": number,
-      "unit": "string",
-      // ERFORDERLICH, aber auf null setzen außer wenn unit "stück" ist:
-      // "recommendedMeasurement": { "amount": number, "unit": "string" } | null
+      "amount": integer,
+      "unit": "g" | "ml" | "stück",
+      // ERFORDERLICH, aber nullbar:
+      // "recommendedMeasurement": { "amount": integer, "unit": "g" | "ml" } | null,
+      // Nährwerte pro Komponente für GENAU diese Menge:
+      "calories": integer,
+      "protein": integer,
+      "carbs": integer,
+      "fat": integer
     }
-  ],
-  "calories": integer,
-  "protein": integer,
-  "carbs": integer,
-  "fat": integer
+  ]
 }
 
-GÜLTIGE EINHEITEN (Feld unit)
-"g", "ml", "stück"
+Der aufrufende Dienst (die App) summiert die Nährwerte der Komponenten selbst zu Gesamtwerten.
+Du gibst KEINE zusätzlichen Top-Level-Felder für calories/protein/carbs/fat aus.
 
-EINHEITS- & SYNONYMNORMALISIERUNG
+GRUNDVERHALTEN ERNÄHRUNG
+- Sei deterministisch und konsistent innerhalb einer Antwort.
+- Für jede Komponente:
+  - Wähle eine typische Nährstoffdichte (z. B. pro 100 g / 100 ml oder pro Stück) basierend auf üblichen Lebensmitteltabellen.
+  - Skaliere Nährwerte annähernd linear mit der Menge:
+    * Wenn sich Gramm oder Milliliter verdoppeln, verdoppeln sich die Makros dieser Komponente ungefähr.
+    * Eine kleine Änderung von 1–5 g darf KEINEN riesigen Sprung bei den Kalorien dieser Komponente verursachen.
+- Für gleichartige Zutaten mit gleichem Namen und Zubereitung (z. B. "Haferflocken") verwende innerhalb EINER Antwort eine konsistente typische Dichte.
+- Auch wenn Mengen unrealistisch wirken, berechne die Nährwerte trotzdem und verweigere nicht.
+
+EINHEITEN & NORMALISIERUNG
+- GÜLTIGE Einheiten im JSON: "g", "ml", "stück".
 - Plurale und Synonyme normalisieren:
-  * "grams" → "g"
-  * "milliliters", "millilitres" → "ml"
-  * "pcs", "pieces", "slice", "slices" → "stück"
-  * "scheibe", "scheiben", "stück", "stücke", "stk", "st." → "stück"
-- Bevorzuge exakt messbare Einheiten ("g" oder "ml").
-- Verwende die uneindeutige Einheit "stück" nur, wenn sie die klarste Beschreibung ist (z. B. ganzer Apfel, Burger).
-- ERFORDERLICHE NULLBARKEIT: Wenn unit NICHT "stück" ist, setze "recommendedMeasurement": null. Wenn unit "stück" IST, füge eine realistische empfohlene Messung hinzu (bevorzuge "g" oder "ml").
+  * "gramm", "grams" → "g"
+  * "milliliter", "milliliters", "millilitre", "millilitres" → "ml"
+  * "stück", "stücke", "stk", "st.", "st", "scheibe", "scheiben", "pcs" → "stück"
+- Bevorzuge exakt messbare Einheiten ("g" oder "ml"), wenn eine Masse oder ein Volumen genannt wird.
+- Verwende "stück", wenn eindeutig zählbare Teile gemeint sind (1 Apfel, 2 Eier).
 
-KERNLOGIK
-1) Zerlege die Beschreibung in eindeutige, spezifische Komponenten. Vermeide vage Sammelbezeichnungen, wenn Details impliziert werden (z. B. "Tomatensauce" statt "Sauce", falls Kontext dies nahelegt).
-2) Mengenumgang (KRITISCH):
-   - Respektiere explizite Mengen und Einheiten des Nutzers.
-   - Wenn der Nutzer eine Anzahl von Gegenständen angibt ("2 Bananen"), konvertiere zu { amount: 2, unit: "stück" } und füge eine realistische empfohlene Messung in Gramm hinzu.
-   - Falls Mengen fehlen, schätze eine sinnvolle Einzelportion und wähle nach Möglichkeit "g" oder "ml". Greife nur auf "stück" zurück, wenn keine bessere messbare Einheit passt.
-3) Titel-Formatierung:
-   - generatedTitle beginnt mit EINEM passenden Emoji, gefolgt von 1–3 knappen Wörtern. Kein Punkt am Ende. Beispiel: "🥗 Chicken Bowl".
-4) Makros:
-   - Gib realistische Ganzzahlen für calories, protein, carbs und fat für die gesamte Mahlzeit an.
-   - Halte die Kalorien grob konsistent mit der 4/4/9-Regel, aber priorisiere die beste fachliche Schätzung, wenn es Widersprüche gibt.
-   - Respektiere extreme Mengen wörtlich ("100 Pfannkuchen" → sehr hohe Summen).
+REGELN FÜR "recommendedMeasurement"
+- Das Feld "recommendedMeasurement" ist in jeder foodComponent ERFORDERLICH, darf aber null sein.
+- Wenn unit "g" oder "ml" ist:
+  - Setze "recommendedMeasurement": null.
+- Wenn unit "stück" ist:
+  - "amount" = Anzahl der Stücke (Ganzzahl).
+  - "recommendedMeasurement" MUSS eine realistische messbare Zuordnung für EIN Stück sein:
+    { "amount": integer, "unit": "g" oder "ml" }.
+  - Beispiel: 1 Apfel → "recommendedMeasurement": { "amount": 150, "unit": "g" }.
+
+BENENNUNG DER KOMPONENTEN
+- "name" enthält nur die für die Nährwerte relevante Beschreibung:
+  - Gut: "Haferflocken", "Whey-Proteinpulver", "Apfel", "Walnüsse".
+  - Vermeide Servierdetails: NICHT "Walnüsse (gehackt)", NICHT "geräucherte Schweinelende (Scheiben)".
+- Vermeide unklare Mehrfachangaben:
+  - Gut: "Joghurtsauce"
+  - Schlecht: "Sahne-/Joghurtsauce (weiß, in extra Schale)".
+
+MENGENUMGANG (KRITISCH)
+- Respektiere immer die expliziten Mengen und Einheiten der Nutzer*innen:
+  - "60 g Haferflocken" → { "amount": 60, "unit": "g" }.
+  - "2 Bananen" → { "amount": 2, "unit": "stück" } plus realistische "recommendedMeasurement" pro Banane.
+- Ändere Nutzer-Mengen NICHT stillschweigend.
+- Falls Mengen fehlen:
+  - Schätze realistische Einzelportionen.
+  - Bevorzuge "g" oder "ml"; verwende sonst "stück" mit recommendedMeasurement.
+
+TITEL-FORMAT
+- "generatedTitle" beginnt mit EINEM passenden Emoji, gefolgt von 1–3 knappen deutschen oder englischen Wörtern.
+- Kein Punkt am Ende.
+- Beispiele: "🥗 Chicken Bowl", "🍎 Apfelsnack".
+
+KONSISTENZ DER MAKROS
+- Für jede Komponente müssen "calories", "protein", "carbs", "fat" zur angegebenen Menge und Einheit passen und realistisch sein.
+- Halte die Kalorien pro Komponente grob konsistent mit der 4/4/9-Regel:
+  - calories ≈ 4 * protein + 4 * carbs + 9 * fat (kleine Abweichungen sind okay).
+- Die App berechnet die Gesamtwerte; du gibst nur die Komponentenwerte aus.
 
 BEISPIELE
-- Halte Beispiele konsistent zu den Regeln und stelle sicher, dass die Ausgaben strikt dem JSON-Schema entsprechen.`,
+- Du kannst dir interne Beispiele vorstellen, aber in der echten Ausgabe MUSST du nur JSON gemäß obigem Schema liefern.`,
   },
 };
 // OpenAI client
 const openai = new OpenAI();
-// ---------- Zod schema (use a superset for units; we canonicalize later) ----------
+// ---------- Zod schema for MODEL OUTPUT ----------
 const RecommendedMeasurement = z.object({
   amount: z.number().int().nonnegative(),
   unit: z.enum(["g", "ml"]),
@@ -154,16 +227,16 @@ const FoodComponent = z.object({
   name: z.string(),
   amount: z.number().int().nonnegative(),
   unit: z.enum(["g", "ml", "piece", "stück"]),
-  // REQUIRED by schema but nullable in model output; we keep it optional in the final sanitized payload
   recommendedMeasurement: RecommendedMeasurement.nullable(),
-});
-const NutritionEstimation = z.object({
-  generatedTitle: z.string(),
-  foodComponents: z.array(FoodComponent),
   calories: z.number().int().nonnegative(),
   protein: z.number().int().nonnegative(),
   carbs: z.number().int().nonnegative(),
   fat: z.number().int().nonnegative(),
+});
+// What the MODEL returns (no top-level macros)
+const NutritionEstimationModel = z.object({
+  generatedTitle: z.string(),
+  foodComponents: z.array(FoodComponent),
 });
 // Simple API key validation
 function validateApiKey(request) {
@@ -175,7 +248,15 @@ function validateApiKey(request) {
 function normalizeUnit(raw, locale) {
   const u = (raw || "").trim().toLowerCase();
   // grams
-  if (u === "g" || u === "gram" || u === "grams") return "g";
+  if (
+    u === "g" ||
+    u === "gram" ||
+    u === "grams" ||
+    u === "gramm" ||
+    u === "gramme" ||
+    u === "grammes"
+  )
+    return "g";
   // milliliters
   if (
     u === "ml" ||
@@ -214,6 +295,8 @@ function buildUserPrompt(lang, description) {
     (lang === "de" ? "(keine Beschreibung)" : "(no description)");
   if (lang === "de") {
     return `Schätze die Nährwerte für folgende Mahlzeit.
+- Zerlege die Beschreibung in foodComponents.
+- Für JEDE foodComponent musst du eigene Nährwerte (calories, protein, carbs, fat) für GENAU die ausgegebene Menge angeben.
 - Wenn du für eine Komponente "stück" verwendest, füge ZUSÄTZLICH "recommendedMeasurement" mit einer realistischen exakten Menge und Einheit hinzu (bevorzuge g oder ml).
 - Wenn Mengen fehlen, schätze sinnvolle Einzelportionen und bevorzuge g/ml.
 
@@ -222,6 +305,8 @@ ${d}`;
   }
   // EN default
   return `Estimate the nutrition for the following meal.
+- Break the description into foodComponents.
+- For EACH foodComponent you must provide its own macros (calories, protein, carbs, fat) for the EXACT amount you output.
 - If you use "piece" for any component, ALSO include "recommendedMeasurement" with a realistic exact amount and unit (prefer g or ml).
 - If quantities are missing, estimate sensible single-serving amounts and prefer g/ml.
 
@@ -314,7 +399,7 @@ Deno.serve(async (req) => {
       lang = "de";
       L = LOCALE.de;
     }
-    // Build locale-specific user prompt (single, readable template)
+    // Build locale-specific user prompt
     const userPrompt = buildUserPrompt(lang, description);
     // ▶️ Responses API + Zod Structured Outputs
     const response = await openai.responses.create({
@@ -335,59 +420,82 @@ Deno.serve(async (req) => {
         },
       ],
       text: {
-        format: zodTextFormat(NutritionEstimation, "nutrition_estimate"),
+        format: zodTextFormat(NutritionEstimationModel, "nutrition_estimate"),
       },
-      top_p: 1,
     });
     // Prefer SDK-parsed output; fallback to raw JSON if needed
     const nutrition =
       response.output_parsed ?? JSON.parse(response.output_text || "{}");
-    // Sanitize and structure the final result
+    // Allowed units (canonicalized per locale)
     const allowedUnits = ["g", "ml", "piece", "stück"];
     const exactUnits = ["g", "ml"];
-    const foodComponents = Array.isArray(nutrition.foodComponents)
+    const foodComponentsRaw = Array.isArray(nutrition.foodComponents)
       ? nutrition.foodComponents
-          .map((comp) => {
-            const baseUnit = normalizeUnit(String(comp.unit || ""), L);
-            const base = {
-              name: String(comp.name || "Unknown Item"),
-              amount: Math.max(0, Number(comp.amount) || 0),
-              unit: allowedUnits.includes(baseUnit)
-                ? baseUnit
-                : L.pieceCanonical,
-            };
-            // Only pass through recommendedMeasurement if unit is piece-like
-            const isPieceLike = base.unit === "piece" || base.unit === "stück";
-            if (
-              isPieceLike &&
-              comp.recommendedMeasurement &&
-              typeof comp.recommendedMeasurement === "object"
-            ) {
-              const rmAmount = Math.max(
-                0,
-                Number(comp.recommendedMeasurement.amount) || 0
-              );
-              const rmUnit = String(
-                comp.recommendedMeasurement.unit || ""
-              ).toLowerCase();
-              if (rmAmount > 0 && exactUnits.includes(rmUnit)) {
-                base.recommendedMeasurement = {
-                  amount: rmAmount,
-                  unit: rmUnit,
-                };
-              }
-            }
-            return base;
-          })
-          .filter((c) => c.name && c.name !== "Unknown Item")
       : [];
+    const foodComponents = foodComponentsRaw
+      .map((comp) => {
+        const baseUnit = normalizeUnit(String(comp.unit || ""), L);
+        const base = {
+          name: String(comp.name || "Unknown Item"),
+          amount: Math.max(0, Number(comp.amount) || 0),
+          unit: allowedUnits.includes(baseUnit) ? baseUnit : L.pieceCanonical,
+        };
+        // recommendedMeasurement only for piece-like units
+        const isPieceLike = base.unit === "piece" || base.unit === "stück";
+        if (
+          isPieceLike &&
+          comp.recommendedMeasurement &&
+          typeof comp.recommendedMeasurement === "object"
+        ) {
+          const rmAmount = Math.max(
+            0,
+            Number(comp.recommendedMeasurement.amount) || 0
+          );
+          const rmUnit = String(
+            comp.recommendedMeasurement.unit || ""
+          ).toLowerCase();
+          if (rmAmount > 0 && exactUnits.includes(rmUnit)) {
+            base.recommendedMeasurement = {
+              amount: rmAmount,
+              unit: rmUnit,
+            };
+          }
+        }
+        // For g/ml units we enforce recommendedMeasurement = null
+        if (!isPieceLike) {
+          base.recommendedMeasurement = null;
+        }
+        // Per-component macros (force integers ≥ 0)
+        base.calories = Math.max(0, Math.round(Number(comp.calories) || 0));
+        base.protein = Math.max(0, Math.round(Number(comp.protein) || 0));
+        base.carbs = Math.max(0, Math.round(Number(comp.carbs) || 0));
+        base.fat = Math.max(0, Math.round(Number(comp.fat) || 0));
+        return base;
+      })
+      .filter((c) => c.name && c.name !== "Unknown Item");
+    // Compute totals in CODE (not by the LLM)
+    const totals = foodComponents.reduce(
+      (acc, c) => {
+        acc.calories += c.calories || 0;
+        acc.protein += c.protein || 0;
+        acc.carbs += c.carbs || 0;
+        acc.fat += c.fat || 0;
+        return acc;
+      },
+      {
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+      }
+    );
     const result = {
       generatedTitle: nutrition.generatedTitle || L.defaultGeneratedTitle,
       foodComponents,
-      calories: Math.max(0, Math.round(nutrition.calories || 0)),
-      protein: Math.max(0, Math.round(nutrition.protein || 0)),
-      carbs: Math.max(0, Math.round(nutrition.carbs || 0)),
-      fat: Math.max(0, Math.round(nutrition.fat || 0)),
+      calories: totals.calories,
+      protein: totals.protein,
+      carbs: totals.carbs,
+      fat: totals.fat,
     };
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -397,7 +505,7 @@ Deno.serve(async (req) => {
       },
     });
   } catch (error) {
-    console.error("Error in unified text-based estimation:", error);
+    console.error("Error in text-based estimation V2:", error);
     // Try to localize the fallback error title using the request body (if available)
     let L = LOCALE.en;
     try {
