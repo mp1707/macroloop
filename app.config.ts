@@ -18,6 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: SCHEME,
   ios: {
     supportsTablet: true,
+    buildNumber: "25",
     infoPlist: {
       // Permission descriptions are handled by the plugins below.
       ITSAppUsesNonExemptEncryption: false,
