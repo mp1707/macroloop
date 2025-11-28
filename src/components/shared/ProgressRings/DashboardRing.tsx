@@ -374,6 +374,12 @@ export const DashboardRing: React.FC<DashboardRingProps> = ({
   const tipY = useSharedValue(0);
   const tipOpacity = useSharedValue(0);
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     if (skipAnimation) {
       // Skip animation: set value instantly
@@ -444,6 +450,10 @@ export const DashboardRing: React.FC<DashboardRingProps> = ({
     top: tipY.value - backgroundSize / 2,
     opacity: tipOpacity.value,
   }));
+
+  if (!isMounted) {
+    return <View style={styles.wrapper} />;
+  }
 
   return (
     <View style={styles.wrapper} testID={testID}>
@@ -524,6 +534,7 @@ const createStyles = (size: number, theme: Theme) =>
       alignItems: "center",
       justifyContent: "center",
       width: size,
+      height: size,
     },
     canvasContainer: {
       width: size,
