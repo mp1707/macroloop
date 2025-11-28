@@ -20,7 +20,9 @@
       "unit": "Gramm",
       "unitShort": "g"
     },
-    "of": "von"
+    "of": "von",
+    "left": "übrig",
+    "over": "drüber"
   },
   "common": {
     "loading": "Wird geladen …",
@@ -486,7 +488,7 @@
         "sections": {
           "hitTarget": {
             "title": "Triff dein Tagesziel",
-            "body": "Halte jeden Tag eine konstante Basis, damit Energie und Mahlzeiten sättigend bleiben. Dieser Wert dient nur als Basis und darf jederzeit überschritten werden solange die Gesamtkalorien eingehalten werden."
+            "body": "Halte jeden Tag eine konstante Basis, damit Energie und Mahlzeiten sättigend bleiben. Ideal sind 20-35 % der Gesamtkalorien. Wir zeigen 20 % als zu erreichendes Minimum an. Dieser Wert darf jederzeit überschritten werden, solange die Gesamtkalorien eingehalten werden."
           },
           "why": {
             "title": "Darum ist es wichtig",

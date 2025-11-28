@@ -40,18 +40,16 @@ export const PortionSlider: React.FC<PortionSliderProps> = ({
           })}
         </AppText>
       </View>
-      <View style={styles.sliderContainer}>
-        <Host matchContents>
-          <Slider
-            value={value}
-            min={0}
-            max={100}
-            steps={19}
-            color={colors.accent}
-            onValueChange={handleValueChange}
-          />
-        </Host>
-      </View>
+      <Host matchContents>
+        <Slider
+          value={value}
+          min={0}
+          max={100}
+          steps={19}
+          color={colors.accent}
+          onValueChange={handleValueChange}
+        />
+      </Host>
     </Animated.View>
   );
 };

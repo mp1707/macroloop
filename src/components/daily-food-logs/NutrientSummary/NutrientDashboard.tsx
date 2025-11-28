@@ -1,5 +1,11 @@
-import React, { useMemo, useEffect } from "react";
-import { View, StyleSheet, Pressable, useWindowDimensions } from "react-native";
+import React, { useMemo, useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  useWindowDimensions,
+  Alert,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,8 +31,11 @@ import {
   type NutrientKey,
 } from "./utils/constants";
 import { getNutrientIcon } from "./utils/nutrientFormatters";
-import { Flame, BicepsFlexed } from "lucide-react-native";
+import { Flame, BicepsFlexed, CircleQuestionMark } from "lucide-react-native";
 import { hasNoDailyTargets } from "@/utils";
+import { Button, Host, Image } from "@expo/ui/swift-ui";
+import { frame } from "@expo/ui/swift-ui/modifiers";
+import { AnimatedPressable } from "@/components/shared/AnimatedPressable";
 
 const ICON_SIZE = 18;
 
@@ -58,6 +67,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { width: screenWidth } = useWindowDimensions();
+  const [showDelta, setShowDelta] = useState(true);
 
   // Get translated nutrient labels
   const NUTRIENT_LABELS = getNutrientLabels(t);
@@ -177,6 +187,23 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
 
   return (
     <View style={styles.container}>
+      <View style={styles.headerIconRow}>
+        <AnimatedPressable
+          onPress={() => handleOpenExplainer("calories")}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={t("explainer.macros.overview.title")}
+        >
+          <Host style={{ flex: 1 }} matchContents>
+            <Image
+              systemName={"questionmark.circle"}
+              color={colors.secondaryText}
+              size={18}
+            />
+          </Host>
+        </AnimatedPressable>
+      </View>
+
       <View style={styles.ringRow}>
         {RING_KEYS.map((ringKey, index) => {
           const ringConfig = RING_CONFIG.find((item) => item.key === ringKey)!;
@@ -184,15 +211,26 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
           const { handlePressIn, handlePressOut, pressAnimatedStyle } =
             ringPressAnimations[ringKey];
           const ringTarget = labelTargets[ringKey];
-          const ringDetailValue =
-            typeof ringTarget === "number"
-              ? `${t("nutrients.of")} ${ringTarget}`
-              : undefined;
+          let ringDetailValue: string | undefined;
+
+          if (typeof ringTarget === "number") {
+            if (showDelta) {
+              const delta = ringTarget - (staticTotals[ringKey] || 0);
+              const suffix =
+                delta >= 0 ? t("nutrients.left") : t("nutrients.over");
+              ringDetailValue = `${Math.abs(delta)} ${suffix}`;
+            } else {
+              ringDetailValue = `${t("nutrients.of")} ${ringTarget}`;
+            }
+          }
+
           const ringIcon = ringKey === "calories" ? Flame : BicepsFlexed;
 
           const ringTotal = staticTotals[ringKey];
           const accessibilityLabel = ringTarget
-            ? `${ringConfig.label} ${ringTotal} ${t("nutrients.of")} ${ringTarget}`
+            ? `${ringConfig.label} ${ringTotal} ${t(
+                "nutrients.of"
+              )} ${ringTarget}`
             : `${ringConfig.label} ${ringTotal}`;
 
           return (
@@ -208,7 +246,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
                 accessibilityRole="button"
                 accessibilityLabel={accessibilityLabel}
                 accessibilityHint={t("nutrients.tapToViewDetails")}
-                onPress={() => handleOpenExplainer(ringKey)}
+                onPress={() => setShowDelta((prev) => !prev)}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
                 style={styles.ringPressable}
@@ -257,7 +295,6 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
             semanticColor={semanticColors.fat}
             showProgressBar
             animatedProgressWidth={fatProgressWidth}
-            onPress={() => handleOpenExplainer("fat")}
           />
           <MacroGridCell
             nutrientKey="carbs"
@@ -265,7 +302,6 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
             accessibilityTotal={staticTotals.carbs}
             unit={NUTRIENT_LABELS.carbs.unit}
             semanticColor={semanticColors.carbs}
-            onPress={() => handleOpenExplainer("carbs")}
           />
         </View>
       </View>
@@ -317,15 +353,17 @@ const MacroGridCell: React.FC<MacroGridCellProps> = ({
   const config = NUTRIENT_LABELS[nutrientKey];
 
   // Create accessibility label with current and target values
-  const totalValue = accessibilityTotal ??
+  const totalValue =
+    accessibilityTotal ??
     (typeof total === "number"
       ? Math.round(total)
       : typeof total === "string"
       ? total
       : "");
-  const accessibilityLabel = target != null
-    ? `${config.label} ${totalValue} ${t("nutrients.of")} ${target} ${unit}`
-    : `${config.label} ${totalValue} ${unit}`;
+  const accessibilityLabel =
+    target != null
+      ? `${config.label} ${totalValue} ${t("nutrients.of")} ${target} ${unit}`
+      : `${config.label} ${totalValue} ${unit}`;
 
   // Only use getNutrientIcon for calories and protein (rings)
   const IconComponent =
@@ -483,6 +521,12 @@ const createGridCellStyles = (theme: Theme) =>
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
+    headerIconRow: {
+      position: "absolute",
+      top: theme.spacing.xs,
+      right: theme.spacing.lg,
+      zIndex: 10,
+    },
     container: {
       paddingHorizontal: theme.spacing.md,
       paddingTop: theme.spacing.xs,

@@ -31,8 +31,6 @@ export const useNutrientNavigation = ({
 
   const handleOpenExplainer = useCallback(
     (nutrient: NutrientKey) => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
       // Pass all macro data to the explainer screen so each component gets correct values
       const params = new URLSearchParams({
         // Calories data

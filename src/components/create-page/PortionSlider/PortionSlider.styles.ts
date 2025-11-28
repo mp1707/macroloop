@@ -20,7 +20,4 @@ export const createStyles = (theme: Theme, colors: Colors) =>
       color: colors.primaryText,
       fontWeight: "600",
     },
-    sliderContainer: {
-      paddingHorizontal: theme.spacing.sm,
-    },
   });

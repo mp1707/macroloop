@@ -20,7 +20,9 @@
       "unit": "grams",
       "unitShort": "g"
     },
-    "of": "of"
+    "of": "of",
+    "left": "left",
+    "over": "over"
   },
   "common": {
     "loading": "Loading…",
@@ -486,7 +488,7 @@
         "sections": {
           "hitTarget": {
             "title": "Hit your daily target",
-            "body": "Keep a steady baseline each day so energy and meals stay satisfying. This value serves only as a baseline and may be exceeded at any time as long as total calories are maintained."
+            "body": "Keep a steady baseline each day so energy and meals stay satisfying. Ideally, fat should make up 20-35% of your total calories. We display 20% as a minimum baseline to reach, which may be exceeded at any time as long as total calories are maintained."
           },
           "why": {
             "title": "Why it matters",
