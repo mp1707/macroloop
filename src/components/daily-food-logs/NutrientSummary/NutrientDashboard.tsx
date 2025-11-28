@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef, useState } from "react";
+import React, { useMemo, useEffect } from "react";
 import { View, StyleSheet, Pressable, useWindowDimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -9,7 +9,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { Theme, useTheme } from "@/theme";
-import { useSegments } from "expo-router";
 import { SetGoalsCTA } from "./SetGoalsCTA";
 import { AppText } from "@/components";
 import { AnimatedText } from "@/components/shared/AnimatedText";
@@ -17,6 +16,7 @@ import { DashboardRing } from "@/components/shared/ProgressRings";
 import { useNutrientCalculations } from "./hooks/useNutrientCalculations";
 import { useNutrientAnimations } from "./hooks/useNutrientAnimations";
 import { useNutrientNavigation } from "./hooks/useNutrientNavigation";
+import { useRingSynchronization } from "./hooks/useRingSynchronization";
 import { usePressAnimation } from "@/hooks/usePressAnimation";
 import {
   getRingConfig,
@@ -69,59 +69,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
   // Scale stroke width proportionally (maintaining ~0.12 ratio from original 22/184)
   const strokeWidth = useMemo(() => Math.max(ringSize * 0.12, 18), [ringSize]);
 
-  const segments = useSegments();
-  const isInsideTabs = useMemo(
-    () => Boolean(segments?.includes("(tabs)")),
-    [segments]
-  );
-  const activeTab = useMemo(() => {
-    if (!segments?.length || !isInsideTabs) {
-      return null;
-    }
-
-    const tabsEntryIndex = segments.indexOf("(tabs)");
-
-    return segments[tabsEntryIndex + 1] ?? null;
-  }, [segments, isInsideTabs]);
-
-  const tabStateRef = useRef({
-    initialized: false,
-    previousTab: null as string | null,
-  });
-  const [shouldInstantlySyncRings, setShouldInstantlySyncRings] = useState(false);
-
-  useEffect(() => {
-    if (!activeTab) {
-      return;
-    }
-
-    if (!tabStateRef.current.initialized) {
-      tabStateRef.current.initialized = true;
-      tabStateRef.current.previousTab = activeTab;
-      return;
-    }
-
-    if (tabStateRef.current.previousTab !== activeTab) {
-      const isReturningToLoggingTab = activeTab === "index";
-      tabStateRef.current.previousTab = activeTab;
-
-      if (isReturningToLoggingTab) {
-        setShouldInstantlySyncRings(true);
-      }
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (!shouldInstantlySyncRings) {
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      setShouldInstantlySyncRings(false);
-    }, 0);
-
-    return () => clearTimeout(timeout);
-  }, [shouldInstantlySyncRings]);
+  const { shouldInstantlySyncRings, mountKey } = useRingSynchronization();
 
   const semanticColors = useMemo(
     () =>
@@ -248,7 +196,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
             : `${ringConfig.label} ${ringTotal}`;
 
           return (
-            <View key={ringKey} style={styles.ringCell}>
+            <View key={`${ringKey}-${mountKey}`} style={styles.ringCell}>
               <AppText
                 role="Subhead"
                 color="secondary"

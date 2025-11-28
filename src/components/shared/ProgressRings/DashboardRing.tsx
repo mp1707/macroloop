@@ -366,8 +366,8 @@ export const DashboardRing: React.FC<DashboardRingProps> = ({
 }) => {
   const { theme, colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
-  const progress = useSharedValue(0);
   const ratio = Math.max(0, (percentage ?? 0) / 100);
+  const progress = useSharedValue(skipAnimation ? ratio : 0);
 
   // Animated values for tip icon position
   const tipX = useSharedValue(0);

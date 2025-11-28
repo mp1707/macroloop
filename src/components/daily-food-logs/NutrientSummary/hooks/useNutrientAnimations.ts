@@ -85,6 +85,7 @@ export const useNutrientAnimations = ({
   return {
     // Date change detection
     dateChanged,
+    selectedDate,
 
     // Icon scales
     proteinIconScale,
