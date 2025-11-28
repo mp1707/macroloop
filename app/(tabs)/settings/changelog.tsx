@@ -26,6 +26,11 @@ const CHANGELOG_DATA_EN: VersionChangelog[] = [
           "Stay on track with your goals using the new trends tab that visualizes your macro progress over time.",
       },
       {
+        title: "Dashboard shows remaining macros",
+        description:
+          "The ring dashboard now displays how many calories and protein you have left until your goal is reached, or how much you're already over. Tap the dashboard to switch to the total goal view.",
+      },
+      {
         title: "Portion slider in creation screen",
         description:
           "The consumed portion slider is now directly available in the food log creation screen, not just in the edit screen after logging.",
@@ -175,6 +180,11 @@ const CHANGELOG_DATA_DE: VersionChangelog[] = [
         title: "Trends-Tab",
         description:
           "Behalte deine Ziele im Blick – der neue Trends-Tab visualisiert deinen Makro-Fortschritt über Zeit.",
+      },
+      {
+        title: "Dashboard zeigt verbleibende Makros",
+        description:
+          "Das Ring-Dashboard zeigt jetzt an, wie viele Kalorien und Protein dir noch bis zum Ziel fehlen oder wie viel du bereits darüber liegst. Tippe auf das Dashboard, um zur Gesamtziel-Ansicht zu wechseln.",
       },
       {
         title: "Portionsregler im Eingabebildschirm",
