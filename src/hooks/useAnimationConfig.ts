@@ -4,11 +4,11 @@ import {
   useDerivedValue,
   withDelay,
   withTiming,
-  runOnJS,
   useAnimatedReaction,
   Easing,
   withSpring,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { useReducedMotion } from "./useReducedMotion";
 
 /**
@@ -93,7 +93,7 @@ export const useNumberReveal = (initial: number) => {
       if (shouldUpdate && rounded !== lastDisplayedValue.value) {
         lastDisplayedValue.value = rounded;
         lastUpdateTime.value = now;
-        runOnJS(setDisplay)(rounded);
+        scheduleOnRN(setDisplay)(rounded);
       }
     },
     [animatedValue, lastDisplayedValue, targetValue, lastUpdateTime]

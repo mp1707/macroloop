@@ -6,8 +6,8 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   withSpring,
-  runOnJS,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/theme";
 import { AppText } from "@/components/shared/AppText";
@@ -82,7 +82,7 @@ export const RulerPicker: React.FC<RulerPickerProps> = ({
       scrollX.value = event.contentOffset.x;
       const index = Math.round(event.contentOffset.x / ITEM_WIDTH);
       const newValue = Math.min(max, Math.max(min, min + (index - 5) * step));
-      runOnJS(setCurrentValue)(newValue);
+      scheduleOnRN(setCurrentValue)(newValue);
     },
   });
 
