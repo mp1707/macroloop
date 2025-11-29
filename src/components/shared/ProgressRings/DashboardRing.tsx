@@ -12,13 +12,13 @@ import {
 } from "@shopify/react-native-skia";
 import {
   SharedValue,
-  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSpring,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import Animated from "react-native-reanimated";
 
 import { AppText } from "@/components";
@@ -316,7 +316,7 @@ const AnimatedRingLayer: React.FC<AnimatedRingLayerProps> = ({
       if (hasSettled || shouldUpdateQuickly || shouldCatchUp) {
         lastUpdateTime.value = now;
         lastSyncedValue.value = value;
-        runOnJS(updateFromRatio)(value);
+        scheduleOnRN(updateFromRatio)(value);
       }
     },
     [updateFromRatio]

@@ -7,10 +7,10 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
-  runOnJS,
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { lockNav, isNavLocked } from "@/utils/navigationLock";
 import { theme } from "@/theme";
@@ -132,7 +132,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
           () => {
             // Call onDelete at the end of the animation
             // This ensures cleanup happens but animation plays first
-            runOnJS(onDelete)();
+            scheduleOnRN(onDelete)();
           }
         );
       }
@@ -147,7 +147,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
     isRightSwiped.value = false;
 
     // Execute left function action and animate back to center
-    runOnJS(onLeftFunction)();
+    scheduleOnRN(onLeftFunction)();
     translateX.value = withSpring(0, {
       damping: 20,
       stiffness: 300,
@@ -267,10 +267,10 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
           // Only determine horizontal direction after significant movement
           if (absX > DIRECTION_THRESHOLD && absX > absY * 2.5) {
             gestureDirection.value = "horizontal";
-            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+            scheduleOnRN(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
             releasePressFeedback();
             if (onSwipeStart) {
-              runOnJS(onSwipeStart)();
+              scheduleOnRN(onSwipeStart)();
             }
           }
         }
@@ -323,12 +323,12 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
               translationX > ACTION_COMPLETE_THRESHOLD ||
               (translationX > ACTION_THRESHOLD && velocityX > 500)
             ) {
-              runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Heavy);
-              runOnJS(executeLeftFunction)();
+              scheduleOnRN(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Heavy);
+              scheduleOnRN(executeLeftFunction)();
             } else if (translationX > ACTION_THRESHOLD) {
               // Show left function button and set persistent state
               if (!isLeftSwiped.value) {
-                runOnJS(Haptics.impactAsync)(
+                scheduleOnRN(Haptics.impactAsync)(
                   Haptics.ImpactFeedbackStyle.Medium
                 );
                 isLeftSwiped.value = true;
@@ -354,12 +354,12 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
               translationX < -ACTION_COMPLETE_THRESHOLD ||
               (translationX < -ACTION_THRESHOLD && velocityX < -500)
             ) {
-              runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Heavy);
-              runOnJS(executeDelete)();
+              scheduleOnRN(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Heavy);
+              scheduleOnRN(executeDelete)();
             } else if (translationX < -ACTION_THRESHOLD) {
               // Show delete button and set persistent state
               if (!isRightSwiped.value) {
-                runOnJS(Haptics.impactAsync)(
+                scheduleOnRN(Haptics.impactAsync)(
                   Haptics.ImpactFeedbackStyle.Medium
                 );
                 isRightSwiped.value = true;
@@ -440,7 +440,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
               easing: theme.interactions.press.timing.easing,
             },
             () => {
-              runOnJS(triggerTap)();
+              scheduleOnRN(triggerTap)();
             }
           );
         } else {
@@ -467,7 +467,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
         releasePressFeedback();
 
         if (onSwipeEnd) {
-          runOnJS(onSwipeEnd)();
+          scheduleOnRN(onSwipeEnd)();
         }
 
         gestureDirection.value = "unknown";
@@ -475,7 +475,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
       .onTouchesCancelled(() => {
         releasePressFeedback();
         if (onSwipeEnd) {
-          runOnJS(onSwipeEnd)();
+          scheduleOnRN(onSwipeEnd)();
         }
         gestureDirection.value = "unknown";
       });

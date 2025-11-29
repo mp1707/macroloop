@@ -6,8 +6,8 @@ import Animated, {
   withSpring,
   withTiming,
   interpolate,
-  runOnJS,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import * as Haptics from "expo-haptics";
 import { Circle, CircleCheck, LucideIcon } from "lucide-react-native";
 import { Card } from "@/components/Card";
@@ -133,7 +133,7 @@ export const RadioCard: React.FC<RadioCardProps> = ({
         easing: theme.interactions.press.timing.easing,
       },
       () => {
-        runOnJS(triggerSelection)();
+        scheduleOnRN(triggerSelection)();
       }
     );
   };

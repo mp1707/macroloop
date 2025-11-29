@@ -7,8 +7,8 @@ import Animated, {
   withSpring,
   withTiming,
   Easing,
-  runOnJS,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/theme";
@@ -59,7 +59,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         },
         (finished) => {
           if (finished) {
-            runOnJS(setVisible)(false);
+            scheduleOnRN(setVisible)(false);
           }
         }
       );
@@ -87,7 +87,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             easing: Easing.in(Easing.cubic),
           },
           () => {
-            runOnJS(handleClose)();
+            scheduleOnRN(handleClose)();
           }
         );
       } else {

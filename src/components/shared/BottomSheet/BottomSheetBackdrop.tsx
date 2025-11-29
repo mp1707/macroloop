@@ -5,8 +5,8 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   Easing,
-  runOnJS,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 
 interface BottomSheetBackdropProps {
   open: boolean;
@@ -38,7 +38,7 @@ export const BottomSheetBackdrop: React.FC<BottomSheetBackdropProps> = ({
         },
         (finished) => {
           if (finished) {
-            runOnJS(setVisible)(false);
+            scheduleOnRN(setVisible)(false);
           }
         }
       );
