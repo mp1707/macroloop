@@ -133,7 +133,7 @@ export const RadioCard: React.FC<RadioCardProps> = ({
         easing: theme.interactions.press.timing.easing,
       },
       () => {
-        scheduleOnRN(triggerSelection)();
+        scheduleOnRN(triggerSelection);
       }
     );
   };

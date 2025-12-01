@@ -132,7 +132,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
           () => {
             // Call onDelete at the end of the animation
             // This ensures cleanup happens but animation plays first
-            scheduleOnRN(onDelete)();
+            scheduleOnRN(onDelete);
           }
         );
       }
@@ -147,7 +147,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
     isRightSwiped.value = false;
 
     // Execute left function action and animate back to center
-    scheduleOnRN(onLeftFunction)();
+    scheduleOnRN(onLeftFunction);
     translateX.value = withSpring(0, {
       damping: 20,
       stiffness: 300,
@@ -267,10 +267,10 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
           // Only determine horizontal direction after significant movement
           if (absX > DIRECTION_THRESHOLD && absX > absY * 2.5) {
             gestureDirection.value = "horizontal";
-            scheduleOnRN(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+            scheduleOnRN(Haptics.impactAsync, Haptics.ImpactFeedbackStyle.Light);
             releasePressFeedback();
             if (onSwipeStart) {
-              scheduleOnRN(onSwipeStart)();
+              scheduleOnRN(onSwipeStart);
             }
           }
         }
@@ -323,14 +323,12 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
               translationX > ACTION_COMPLETE_THRESHOLD ||
               (translationX > ACTION_THRESHOLD && velocityX > 500)
             ) {
-              scheduleOnRN(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Heavy);
-              scheduleOnRN(executeLeftFunction)();
+              scheduleOnRN(Haptics.impactAsync, Haptics.ImpactFeedbackStyle.Heavy);
+              scheduleOnRN(executeLeftFunction);
             } else if (translationX > ACTION_THRESHOLD) {
               // Show left function button and set persistent state
               if (!isLeftSwiped.value) {
-                scheduleOnRN(Haptics.impactAsync)(
-                  Haptics.ImpactFeedbackStyle.Medium
-                );
+                scheduleOnRN(Haptics.impactAsync, Haptics.ImpactFeedbackStyle.Medium);
                 isLeftSwiped.value = true;
               }
               translateX.value = withSpring(ACTION_BUTTON_WIDTH);
@@ -354,14 +352,12 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
               translationX < -ACTION_COMPLETE_THRESHOLD ||
               (translationX < -ACTION_THRESHOLD && velocityX < -500)
             ) {
-              scheduleOnRN(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Heavy);
-              scheduleOnRN(executeDelete)();
+              scheduleOnRN(Haptics.impactAsync, Haptics.ImpactFeedbackStyle.Heavy);
+              scheduleOnRN(executeDelete);
             } else if (translationX < -ACTION_THRESHOLD) {
               // Show delete button and set persistent state
               if (!isRightSwiped.value) {
-                scheduleOnRN(Haptics.impactAsync)(
-                  Haptics.ImpactFeedbackStyle.Medium
-                );
+                scheduleOnRN(Haptics.impactAsync, Haptics.ImpactFeedbackStyle.Medium);
                 isRightSwiped.value = true;
               }
               translateX.value = withSpring(-ACTION_BUTTON_WIDTH);
@@ -440,7 +436,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
               easing: theme.interactions.press.timing.easing,
             },
             () => {
-              scheduleOnRN(triggerTap)();
+              scheduleOnRN(triggerTap);
             }
           );
         } else {
@@ -467,7 +463,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
         releasePressFeedback();
 
         if (onSwipeEnd) {
-          scheduleOnRN(onSwipeEnd)();
+          scheduleOnRN(onSwipeEnd);
         }
 
         gestureDirection.value = "unknown";
@@ -475,7 +471,7 @@ export const SwipeToFunctions: React.FC<SwipeToFunctionsProps> = ({
       .onTouchesCancelled(() => {
         releasePressFeedback();
         if (onSwipeEnd) {
-          scheduleOnRN(onSwipeEnd)();
+          scheduleOnRN(onSwipeEnd);
         }
         gestureDirection.value = "unknown";
       });

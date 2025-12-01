@@ -82,7 +82,7 @@ export const RulerPicker: React.FC<RulerPickerProps> = ({
       scrollX.value = event.contentOffset.x;
       const index = Math.round(event.contentOffset.x / ITEM_WIDTH);
       const newValue = Math.min(max, Math.max(min, min + (index - 5) * step));
-      scheduleOnRN(setCurrentValue)(newValue);
+      scheduleOnRN(setCurrentValue, newValue);
     },
   });
 

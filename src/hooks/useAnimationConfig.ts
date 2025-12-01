@@ -93,7 +93,7 @@ export const useNumberReveal = (initial: number) => {
       if (shouldUpdate && rounded !== lastDisplayedValue.value) {
         lastDisplayedValue.value = rounded;
         lastUpdateTime.value = now;
-        scheduleOnRN(setDisplay)(rounded);
+        scheduleOnRN(setDisplay, rounded);
       }
     },
     [animatedValue, lastDisplayedValue, targetValue, lastUpdateTime]

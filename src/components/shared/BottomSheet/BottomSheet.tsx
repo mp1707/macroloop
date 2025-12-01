@@ -59,7 +59,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         },
         (finished) => {
           if (finished) {
-            scheduleOnRN(setVisible)(false);
+            scheduleOnRN(setVisible, false);
           }
         }
       );
@@ -87,7 +87,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             easing: Easing.in(Easing.cubic),
           },
           () => {
-            scheduleOnRN(handleClose)();
+            scheduleOnRN(handleClose);
           }
         );
       } else {

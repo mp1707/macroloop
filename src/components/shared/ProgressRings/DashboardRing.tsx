@@ -316,7 +316,7 @@ const AnimatedRingLayer: React.FC<AnimatedRingLayerProps> = ({
       if (hasSettled || shouldUpdateQuickly || shouldCatchUp) {
         lastUpdateTime.value = now;
         lastSyncedValue.value = value;
-        scheduleOnRN(updateFromRatio)(value);
+        scheduleOnRN(updateFromRatio, value);
       }
     },
     [updateFromRatio]

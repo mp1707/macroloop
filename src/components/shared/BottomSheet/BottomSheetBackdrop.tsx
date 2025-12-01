@@ -38,7 +38,7 @@ export const BottomSheetBackdrop: React.FC<BottomSheetBackdropProps> = ({
         },
         (finished) => {
           if (finished) {
-            scheduleOnRN(setVisible)(false);
+            scheduleOnRN(setVisible, false);
           }
         }
       );
