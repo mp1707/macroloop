@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Canvas,
   Rect,
@@ -14,6 +14,9 @@ import {
   interpolate,
   Extrapolation,
   withTiming,
+  useSharedValue,
+  interpolateColor,
+  Easing,
 } from "react-native-reanimated";
 import { ChartConfig, BarData } from "./types";
 import { useTheme } from "@/theme";
@@ -56,6 +59,15 @@ export const ChartCanvas: React.FC<ChartCanvasProps> = ({
     typeof goalRange.max === "number" &&
     config.maxValue > 0;
 
+  const goalRangeTopY =
+    hasGoalRange && goalRange
+      ? config.PADDING.top + config.scaleY(goalRange.max)
+      : undefined;
+  const goalRangeBottomY =
+    hasGoalRange && goalRange
+      ? config.PADDING.top + config.scaleY(goalRange.min)
+      : undefined;
+
   const hasActiveSelection = !!activeBarKey;
 
   return (
@@ -66,67 +78,22 @@ export const ChartCanvas: React.FC<ChartCanvasProps> = ({
           height: config.chartHeight,
         }}
       >
-        {/* Goal Range */}
-        {hasGoalRange && goalRange && (
-          <>
-            <Rect
-              x={theme.spacing.sm}
-              y={config.PADDING.top + config.scaleY(goalRange.max)}
-              width={config.chartWidth - theme.spacing.sm * 2}
-              height={
-                config.scaleY(goalRange.min) - config.scaleY(goalRange.max)
-              }
-              color={color}
-              opacity={0.1}
-            />
-            <Line
-              p1={vec(
-                theme.spacing.sm,
-                config.PADDING.top + config.scaleY(goalRange.max)
-              )}
-              p2={vec(
-                config.chartWidth - theme.spacing.sm,
-                config.PADDING.top + config.scaleY(goalRange.max)
-              )}
-              color={color}
-              style="stroke"
-              strokeWidth={1}
-              opacity={0.3}
-            >
-              <DashPathEffect intervals={[4, 4]} />
-            </Line>
-            <Line
-              p1={vec(
-                theme.spacing.sm,
-                config.PADDING.top + config.scaleY(goalRange.min)
-              )}
-              p2={vec(
-                config.chartWidth - theme.spacing.sm,
-                config.PADDING.top + config.scaleY(goalRange.min)
-              )}
-              color={color}
-              style="stroke"
-              strokeWidth={1}
-              opacity={0.3}
-            >
-              <DashPathEffect intervals={[4, 4]} />
-            </Line>
-          </>
-        )}
+        <AnimatedGoalRange
+          minY={goalRangeBottomY}
+          maxY={goalRangeTopY}
+          isVisible={!!hasGoalRange && !!goalRange}
+          width={config.chartWidth}
+          color={color}
+          paddingHorizontal={theme.spacing.sm}
+        />
 
-        {/* Goal Line */}
-        {!hasGoalRange && goalLineY !== undefined && (
-          <Line
-            p1={vec(theme.spacing.sm, goalLineY)}
-            p2={vec(config.chartWidth - theme.spacing.sm, goalLineY)}
-            color={color}
-            style="stroke"
-            strokeWidth={1}
-            opacity={0.5}
-          >
-            <DashPathEffect intervals={[4, 4]} />
-          </Line>
-        )}
+        <AnimatedGoalLine
+          targetY={goalLineY}
+          isVisible={!hasGoalRange && goalLineY !== undefined}
+          width={config.chartWidth}
+          color={color}
+          paddingHorizontal={theme.spacing.sm}
+        />
 
         {/* Bars */}
         {bars.map((bar) => (
@@ -142,6 +109,186 @@ export const ChartCanvas: React.FC<ChartCanvasProps> = ({
         ))}
       </Canvas>
     </GestureDetector>
+  );
+};
+
+interface AnimatedGoalLineProps {
+  targetY?: number;
+  isVisible: boolean;
+  width: number;
+  color: string;
+  paddingHorizontal: number;
+}
+
+const AnimatedGoalLine: React.FC<AnimatedGoalLineProps> = ({
+  targetY,
+  isVisible,
+  width,
+  color,
+  paddingHorizontal,
+}) => {
+  const y = useSharedValue(targetY || 0);
+  const opacity = useSharedValue(0);
+
+  const prevColor = useSharedValue(color);
+  const nextColor = useSharedValue(color);
+  const colorProgress = useSharedValue(1);
+
+  useEffect(() => {
+    prevColor.value = nextColor.value;
+    nextColor.value = color;
+    colorProgress.value = 0;
+    colorProgress.value = withTiming(1, { duration: 500 });
+  }, [color, prevColor, nextColor, colorProgress]);
+
+  const derivedColor = useDerivedValue(() => {
+    return interpolateColor(
+      colorProgress.value,
+      [0, 1],
+      [prevColor.value, nextColor.value]
+    );
+  });
+
+  useEffect(() => {
+    if (isVisible && targetY !== undefined) {
+      if (opacity.value === 0) {
+        y.value = targetY;
+        opacity.value = withTiming(0.5, { duration: 500 });
+      } else {
+        y.value = withTiming(targetY, { duration: 500 });
+        opacity.value = withTiming(0.5, { duration: 500 });
+      }
+    } else {
+      opacity.value = withTiming(0, { duration: 300 });
+    }
+  }, [targetY, isVisible, y, opacity]);
+
+  // Only render if opacity is > 0 or isVisible
+  // Since we can't easily unmount inside Canvas, we rely on opacity.
+  // We use y.value for position.
+
+  const p1 = useDerivedValue(() => vec(paddingHorizontal, y.value));
+  const p2 = useDerivedValue(() => vec(width - paddingHorizontal, y.value));
+
+  return (
+    <Line
+      p1={p1}
+      p2={p2}
+      color={derivedColor}
+      style="stroke"
+      strokeWidth={1}
+      opacity={opacity}
+    >
+      <DashPathEffect intervals={[4, 4]} />
+    </Line>
+  );
+};
+
+interface AnimatedGoalRangeProps {
+  minY?: number;
+  maxY?: number;
+  isVisible: boolean;
+  width: number;
+  color: string;
+  paddingHorizontal: number;
+}
+
+const AnimatedGoalRange: React.FC<AnimatedGoalRangeProps> = ({
+  minY,
+  maxY,
+  isVisible,
+  width,
+  color,
+  paddingHorizontal,
+}) => {
+  const yMin = useSharedValue(minY || 0);
+  const yMax = useSharedValue(maxY || 0);
+  const opacity = useSharedValue(0);
+
+  const prevColor = useSharedValue(color);
+  const nextColor = useSharedValue(color);
+  const colorProgress = useSharedValue(1);
+
+  useEffect(() => {
+    prevColor.value = nextColor.value;
+    nextColor.value = color;
+    colorProgress.value = 0;
+    colorProgress.value = withTiming(1, { duration: 500 });
+  }, [color, prevColor, nextColor, colorProgress]);
+
+  const derivedColor = useDerivedValue(() => {
+    return interpolateColor(
+      colorProgress.value,
+      [0, 1],
+      [prevColor.value, nextColor.value]
+    );
+  });
+
+  useEffect(() => {
+    if (isVisible && minY !== undefined && maxY !== undefined) {
+      if (opacity.value === 0) {
+        // Appear animation: Expand from center
+        const center = (minY + maxY) / 2;
+        yMin.value = center;
+        yMax.value = center;
+        
+        yMin.value = withTiming(minY, { duration: 500, easing: Easing.out(Easing.quad) });
+        yMax.value = withTiming(maxY, { duration: 500, easing: Easing.out(Easing.quad) });
+        opacity.value = withTiming(1, { duration: 500 });
+      } else {
+        // Update animation
+        yMin.value = withTiming(minY, { duration: 500 });
+        yMax.value = withTiming(maxY, { duration: 500 });
+        opacity.value = withTiming(1, { duration: 300 });
+      }
+    } else {
+      // Disappear animation
+      opacity.value = withTiming(0, { duration: 300 });
+    }
+  }, [minY, maxY, isVisible, yMin, yMax, opacity]);
+
+  const rectY = useDerivedValue(() => yMax.value);
+  const rectHeight = useDerivedValue(() => yMin.value - yMax.value);
+  const rectOpacity = useDerivedValue(() => opacity.value * 0.1);
+  const lineOpacity = useDerivedValue(() => opacity.value * 0.3);
+
+  const topP1 = useDerivedValue(() => vec(paddingHorizontal, yMax.value));
+  const topP2 = useDerivedValue(() => vec(width - paddingHorizontal, yMax.value));
+
+  const bottomP1 = useDerivedValue(() => vec(paddingHorizontal, yMin.value));
+  const bottomP2 = useDerivedValue(() => vec(width - paddingHorizontal, yMin.value));
+
+  return (
+    <>
+      <Rect
+        x={paddingHorizontal}
+        y={rectY}
+        width={width - paddingHorizontal * 2}
+        height={rectHeight}
+        color={derivedColor}
+        opacity={rectOpacity}
+      />
+      <Line
+        p1={topP1}
+        p2={topP2}
+        color={derivedColor}
+        style="stroke"
+        strokeWidth={1}
+        opacity={lineOpacity}
+      >
+        <DashPathEffect intervals={[4, 4]} />
+      </Line>
+      <Line
+        p1={bottomP1}
+        p2={bottomP2}
+        color={derivedColor}
+        style="stroke"
+        strokeWidth={1}
+        opacity={lineOpacity}
+      >
+        <DashPathEffect intervals={[4, 4]} />
+      </Line>
+    </>
   );
 };
 
@@ -162,6 +309,12 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
   isActive,
   hasActiveSelection,
 }) => {
+  const targetHeightSv = useSharedValue(bar.targetHeight);
+
+  useEffect(() => {
+    targetHeightSv.value = withTiming(bar.targetHeight, { duration: 500 });
+  }, [bar.targetHeight, targetHeightSv]);
+
   const height = useDerivedValue(() => {
     const delayFactor = 0.5;
     const barDuration = 0.5;
@@ -176,7 +329,26 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
       Extrapolation.CLAMP
     );
 
-    return localProgress * bar.targetHeight;
+    return localProgress * targetHeightSv.value;
+  });
+
+  const prevColorSv = useSharedValue(bar.color);
+  const nextColorSv = useSharedValue(bar.color);
+  const colorProgress = useSharedValue(1);
+
+  useEffect(() => {
+    prevColorSv.value = nextColorSv.value;
+    nextColorSv.value = bar.color;
+    colorProgress.value = 0;
+    colorProgress.value = withTiming(1, { duration: 500 });
+  }, [bar.color, prevColorSv, nextColorSv, colorProgress]);
+
+  const color = useDerivedValue(() => {
+    return interpolateColor(
+      colorProgress.value,
+      [0, 1],
+      [prevColorSv.value, nextColorSv.value]
+    );
   });
 
   const y = useDerivedValue(() => {
@@ -200,7 +372,7 @@ const AnimatedBar: React.FC<AnimatedBarProps> = ({
       width={bar.width}
       height={height}
       r={bar.rx}
-      color={bar.color}
+      color={color}
       opacity={opacity}
     />
   );

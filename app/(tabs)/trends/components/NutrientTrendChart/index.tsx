@@ -75,7 +75,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
       duration: 800,
       easing: Easing.out(Easing.quad),
     });
-  }, [dailyData, nutrient]);
+  }, [days, dailyData[0]?.dateKey]);
 
   return (
     <View style={styles.container}>
