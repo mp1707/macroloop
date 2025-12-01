@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { StyleSheet, View } from "react-native";
 import {
   BlurMask,
@@ -25,7 +31,12 @@ import { AppText } from "@/components";
 import { AnimatedText } from "@/components/shared/AnimatedText";
 import { Theme, useTheme } from "@/theme";
 import { Flame } from "lucide-react-native";
-import { hexToRgb, rgbToHex, adjustColor, interpolateColor } from "@/utils/colorUtils";
+import {
+  hexToRgb,
+  rgbToHex,
+  adjustColor,
+  interpolateColor,
+} from "@/utils/colorUtils";
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 const TWO_PI = Math.PI * 2;
