@@ -3,13 +3,14 @@
 // Unified IMAGE-based nutrition estimation V2 (DE/EN)
 // - LLM returns per-component macros
 // - Edge function sums components to top-level totals
-// using OpenAI Responses + Zod Structured Outputs
+// - AUTO-DELETION implemented for privacy
 import OpenAI from "jsr:@openai/openai@6.5.0";
 import { z } from "npm:zod@3.25.1";
 import { zodTextFormat } from "jsr:@openai/openai@6.5.0/helpers/zod";
 import { Ratelimit } from "npm:@upstash/ratelimit@2.0.7";
 import { Redis } from "npm:@upstash/redis@1.35.6";
 import { createClient } from "npm:@supabase/supabase-js@2.39.4";
+
 // Supabase client with Service Role key for privileged operations
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -20,6 +21,7 @@ const supabase = createClient(
     },
   }
 );
+
 // Rate limiting
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -27,11 +29,30 @@ const ratelimit = new Ratelimit({
   analytics: true,
   prefix: "@upstash/ratelimit",
 });
+
 // Helper: get client IP (behind proxy)
 function getClientIp(req) {
   const ipHeader = req.headers.get("x-forwarded-for");
   return ipHeader ? ipHeader.split(",")[0].trim() : "unknown";
 }
+
+// --------------------------------------------------------------------------
+// NEW HELPER: Safe Deletion
+// --------------------------------------------------------------------------
+async function cleanupImage(bucket, path) {
+  if (!path) return;
+  try {
+    const { error } = await supabase.storage.from(bucket).remove([path]);
+    if (error) {
+      console.error(`[Cleanup] Failed to delete ${path}:`, error.message);
+    } else {
+      console.log(`[Cleanup] Successfully deleted ${path}`);
+    }
+  } catch (err) {
+    console.error(`[Cleanup] Exception during deletion of ${path}:`, err);
+  }
+}
+
 // Locale bundles (strings + prompts)
 const LOCALE = {
   en: {
@@ -700,8 +721,10 @@ Beispiel 5 – Nicht-Essen:
 `,
   },
 };
+
 // OpenAI client
 const openai = new OpenAI();
+
 // ---------- Zod schema for model output ----------
 const RecommendedMeasurement = z.object({
   amount: z.number().int().nonnegative(),
@@ -722,12 +745,14 @@ const NutritionEstimationModel = z.object({
   generatedTitle: z.string(),
   foodComponents: z.array(FoodComponent),
 });
+
 // Simple API key validation
 function validateApiKey(request) {
   const authHeader = request.headers.get("authorization");
   const apiKeyHeader = request.headers.get("apikey");
   return !!(authHeader?.startsWith("Bearer ") || apiKeyHeader);
 }
+
 // Normalize arbitrary unit strings into canonical per-locale units
 function normalizeUnit(raw, locale) {
   const u = (raw || "").trim().toLowerCase();
@@ -769,6 +794,7 @@ function normalizeUnit(raw, locale) {
   // fall back to canonical piece for the selected locale
   return locale.pieceCanonical;
 }
+
 // Build locale-specific user prompt (single template per locale)
 function buildUserPrompt(lang, title, description) {
   const t =
@@ -796,6 +822,7 @@ Benutzerkontext: ${t} ${d}`;
 
 User context: ${t} ${d}`;
 }
+
 // Main handler
 Deno.serve(async (req) => {
   const identifier = getClientIp(req);
@@ -853,11 +880,19 @@ Deno.serve(async (req) => {
       }
     );
   }
+
+  // Define these variables outside the try block so they are accessible in catch
+  const bucket = "food-images";
+  let imagePath = null;
+  let lang = "en";
+  let L = LOCALE.en;
+
   try {
-    const { imagePath, title, description, language } = await req.json();
+    const body = await req.json();
+    imagePath = body.imagePath;
+    const { title, description, language } = body;
+
     // Locale selection (fallback to EN)
-    let lang = "en";
-    let L = LOCALE.en;
     if (
       typeof language === "string" &&
       language.trim().toLowerCase() === "de"
@@ -865,7 +900,7 @@ Deno.serve(async (req) => {
       lang = "de";
       L = LOCALE.de;
     }
-    const bucket = "food-images";
+
     const expiresIn = 60;
     if (!imagePath?.trim()) {
       return new Response(
@@ -881,6 +916,7 @@ Deno.serve(async (req) => {
         }
       );
     }
+
     // Create a signed URL for the provided image
     const { data, error } = await supabase.storage
       .from(bucket)
@@ -898,8 +934,10 @@ Deno.serve(async (req) => {
       );
     }
     const imageUrl = data.signedUrl;
+
     // Build locale-specific user prompt
     const userPrompt = buildUserPrompt(lang, title, description);
+
     // Call OpenAI Responses API with locale-appropriate system prompt
     const response = await openai.responses.create({
       model: "gpt-5-mini",
@@ -927,12 +965,23 @@ Deno.serve(async (req) => {
         format: zodTextFormat(NutritionEstimationModel, "nutrition_estimate"),
       },
     });
+
+    // -------------------------------------------------------------
+    // SAFE DELETE: IMMEDIATE CLEANUP (Happy Path)
+    // -------------------------------------------------------------
+    // We delete here immediately after OpenAI is done reading the image.
+    // We do NOT wait for parsing or other logic.
+    await cleanupImage(bucket, imagePath);
+    // -------------------------------------------------------------
+
     // Parse structured output
     const nutrition =
       response.output_parsed ?? JSON.parse(response.output_text || "{}");
+
     // Allowed units (accept superset; canonicalize per locale)
     const allowedUnits = ["g", "ml", "piece", "stück"];
     const exactUnits = ["g", "ml"];
+
     // Sanitize components into our final payload (canonicalize units per locale)
     const foodComponentsRaw = Array.isArray(nutrition.foodComponents)
       ? nutrition.foodComponents
@@ -1011,22 +1060,18 @@ Deno.serve(async (req) => {
       },
     });
   } catch (error) {
+    // -------------------------------------------------------------
+    // SAFE DELETE: FAILURE CLEANUP (Error Path)
+    // -------------------------------------------------------------
+    // If OpenAI crashed, we still ensure the image is gone.
+    if (imagePath) {
+      await cleanupImage(bucket, imagePath);
+    }
+    // -------------------------------------------------------------
+
     // In case of any error, fall back to a localized "invalid image" response
     console.warn("Error in image-based estimation V2:", error);
-    // Attempt to detect locale again from body if readable; otherwise default EN
-    let L = LOCALE.en;
-    try {
-      const clone = req.clone();
-      const body = await clone.json();
-      if (
-        typeof body?.language === "string" &&
-        body.language.trim().toLowerCase() === "de"
-      ) {
-        L = LOCALE.de;
-      }
-    } catch (_) {
-      // ignore
-    }
+
     const INVALID_IMAGE_RESPONSE = {
       generatedTitle: L.invalidImageTitle,
       foodComponents: [],
@@ -1036,7 +1081,7 @@ Deno.serve(async (req) => {
       fat: 0,
     };
     return new Response(JSON.stringify(INVALID_IMAGE_RESPONSE), {
-      status: 200,
+      status: 200, // Returning 200 with zero macros is often safer for UI
       headers: {
         "Content-Type": "application/json",
         ...corsHeaders,
