@@ -31,10 +31,8 @@ import {
   type NutrientKey,
 } from "./utils/constants";
 import { getNutrientIcon } from "./utils/nutrientFormatters";
-import { Flame, BicepsFlexed, CircleQuestionMark } from "lucide-react-native";
+import { Flame, BicepsFlexed, Info } from "lucide-react-native";
 import { hasNoDailyTargets } from "@/utils";
-import { Button, Host, Image } from "@expo/ui/swift-ui";
-import { frame } from "@expo/ui/swift-ui/modifiers";
 import { AnimatedPressable } from "@/components/shared/AnimatedPressable";
 
 const ICON_SIZE = 18;
@@ -194,13 +192,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
           accessibilityRole="button"
           accessibilityLabel={t("explainer.macros.overview.title")}
         >
-          <Host style={{ flex: 1 }} matchContents>
-            <Image
-              systemName={"questionmark.circle"}
-              color={colors.secondaryText}
-              size={18}
-            />
-          </Host>
+          <Info size={18} color={colors.secondaryText} />
         </AnimatedPressable>
       </View>
 
