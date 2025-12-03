@@ -46,21 +46,25 @@
 //   "carbs": number,
 //   "fat": number
 // }
+
 import OpenAI from "jsr:@openai/openai@6.5.0";
 import { z } from "npm:zod@3.25.1";
 import { zodTextFormat } from "jsr:@openai/openai@6.5.0/helpers/zod";
 import { Ratelimit } from "npm:@upstash/ratelimit@2.0.7";
 import { Redis } from "npm:@upstash/redis@1.35.6";
+
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(10, "60 s"),
   analytics: true,
   prefix: "@upstash/ratelimit",
 });
-function getClientIp(req) {
+
+function getClientIp(req: Request) {
   const ipHeader = req.headers.get("x-forwarded-for");
   return ipHeader ? ipHeader.split(",")[0].trim() : "unknown";
 }
+
 const LOCALE = {
   en: {
     errorTitle: "Refinement Error",
@@ -294,7 +298,9 @@ AUSGABE
 - Gib KEINE Gesamtwerte für die Mahlzeit aus; der Aufrufer summiert die Komponenten selbst.`,
   },
 };
+
 const openai = new OpenAI();
+
 // ---------- Zod schema for model output ----------
 const RefinedFoodComponent = z.object({
   name: z.string(),
@@ -305,15 +311,21 @@ const RefinedFoodComponent = z.object({
   carbs: z.number().int().nonnegative(),
   fat: z.number().int().nonnegative(),
 });
+
 const RefineOutputModel = z.object({
   foodComponents: z.array(RefinedFoodComponent),
 });
-function validateApiKey(request) {
+
+function validateApiKey(request: Request) {
   const authHeader = request.headers.get("authorization");
   const apiKeyHeader = request.headers.get("apikey");
   return !!(authHeader?.startsWith("Bearer ") || apiKeyHeader);
 }
-function normalizeUnit(raw, locale) {
+
+function normalizeUnit(
+  raw: string,
+  locale: (typeof LOCALE)["en"] | (typeof LOCALE)["de"]
+) {
   const u = (raw || "").trim().toLowerCase();
   if (
     u === "g" ||
@@ -349,10 +361,11 @@ function normalizeUnit(raw, locale) {
     "stueck",
     "stuck",
   ]);
-  if (pieceSynonyms.has(u)) return locale.pieceCanonical ?? "piece";
-  return locale.pieceCanonical ?? "piece";
+  if (pieceSynonyms.has(u)) return (locale as any).pieceCanonical ?? "piece";
+  return (locale as any).pieceCanonical ?? "piece";
 }
-function buildUserPrompt(lang, payload) {
+
+function buildUserPrompt(lang: "en" | "de", payload: any) {
   const json = JSON.stringify(payload, null, 2);
   if (lang === "de") {
     return `Verfeinere die Nährwertberechnung für diese Komponenten.
@@ -365,6 +378,7 @@ function buildUserPrompt(lang, payload) {
 Input (JSON):
 ${json}`;
   }
+
   return `Refine the nutrition calculation for these components.
 
 - When baseline fields (baseAmount/baseUnit/baseCalories/...) are present and usable,
@@ -375,64 +389,45 @@ ${json}`;
 Input (JSON):
 ${json}`;
 }
-Deno.serve(async (req) => {
+
+Deno.serve(async (req: Request) => {
   const identifier = getClientIp(req);
   const { success } = await ratelimit.limit(identifier);
   if (!success) {
-    return new Response(
-      JSON.stringify({
-        error: "AI_ESTIMATION_RATE_LIMIT",
-      }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    return new Response(JSON.stringify({ error: "AI_ESTIMATION_RATE_LIMIT" }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    });
   }
+
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
+
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Only POST method allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({
-        error: "Only POST method allowed",
-      }),
-      {
-        status: 405,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  }
+
   if (!validateApiKey(req)) {
-    return new Response(
-      JSON.stringify({
-        error: "Invalid API key",
-      }),
-      {
-        status: 401,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Invalid API key" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
+
   try {
     const { foodComponents, language } = await req.json();
+
     if (!Array.isArray(foodComponents)) {
       return new Response(
         JSON.stringify({
@@ -440,14 +435,12 @@ Deno.serve(async (req) => {
         }),
         {
           status: 400,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
-    let lang = "en";
+
+    let lang: "en" | "de" = "en";
     let L = LOCALE.en;
     if (
       typeof language === "string" &&
@@ -456,72 +449,73 @@ Deno.serve(async (req) => {
       lang = "de";
       L = LOCALE.de;
     }
-    const payload = {
-      foodComponents,
-    };
+
+    const payload = { foodComponents };
     const userPrompt = buildUserPrompt(lang, payload);
+
     const response = await openai.responses.create({
-      model: "gpt-5-mini",
+      model: "gpt-5.1",
       instructions: L.systemPrompt,
-      reasoning: {
-        effort: "minimal",
-      },
+      reasoning: { effort: "low" },
       input: [
         {
           role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: userPrompt,
-            },
-          ],
+          content: [{ type: "input_text", text: userPrompt }],
         },
       ],
       text: {
         format: zodTextFormat(RefineOutputModel, "nutrition_refine"),
       },
     });
+
     const refineOutput =
       response.output_parsed ?? JSON.parse(response.output_text || "{}");
+
     const allowedUnits = ["g", "ml", "piece", "stück"];
+
     const refinedComponentsRaw = Array.isArray(refineOutput.foodComponents)
       ? refineOutput.foodComponents
       : [];
-    const refinedComponents = refinedComponentsRaw.map((comp, idx) => {
-      const localeObj = L;
-      const baseUnit = normalizeUnit(String(comp.unit || ""), localeObj);
-      const amount = Math.max(
-        0,
-        Number(comp.amount ?? foodComponents[idx]?.amount ?? 0) || 0
-      );
-      const unit = allowedUnits.includes(baseUnit)
-        ? baseUnit
-        : localeObj.pieceCanonical ?? "piece";
-      return {
-        name: String(comp.name || foodComponents[idx]?.name || "Unknown Item"),
-        amount,
-        unit,
-        calories: Math.max(0, Math.round(Number(comp.calories) || 0)),
-        protein: Math.max(0, Math.round(Number(comp.protein) || 0)),
-        carbs: Math.max(0, Math.round(Number(comp.carbs) || 0)),
-        fat: Math.max(0, Math.round(Number(comp.fat) || 0)),
-      };
-    });
+
+    const refinedComponents = refinedComponentsRaw.map(
+      (comp: any, idx: number) => {
+        const localeObj = L as any;
+        const baseUnit = normalizeUnit(String(comp.unit || ""), localeObj);
+
+        const amount = Math.max(
+          0,
+          Number(comp.amount ?? foodComponents[idx]?.amount ?? 0) || 0
+        );
+
+        const unit = allowedUnits.includes(baseUnit)
+          ? baseUnit
+          : localeObj.pieceCanonical ?? "piece";
+
+        return {
+          name: String(
+            comp.name || foodComponents[idx]?.name || "Unknown Item"
+          ),
+          amount,
+          unit,
+          calories: Math.max(0, Math.round(Number(comp.calories) || 0)),
+          protein: Math.max(0, Math.round(Number(comp.protein) || 0)),
+          carbs: Math.max(0, Math.round(Number(comp.carbs) || 0)),
+          fat: Math.max(0, Math.round(Number(comp.fat) || 0)),
+        };
+      }
+    );
+
     const totals = refinedComponents.reduce(
-      (acc, c) => {
+      (acc: any, c: any) => {
         acc.calories += c.calories || 0;
         acc.protein += c.protein || 0;
         acc.carbs += c.carbs || 0;
         acc.fat += c.fat || 0;
         return acc;
       },
-      {
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-      }
+      { calories: 0, protein: 0, carbs: 0, fat: 0 }
     );
+
     const result = {
       foodComponents: refinedComponents,
       calories: totals.calories,
@@ -529,15 +523,14 @@ Deno.serve(async (req) => {
       carbs: totals.carbs,
       fat: totals.fat,
     };
+
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json",
-      },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error in unified nutrition refinement V2:", error);
+
     let L = LOCALE.en;
     try {
       const clone = req.clone();
@@ -549,6 +542,7 @@ Deno.serve(async (req) => {
         L = LOCALE.de;
       }
     } catch {}
+
     const ERROR_RESPONSE = {
       foodComponents: [],
       calories: 0,
@@ -556,12 +550,10 @@ Deno.serve(async (req) => {
       carbs: 0,
       fat: 0,
     };
+
     return new Response(JSON.stringify(ERROR_RESPONSE), {
       status: 500,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json",
-      },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

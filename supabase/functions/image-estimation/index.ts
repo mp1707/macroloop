@@ -940,10 +940,10 @@ Deno.serve(async (req) => {
 
     // Call OpenAI Responses API with locale-appropriate system prompt
     const response = await openai.responses.create({
-      model: "gpt-5-mini",
+      model: "gpt-5.1",
       instructions: L.systemPrompt,
       reasoning: {
-        effort: "minimal",
+        effort: "medium",
       },
       input: [
         {
@@ -956,7 +956,7 @@ Deno.serve(async (req) => {
             {
               type: "input_image",
               image_url: imageUrl,
-              detail: "low",
+              detail: "auto",
             },
           ],
         },

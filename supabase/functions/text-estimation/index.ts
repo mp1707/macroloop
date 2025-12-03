@@ -686,10 +686,10 @@ Deno.serve(async (req) => {
     const userPrompt = buildUserPrompt(lang, description);
     // ▶️ Responses API + Zod Structured Outputs
     const response = await openai.responses.create({
-      model: "gpt-5-mini",
+      model: "gpt-5.1",
       instructions: L.systemPrompt,
       reasoning: {
-        effort: "minimal",
+        effort: "low",
       },
       input: [
         {
