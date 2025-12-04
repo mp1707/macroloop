@@ -515,7 +515,7 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     headerIconRow: {
       position: "absolute",
-      top: theme.spacing.xs,
+      top: 5,
       right: theme.spacing.lg,
       zIndex: 10,
     },
