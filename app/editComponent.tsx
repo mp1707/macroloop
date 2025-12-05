@@ -194,8 +194,8 @@ export default function EditComponent() {
       useAppStore.getState().setLastUsedUnit(unit);
     }
 
-    // Pass data back via store, then dismiss modal
-    if (logId) {
+    // Pass data back via store, then dismiss modal (only if changes were made)
+    if (logId && (mode === "create" || isDirty)) {
       useAppStore.getState().setPendingComponentEdit({
         logId,
         component,
@@ -205,7 +205,7 @@ export default function EditComponent() {
     }
 
     router.back();
-  }, [isValid, name, amount, unit, mode, router, logId, indexParam, theme]);
+  }, [isValid, name, amount, unit, mode, router, logId, indexParam, theme, isDirty]);
 
   // Handle Cancel
   const handleCancel = useCallback(() => {
