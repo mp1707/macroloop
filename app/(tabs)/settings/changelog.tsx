@@ -18,6 +18,26 @@ interface VersionChangelog {
 
 const CHANGELOG_DATA_EN: VersionChangelog[] = [
   {
+    version: "1.0.6",
+    changes: [
+      {
+        title: "Animated trends charts",
+        description:
+          "The trends tab chart animations were reworked so every timeframe transition feels smoother.",
+      },
+      {
+        title: "Light mode contrast",
+        description:
+          "Light mode colors were sharpened for better readability in bright environments.",
+      },
+      {
+        title: "Bug fixes",
+        description:
+          "Minor visual bugs, like the question mark drifting on the main dashboard, were fixed.",
+      },
+    ],
+  },
+  {
     version: "1.0.5",
     changes: [
       {
@@ -173,6 +193,26 @@ const CHANGELOG_DATA_EN: VersionChangelog[] = [
 ];
 
 const CHANGELOG_DATA_DE: VersionChangelog[] = [
+  {
+    version: "1.0.6",
+    changes: [
+      {
+        title: "Animierte Trenddiagramme",
+        description:
+          "Im Trends-Tab wurden die Diagramm-Animationen überarbeitet.",
+      },
+      {
+        title: "Kontrast im Light-Mode",
+        description:
+          "Die hellen Farben wurden für bessere Lesbarkeit bei viel Licht nachgeschärft.",
+      },
+      {
+        title: "Bugfixes",
+        description:
+          "Kleinere visuelle Fehler, wie das verrutschende Fragezeichen am Hauptdashboard, wurden behoben.",
+      },
+    ],
+  },
   {
     version: "1.0.5",
     changes: [
