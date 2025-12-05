@@ -11,14 +11,10 @@ import {
   clipShape,
   frame,
   padding,
+  shadow,
 } from "@expo/ui/swift-ui/modifiers";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { StyleProp, ViewStyle } from "react-native";
-
-const SIZE = 44;
-const TOUCH_PADDING = 11;
-const TOUCH_SIZE = SIZE + TOUCH_PADDING * 2; // 66pt touch area
-const NEGATIVE_MARGIN = -8;
 
 export interface HeaderButtonProps {
   imageProps?: ImageProps;
@@ -70,8 +66,9 @@ export function HeaderButton({
                     : { height: 34, width: 24 }
                 ),
                 padding({ all: 8 }),
+                shadow({ radius: 16, color: "rgba(0, 0, 0, 0.08)", x: 0, y: 6 }),
               ]
-            : [clipShape("circle")]
+            : [clipShape("circle"), shadow({ radius: 16, color: "rgba(0, 0, 0, 0.08)", x: 0, y: 6 })]
         }
         {...buttonProps}
       >

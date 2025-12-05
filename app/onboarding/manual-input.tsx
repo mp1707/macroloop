@@ -4,7 +4,7 @@ import { AppText } from "@/components/shared/AppText";
 import { useTheme } from "@/theme";
 import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import * as Haptics from "expo-haptics";
-import { BicepsFlexed, Droplet, Zap } from "lucide-react-native";
+import { BicepsFlexed, Droplet, Wheat } from "lucide-react-native";
 import { Button } from "@/components/shared/Button";
 import { OnboardingScreen } from "../../src/components/onboarding/OnboardingScreen";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
@@ -159,7 +159,7 @@ const ManualInputScreen = () => {
               <View style={styles.carbsDisplay}>
                 <View style={styles.carbsHeader}>
                   <View style={styles.carbsLabelRow}>
-                    <Zap
+                    <Wheat
                       size={20}
                       color={colors.semantic.carbs}
                       fill={colors.semantic.carbs}

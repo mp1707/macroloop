@@ -243,7 +243,7 @@
   },
   "createLog": {
     "header": {
-      "title": "Neuer Eintrag",
+      "title": "Mahlzeit erfassen",
       "explainer": "So erhältst du die besten KI-Schätzungen"
     },
     "input": {
@@ -727,7 +727,7 @@
     "fallbackTitle": "Neuer Eintrag",
     "percentageEaten": "{{percentage}}% verzehrt",
     "contextMenu": {
-      "createLog": "Eintrag erstellen",
+      "createLog": "Mahlzeit erfassen",
       "logAgain": "Erneut protokollieren",
       "saveToFavorites": "Zu Favoriten speichern",
       "removeFromFavorites": "Aus Favoriten entfernen"

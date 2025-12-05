@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { Zap } from "lucide-react-native";
+import { Wheat } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText } from "@/components/shared/AppText";
@@ -36,7 +36,7 @@ export const CarbsExplainer: React.FC<CarbsExplainerProps> = ({
           <View style={styles.displaySection}>
             <View style={styles.valueRow}>
               <View style={styles.iconWrapper}>
-                <Zap
+                <Wheat
                   size={22}
                   color={semanticColor}
                   fill={semanticColor}

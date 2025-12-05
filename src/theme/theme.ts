@@ -38,12 +38,12 @@ const lightColors = {
     calories: "#1EC8B6", // same family, slightly deeper
     protein: "#4F76FF",
     carbs: "#FF5D5D",
-    fat: "#F5B72A",
+    fat: "#e7ad28ff",
   },
 
   // Subtle tints for semantic surfaces (alpha for neutral tracks)
   semanticSurfaces: {
-    calories: "rgba(68, 235, 212, 0.32)",
+    calories: "rgba(57, 219, 198, 0.32)",
     protein: "rgba(94, 135, 255, 0.32)",
     carbs: "rgba(255, 109, 109, 0.16)",
     fat: "rgba(255, 194, 51, 0.18)",

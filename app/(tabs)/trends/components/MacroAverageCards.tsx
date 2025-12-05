@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { BicepsFlexed, Zap, Droplet, Flame } from "lucide-react-native";
+import { BicepsFlexed, Wheat, Droplet, Flame } from "lucide-react-native";
 import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { useTranslation } from "react-i18next";
@@ -53,8 +53,7 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
 
         pillInfo = {
           text: `${sign}${absDiff}`,
-          backgroundColor:
-            badgeColors?.background || colors.subtleBackground,
+          backgroundColor: badgeColors?.background || colors.subtleBackground,
           textColor: badgeColors?.text || colors.primaryText,
         };
       }
@@ -69,7 +68,8 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
 
       pillInfo = {
         text: `${percentage} %`,
-        backgroundColor: colors.semanticSurfaces?.fat || colors.subtleBackground,
+        backgroundColor:
+          colors.semanticSurfaces?.fat || colors.subtleBackground,
         textColor: colors.semantic.fat,
       };
     }
@@ -95,7 +95,7 @@ export const MacroAverageCards: React.FC<MacroAverageCardsProps> = ({
         };
       case "carbs":
         return {
-          Icon: Zap,
+          Icon: Wheat,
           label: t("nutrients.carbs.label"),
           color: colors.semantic.carbs,
           value: averages.carbs,

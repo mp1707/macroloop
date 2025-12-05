@@ -1,4 +1,4 @@
-import { Droplet, Flame, BicepsFlexed, Zap } from "lucide-react-native";
+import { Droplet, Flame, BicepsFlexed, Wheat } from "lucide-react-native";
 import type { TFunction } from "i18next";
 
 /**
@@ -50,7 +50,7 @@ export const getNutrientLabels = (t: TFunction) =>
     carbs: {
       label: t("nutrients.carbs.label"),
       unit: t("nutrients.carbs.unitShort"),
-      Icon: Zap,
+      Icon: Wheat,
       hasTarget: false,
     },
   } as const);

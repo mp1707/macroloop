@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 import { TouchableOpacity, View } from "react-native";
 import { Plus } from "lucide-react-native";
 import * as Haptics from "expo-haptics";

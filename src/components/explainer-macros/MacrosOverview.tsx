@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { Flame, BicepsFlexed, Droplet, Zap } from "lucide-react-native";
+import { Flame, BicepsFlexed, Droplet, Wheat } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText } from "@/components/shared/AppText";
@@ -30,13 +30,13 @@ export const MacrosOverview: React.FC = () => {
                   size={28}
                   color={colors.semantic.calories}
                   fill={colors.semantic.calories}
-                  strokeWidth={1.5}
+                  strokeWidth={0}
                 />
                 <BicepsFlexed
                   size={24}
                   color={colors.semantic.protein}
                   fill={colors.semantic.protein}
-                  strokeWidth={1.5}
+                  strokeWidth={0}
                   style={{ marginTop: 2 }}
                 />
               </View>
@@ -66,7 +66,7 @@ export const MacrosOverview: React.FC = () => {
                   size={28}
                   color={colors.semantic.fat}
                   fill={colors.semantic.fat}
-                  strokeWidth={1.5}
+                  strokeWidth={0}
                 />
               </View>
               <AppText role="Caption" color="secondary" style={styles.label}>
@@ -91,11 +91,11 @@ export const MacrosOverview: React.FC = () => {
           <View style={styles.sectionRow}>
             <View style={styles.leftColumn}>
               <View style={styles.iconContainer}>
-                <Zap
+                <Wheat
                   size={28}
                   color={colors.semantic.carbs}
                   fill={colors.semantic.carbs}
-                  strokeWidth={1.5}
+                  strokeWidth={0}
                 />
               </View>
               <AppText role="Caption" color="secondary" style={styles.label}>
