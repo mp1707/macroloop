@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { StyleSheet, View } from "react-native";
 import {
-  BlurMask,
   Canvas,
   Circle,
   Group,
@@ -121,8 +120,6 @@ interface RingAnimationState {
   rotation: number;
   endX: number;
   endY: number;
-  shadowX: number;
-  shadowY: number;
   opacity: number;
   color: string;
   stops: GradientStop[];
@@ -143,10 +140,6 @@ const calculateRingState = (
   const rotation = Math.max(ratio - 1, 0) * TWO_PI;
   const endX = center + radius * Math.cos(angle);
   const endY = center + radius * Math.sin(angle);
-  const tangentAngle = angle + Math.PI / 2;
-  const offsetDistance = strokeWidth * 0.55;
-  const shadowX = endX + Math.cos(tangentAngle) * offsetDistance;
-  const shadowY = endY + Math.sin(tangentAngle) * offsetDistance;
   const effectIntensity = clamp01((sweepValue - 0.1) / 0.3);
   const stops = deriveStops(baseColor, sweepValue, effectIntensity, isDark);
   const color = colorAtOffset(sweepValue, stops);
@@ -156,8 +149,6 @@ const calculateRingState = (
     rotation,
     endX,
     endY,
-    shadowX,
-    shadowY,
     opacity: ratio > 0.002 ? effectIntensity : 0,
     color,
     stops,
@@ -169,8 +160,6 @@ const ringStatesEqual = (a: RingAnimationState, b: RingAnimationState) =>
   a.rotation === b.rotation &&
   a.endX === b.endX &&
   a.endY === b.endY &&
-  a.shadowX === b.shadowX &&
-  a.shadowY === b.shadowY &&
   a.opacity === b.opacity &&
   a.color === b.color &&
   stopsEqual(a.stops, b.stops);
@@ -182,7 +171,6 @@ interface BaseRingLayerProps {
   trackColor: string;
   baseColor: string;
   trackOpacity: number;
-  shadowColor: string;
   isDark: boolean;
 }
 
@@ -199,7 +187,6 @@ const RingVisual: React.FC<
   center,
   trackColor,
   trackOpacity,
-  shadowColor,
 }) => {
   const path = useMemo(() => {
     const ring = Skia.Path.Make();
@@ -228,15 +215,6 @@ const RingVisual: React.FC<
         opacity={trackOpacity}
       />
       <Group origin={centerVector} transform={[{ rotate: state.rotation }]}>
-        <Circle
-          cx={state.shadowX}
-          cy={state.shadowY}
-          r={strokeWidth * 0.75}
-          color={shadowColor}
-          opacity={state.opacity * 0.75}
-        >
-          <BlurMask blur={strokeWidth * 1.2} style="normal" />
-        </Circle>
         <Path
           path={path}
           style="stroke"
@@ -419,8 +397,6 @@ export const DashboardRing: React.FC<DashboardRingProps> = ({
   const tipBadgeBackground = isDark
     ? resolvedTrackColor
     : adjustColor(color, 0.85); // Solid light color (85% lighter)
-  // Gentler shadow in light mode (0.12 vs 0.32)
-  const shadowColor = isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.12)";
 
   // Calculate tip position
   useAnimatedReaction(
@@ -486,7 +462,6 @@ export const DashboardRing: React.FC<DashboardRingProps> = ({
               trackColor={resolvedTrackColor}
               baseColor={color}
               trackOpacity={0.75}
-              shadowColor={shadowColor}
               isDark={isDark}
             />
           </Group>
