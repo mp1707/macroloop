@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import { Appearance, StatusBar } from "react-native";
 import { theme, ColorScheme, AppearancePreference } from "./theme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Colors = typeof theme.colors.light | typeof theme.colors.dark;
 
@@ -32,14 +32,18 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>("light");
+  // Default to system scheme
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>(
+    Appearance.getColorScheme() || "light"
+  );
   const [appearancePreference, setAppearancePreferenceState] =
     useState<AppearancePreference>("system");
-  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
-  // Track whether user manually selected a theme
-  const manualPreferenceRef = useRef(false);
+  const [isThemeLoaded, setIsThemeLoaded] = useState(true);
 
-  // Load saved preference or fallback to system on mount
+  // FUTURE: Track whether user manually selected a theme
+  // const manualPreferenceRef = useRef(false);
+
+  /* FUTURE: Load saved preference or fallback to system on mount
   useEffect(() => {
     (async () => {
       let saved: AppearancePreference | null = null;
@@ -53,7 +57,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         setColorSchemeState(saved);
         setAppearancePreferenceState(saved);
         manualPreferenceRef.current = true;
+      } else if (saved === "system") {
+        const systemScheme = Appearance.getColorScheme() || "light";
+        setColorSchemeState(systemScheme);
+        setAppearancePreferenceState("system");
+        manualPreferenceRef.current = false;
       } else {
+         // Default fallback
         const systemScheme = Appearance.getColorScheme() || "light";
         setColorSchemeState(systemScheme);
         setAppearancePreferenceState("system");
@@ -62,14 +72,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       setIsThemeLoaded(true);
     })();
   }, []);
+  */
 
-  // Listen for system appearance changes (only when no manual preference)
+  // Listen for system appearance changes
   useEffect(() => {
     const subscription = Appearance.addChangeListener(
       ({ colorScheme: newScheme }) => {
-        if (!manualPreferenceRef.current) {
-          setColorSchemeState(newScheme || "light");
-        }
+        // FUTURE: Only update if not manually overridden
+        // if (!manualPreferenceRef.current) {
+        setColorSchemeState(newScheme || "light");
+        // }
       }
     );
     return () => subscription?.remove();
@@ -86,14 +98,18 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const colors = useMemo(() => theme.getColors(colorScheme), [colorScheme]);
 
   const setColorScheme = useCallback((scheme: ColorScheme) => {
-    manualPreferenceRef.current = true;
-    setAppearancePreferenceState(scheme);
-    setColorSchemeState(scheme);
-    AsyncStorage.setItem("colorSchemePreference", scheme).catch(() => {});
+    // FUTURE: Enable manual override
+    // manualPreferenceRef.current = true;
+    // setAppearancePreferenceState(scheme);
+    // setColorSchemeState(scheme);
+    // AsyncStorage.setItem("colorSchemePreference", scheme).catch(() => {});
+    console.warn("Theme is currently hardcoded to system settings.");
   }, []);
 
   const setAppearancePreference = useCallback(
     (preference: AppearancePreference) => {
+      // FUTURE: Enable preference setting
+      /*
       if (preference === "system") {
         manualPreferenceRef.current = false;
         setAppearancePreferenceState("system");
@@ -105,12 +121,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       } else {
         setColorScheme(preference);
       }
+      */
+      console.warn("Theme is currently hardcoded to system settings.");
     },
     [setColorScheme]
   );
 
   const toggleColorScheme = useCallback(() => {
-    setColorScheme(colorScheme === "light" ? "dark" : "light");
+    // FUTURE: Enable toggle
+    // setColorScheme(colorScheme === "light" ? "dark" : "light");
+    console.warn("Theme is currently hardcoded to system settings.");
   }, [colorScheme, setColorScheme]);
 
   const value: ThemeContextType = useMemo(
