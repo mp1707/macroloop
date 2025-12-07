@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { View, Pressable } from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -14,8 +14,9 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { AlertCircle } from "lucide-react-native";
 import { Favorite, FoodLog } from "@/types/models";
-import { useTheme } from "@/theme";
+import { useTheme, theme } from "@/theme";
 import { Card } from "@/components/Card";
 import { AppText } from "@/components";
 import { ContextMenu, ContextMenuItem } from "@/components/shared/ContextMenu";
@@ -31,6 +32,8 @@ import { useTranslation } from "react-i18next";
 interface LogCardProps {
   foodLog: FoodLog | Favorite;
   isLoading?: boolean;
+  isFailed?: boolean;
+  onRetry?: (log: FoodLog) => void;
   onLogAgain?: (log: FoodLog | Favorite) => void;
   onSaveToFavorites?: (log: FoodLog | Favorite) => void;
   onRemoveFromFavorites?: (log: FoodLog | Favorite) => void;
@@ -312,10 +315,83 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
   );
 };
 
+// Failed state variant - shows error icon and tap to retry
+type FailedLogCardProps = {
+  foodLog: FoodLog;
+  onRetry?: (log: FoodLog) => void;
+  onLongPress?: () => void;
+};
+
+const FailedLogCard: React.FC<FailedLogCardProps> = ({
+  foodLog,
+  onRetry,
+  onLongPress,
+}) => {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
+  const handlePress = useCallback(async () => {
+    if (isNavLocked()) return;
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch {}
+    lockNav(300);
+    onRetry?.(foodLog);
+  }, [foodLog, onRetry]);
+
+  const displayDescription = foodLog.description || t("logCard.noDescription");
+
+  return (
+    <Pressable
+      style={styles.cardContainer}
+      onPress={handlePress}
+      onLongPress={onLongPress}
+      delayLongPress={500}
+    >
+      <Card style={[styles.card, { borderColor: colors.error, borderWidth: 1 }]}>
+        <View style={styles.contentContainer}>
+          <View style={[styles.leftSection, { maxWidth: "80%" }]}>
+            <AppText role="Headline" style={{ color: colors.error }}>
+              {t("logCard.estimationFailed")}
+            </AppText>
+            <AppText
+              role="Body"
+              style={[styles.description, { color: colors.secondaryText }]}
+              numberOfLines={2}
+            >
+              {displayDescription}
+            </AppText>
+            <AppText
+              role="Caption"
+              style={{ color: colors.error, marginTop: theme.spacing.sm }}
+            >
+              {t("logCard.tapToRetry")}
+            </AppText>
+          </View>
+
+          <View style={[styles.rightSection, failedStyles.iconContainer]}>
+            <AlertCircle size={32} color={colors.error} strokeWidth={1.5} />
+          </View>
+        </View>
+      </Card>
+    </Pressable>
+  );
+};
+
+const failedStyles = StyleSheet.create({
+  iconContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
+
 // Wrapper: choose animated only when needed, otherwise render lightweight static card
 const LogCardInner: React.FC<LogCardProps> = ({
   foodLog,
   isLoading,
+  isFailed,
+  onRetry,
   onLogAgain,
   onSaveToFavorites,
   onRemoveFromFavorites,
@@ -417,6 +493,24 @@ const LogCardInner: React.FC<LogCardProps> = ({
     setMenuVisible(true);
   }, [menuVisible]);
 
+  // Show failed state card if estimation failed
+  if (isFailed && "estimationFailed" in foodLog) {
+    return (
+      <>
+        <FailedLogCard
+          foodLog={foodLog as FoodLog}
+          onRetry={onRetry}
+          onLongPress={handleLongPress}
+        />
+        <ContextMenu
+          visible={menuVisible}
+          items={items}
+          onClose={() => setMenuVisible(false)}
+        />
+      </>
+    );
+  }
+
   if (!isLoading && !hasEverBeenLoadingRef.current) {
     return (
       <>
@@ -470,6 +564,8 @@ const LogCardInner: React.FC<LogCardProps> = ({
 // Memoize wrapper to avoid unnecessary re-renders when lists scroll
 export const LogCard = memo(LogCardInner, (prev, next) => {
   if (prev.isLoading !== next.isLoading) return false;
+  if (prev.isFailed !== next.isFailed) return false;
+  if (prev.onRetry !== next.onRetry) return false;
   if (prev.onLogAgain !== next.onLogAgain) return false;
   if (prev.onSaveToFavorites !== next.onSaveToFavorites) return false;
   if (prev.onRemoveFromFavorites !== next.onRemoveFromFavorites) return false;

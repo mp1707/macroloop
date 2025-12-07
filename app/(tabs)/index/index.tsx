@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useCallback } from "react";
 import { useTabBarSpacing } from "@/hooks/useTabBarSpacing";
 import { useAppStore } from "@/store/useAppStore";
 import { selectDailyData } from "@/store/selectors";
@@ -20,6 +20,9 @@ import { useTheme } from "@/theme/ThemeProvider";
 import { View } from "react-native";
 import { TargetMethodContent } from "app/onboarding/target-method";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { retryFailedEstimation } from "@/hooks/useEstimationRecovery";
+import { useLocalization } from "@/context/LocalizationContext";
+import type { FoodLog } from "@/types/models";
 
 export default function TodayTab() {
   const { safeNavigate } = useNavigationGuard();
@@ -28,6 +31,8 @@ export default function TodayTab() {
   const headerHeight = useHeaderHeight();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { currentLanguage } = useLocalization();
+  const language = currentLanguage || "en";
 
   const foodLogs = useAppStore((state) => state.foodLogs);
   const selectedDate = useAppStore((state) => state.selectedDate);
@@ -85,6 +90,13 @@ export default function TodayTab() {
     [addFavorite, deleteFavorite, favorites, t]
   );
 
+  const handleRetry = useCallback(
+    (log: FoodLog) => {
+      void retryFailedEstimation(log.id, language);
+    },
+    [language]
+  );
+
   // Periodic memory cache cleanup to prevent buildup during extended use
   useEffect(() => {
     const interval = setInterval(() => {
@@ -125,6 +137,7 @@ export default function TodayTab() {
         onLogAgain={handleLogAgain}
         onSaveToFavorites={handleSaveToFavorites}
         onRemoveFromFavorites={handleRemoveFromFavorites}
+        onRetry={handleRetry}
       />
     </View>
   );

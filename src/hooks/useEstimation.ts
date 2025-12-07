@@ -73,7 +73,7 @@ const showProRequiredHud = (subtitle: string) => {
 };
 
 export const useEstimation = () => {
-  const { addFoodLog, updateFoodLog, deleteFoodLog } = useAppStore();
+  const { addFoodLog, updateFoodLog } = useAppStore();
   const isPro = useAppStore((state) => state.isPro);
   const [isEditEstimating, setIsEditEstimating] = useState(false);
   const { currentLanguage } = useLocalization();
@@ -133,9 +133,16 @@ export const useEstimation = () => {
           incompleteLog,
           estimationResults
         );
-        updateFoodLog(incompleteLog.id, completedLog);
+        updateFoodLog(incompleteLog.id, {
+          ...completedLog,
+          estimationFailed: false,
+        });
       } catch (error) {
-        await deleteFoodLog(incompleteLog.id);
+        // Mark as failed instead of deleting - allows user to retry
+        updateFoodLog(incompleteLog.id, {
+          isEstimating: false,
+          estimationFailed: true,
+        });
 
         // Check if it's a rate limit error
         if (error instanceof Error && error.message === "AI_ESTIMATION_RATE_LIMIT") {
@@ -152,7 +159,7 @@ export const useEstimation = () => {
         }
       }
     },
-    [addFoodLog, updateFoodLog, deleteFoodLog, isPro, language, t]
+    [addFoodLog, updateFoodLog, isPro, language, t]
   );
 
   // Edit page flow: refinement based solely on provided components

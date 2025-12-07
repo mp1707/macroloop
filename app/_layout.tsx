@@ -2,7 +2,6 @@ import { Stack } from "expo-router";
 import { ThemeProvider, useTheme } from "@/theme";
 import React, { useEffect } from "react";
 import { useFonts } from "../src/hooks/useFonts";
-import { useAppStore } from "@/store/useAppStore";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { HudNotification } from "@/components/shared/HudNotification";
@@ -12,6 +11,7 @@ import {
   useNavigationTransition,
 } from "@/context/NavigationTransitionContext";
 import { useRevenueCat } from "@/hooks/useRevenueCat";
+import { useEstimationRecovery } from "@/hooks/useEstimationRecovery";
 import "@/lib/i18n";
 import { LocalizationProvider } from "@/context/LocalizationContext";
 import { Image } from "expo-image";
@@ -115,16 +115,12 @@ function ThemedStack() {
 
 function RootLayoutContent() {
   const { colors } = useTheme();
-  const cleanupIncompleteEstimations = useAppStore(
-    (state) => state.cleanupIncompleteEstimations
-  );
 
   useRevenueCat();
+  // Auto-recover pending estimations when app returns to foreground
+  useEstimationRecovery();
 
   useEffect(() => {
-    // Cleanup incomplete estimations from previous sessions
-    cleanupIncompleteEstimations();
-
     // Clear image caches on app start for fresh state
     // expo-image automatically manages memory cache size (default ~50MB)
     // but we clear on start to ensure no stale images from crashed sessions
@@ -149,7 +145,7 @@ function RootLayoutContent() {
         }
       };
     }
-  }, [cleanupIncompleteEstimations]);
+  }, []);
 
   return (
     <ErrorBoundary>

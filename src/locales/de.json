@@ -726,6 +726,9 @@
   "logCard": {
     "fallbackTitle": "Neuer Eintrag",
     "percentageEaten": "{{percentage}}% verzehrt",
+    "estimationFailed": "Schätzung fehlgeschlagen",
+    "tapToRetry": "Zum Wiederholen tippen",
+    "noDescription": "Keine Beschreibung",
     "contextMenu": {
       "createLog": "Mahlzeit erfassen",
       "logAgain": "Erneut protokollieren",

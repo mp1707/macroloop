@@ -23,6 +23,7 @@ interface FoodLogsListProps {
   onLogAgain: (log: FoodLog | Favorite) => void;
   onSaveToFavorites: (log: FoodLog | Favorite) => void;
   onRemoveFromFavorites: (log: FoodLog | Favorite) => void;
+  onRetry?: (log: FoodLog) => void;
 }
 
 export const FoodLogsList: React.FC<FoodLogsListProps> = ({
@@ -38,6 +39,7 @@ export const FoodLogsList: React.FC<FoodLogsListProps> = ({
   onLogAgain,
   onSaveToFavorites,
   onRemoveFromFavorites,
+  onRetry,
 }) => {
   const { colors, theme } = useTheme();
   const router = useSafeRouter();
@@ -80,6 +82,7 @@ export const FoodLogsList: React.FC<FoodLogsListProps> = ({
         onLogAgain={onLogAgain}
         onSaveToFavorites={onSaveToFavorites}
         onRemoveFromFavorites={onRemoveFromFavorites}
+        onRetry={onRetry}
       />
     ),
     [
@@ -89,6 +92,7 @@ export const FoodLogsList: React.FC<FoodLogsListProps> = ({
       onLogAgain,
       onSaveToFavorites,
       onRemoveFromFavorites,
+      onRetry,
     ]
   );
 

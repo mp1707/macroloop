@@ -15,6 +15,7 @@ interface FoodLogItemProps {
   onLogAgain: (log: FoodLog | Favorite) => void;
   onSaveToFavorites: (log: FoodLog | Favorite) => void;
   onRemoveFromFavorites: (log: FoodLog | Favorite) => void;
+  onRetry?: (log: FoodLog) => void;
 }
 
 export const FoodLogItem: React.FC<FoodLogItemProps> = ({
@@ -26,9 +27,14 @@ export const FoodLogItem: React.FC<FoodLogItemProps> = ({
   onLogAgain,
   onSaveToFavorites,
   onRemoveFromFavorites,
+  onRetry,
 }) => {
   const { theme } = useTheme();
   const isItemLoading = Boolean(isLoading ?? item.isEstimating);
+  const isItemFailed = Boolean(item.estimationFailed);
+
+  // Disable swipe interactions for loading or failed states
+  const disableInteractions = isItemLoading || isItemFailed;
 
   return (
     <Animated.View
@@ -36,16 +42,18 @@ export const FoodLogItem: React.FC<FoodLogItemProps> = ({
       layout={LinearTransition}
     >
       <SwipeToFunctions
-        onDelete={isItemLoading ? undefined : () => onDelete(item)}
+        onDelete={disableInteractions ? undefined : () => onDelete(item)}
         onLeftFunction={
-          isItemLoading ? undefined : () => onToggleFavorite(item)
+          disableInteractions ? undefined : () => onToggleFavorite(item)
         }
-        leftIcon={isItemLoading ? undefined : <Star size={24} color="white" />}
-        onTap={isItemLoading ? undefined : () => onEdit(item)}
+        leftIcon={disableInteractions ? undefined : <Star size={24} color="white" />}
+        onTap={disableInteractions ? undefined : () => onEdit(item)}
       >
         <LogCard
           foodLog={item}
           isLoading={isItemLoading}
+          isFailed={isItemFailed}
+          onRetry={onRetry}
           onLogAgain={onLogAgain}
           onSaveToFavorites={onSaveToFavorites}
           onRemoveFromFavorites={onRemoveFromFavorites}
