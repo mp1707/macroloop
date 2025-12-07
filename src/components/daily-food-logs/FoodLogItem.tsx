@@ -36,6 +36,15 @@ export const FoodLogItem: React.FC<FoodLogItemProps> = ({
   // Disable general interactions (edit/favorite) for loading or failed states
   const disableInteractions = isItemLoading || isItemFailed;
 
+  const onTap = () => {
+    if (isItemLoading) return;
+    if (isItemFailed) {
+      onRetry?.(item);
+      return;
+    }
+    onEdit(item);
+  };
+
   return (
     <Animated.View
       style={{ paddingHorizontal: theme.spacing.md }}
@@ -46,8 +55,10 @@ export const FoodLogItem: React.FC<FoodLogItemProps> = ({
         onLeftFunction={
           disableInteractions ? undefined : () => onToggleFavorite(item)
         }
-        leftIcon={disableInteractions ? undefined : <Star size={24} color="white" />}
-        onTap={disableInteractions ? undefined : () => onEdit(item)}
+        leftIcon={
+          disableInteractions ? undefined : <Star size={24} color="white" />
+        }
+        onTap={onTap}
       >
         <LogCard
           foodLog={item}

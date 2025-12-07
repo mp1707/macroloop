@@ -34,7 +34,7 @@ export const createStyles = (colors: Colors) =>
       gap: theme.spacing.sm,
     },
     rightSection: {
-      justifyContent: "center",
+      justifyContent: "flex-end",
       alignItems: "flex-start",
       minWidth: "35%",
     },
@@ -47,6 +47,14 @@ export const createStyles = (colors: Colors) =>
       color: colors.secondaryText,
       fontSize: theme.typography.Caption.fontSize,
       marginTop: theme.spacing.xs,
+    },
+    failedDescriptionText: {
+      color: colors.secondaryText,
+      fontSize: theme.typography.Body.fontSize,
+      marginTop: theme.spacing.xs,
+    },
+    failedImage: {
+      marginTop: theme.spacing.md,
     },
     description: {
       fontStyle: "italic",

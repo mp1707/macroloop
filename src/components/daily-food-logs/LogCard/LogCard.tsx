@@ -321,14 +321,9 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
 type FailedLogCardProps = {
   foodLog: FoodLog;
   onRetry?: (log: FoodLog) => void;
-  onLongPress?: () => void;
 };
 
-const FailedLogCard: React.FC<FailedLogCardProps> = ({
-  foodLog,
-  onRetry,
-  onLongPress,
-}) => {
+const FailedLogCard: React.FC<FailedLogCardProps> = ({ foodLog, onRetry }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -342,53 +337,49 @@ const FailedLogCard: React.FC<FailedLogCardProps> = ({
     onRetry?.(foodLog);
   }, [foodLog, onRetry]);
 
-  const displayDescription = foodLog.description || t("logCard.noDescription");
+  const displayDescription = foodLog.description;
   const imageSource = foodLog.localImagePath || foodLog.supabaseImagePath;
 
   return (
-    <Pressable
-      style={styles.cardContainer}
-      onLongPress={onLongPress}
-      delayLongPress={500}
-    >
+    <Pressable style={styles.cardContainer}>
       <Card style={styles.card}>
-        <View>
-          <View style={{ marginBottom: 12 }}>
-            <AppText role="Headline" style={{ color: colors.primaryText }}>
-              {"🤔 " + t("logCard.estimationFailed")}
-            </AppText>
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
-            {imageSource && (
-              <Image
-                source={{ uri: imageSource }}
-                style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: theme.components.cards.cornerRadius,
-                  backgroundColor: colors.secondaryBackground,
-                }}
-                contentFit="cover"
-              />
-            )}
-
-            <View style={{ flex: 1, justifyContent: "center" }}>
+        <LogCardTitle
+          title={"⚠️ " + t("logCard.estimationFailed")}
+          style={[styles.title, { marginBottom: theme.spacing.sm }]}
+        />
+        <View style={styles.contentContainer}>
+          <View style={styles.leftSection}>
+            {displayDescription && (
               <AppText
                 role="Body"
-                style={{ color: colors.secondaryText }}
+                style={styles.failedDescriptionText}
                 numberOfLines={2}
               >
                 {displayDescription}
               </AppText>
-            </View>
+            )}
 
+            {imageSource && (
+              <View style={styles.failedImage}>
+                <Image
+                  source={{ uri: imageSource }}
+                  style={{
+                    width: 100,
+                    height: 60,
+                    borderRadius: theme.components.cards.cornerRadius,
+                    backgroundColor: colors.secondaryBackground,
+                  }}
+                  contentFit="cover"
+                />
+              </View>
+            )}
+          </View>
+          <View style={styles.rightSection}>
             <Button
-              label={t("retry")}
+              label={t("paywall.buttons.retry")}
               Icon={RefreshCw}
               variant="primary"
-              onPress={handleRetryPress}
-              style={{ alignSelf: "flex-end", marginTop: theme.spacing.sm }}
+              style={{ alignSelf: "flex-end" }}
             />
           </View>
         </View>
@@ -396,7 +387,6 @@ const FailedLogCard: React.FC<FailedLogCardProps> = ({
     </Pressable>
   );
 };
-
 
 // Wrapper: choose animated only when needed, otherwise render lightweight static card
 const LogCardInner: React.FC<LogCardProps> = ({
@@ -487,20 +477,7 @@ const LogCardInner: React.FC<LogCardProps> = ({
 
   // Show failed state card if estimation failed
   if (isFailed && "estimationFailed" in foodLog) {
-    return (
-      <>
-        <FailedLogCard
-          foodLog={foodLog as FoodLog}
-          onRetry={onRetry}
-          onLongPress={handleLongPress}
-        />
-        <ContextMenu
-          visible={menuVisible}
-          items={items}
-          onClose={() => setMenuVisible(false)}
-        />
-      </>
-    );
+    return <FailedLogCard foodLog={foodLog as FoodLog} onRetry={onRetry} />;
   }
 
   // Show animated loading card if currently loading
