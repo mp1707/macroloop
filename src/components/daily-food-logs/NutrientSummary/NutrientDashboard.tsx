@@ -137,17 +137,12 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
     [totals.calories, totals.protein, totals.fat, totals.carbs]
   );
 
-  const shouldAnimateTotals = !animations.dateChanged;
-
-  const displayTotals: Record<NutrientKey, number | SharedValue<number>> =
-    shouldAnimateTotals
-      ? {
-          calories: animations.animatedCaloriesTotal,
-          protein: animations.animatedProteinTotal,
-          fat: animations.animatedFatTotal,
-          carbs: animations.animatedCarbsTotal,
-        }
-      : staticTotals;
+  const displayTotals: Record<NutrientKey, number | SharedValue<number>> = {
+    calories: animations.animatedCaloriesTotal,
+    protein: animations.animatedProteinTotal,
+    fat: animations.animatedFatTotal,
+    carbs: animations.animatedCarbsTotal,
+  };
 
   const labelTargets: Partial<Record<NutrientKey, number>> = {
     calories: Math.round(targets.calories || 0),
@@ -162,21 +157,16 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
   useEffect(() => {
     const fatPercentage = Math.min(percentages.fat || 0, 100);
 
-    if (animations.dateChanged) {
-      // Skip animation: set value instantly on date changes
-      fatProgressWidth.value = fatPercentage;
-    } else {
-      // Animate with delay and spring (after both rings)
-      fatProgressWidth.value = withDelay(
-        ANIMATION_DELAYS.BASE_DELAY + ANIMATION_DELAYS.FAT_STAT,
-        withSpring(fatPercentage, {
-          mass: 1.2,
-          damping: 25,
-          stiffness: 80,
-        })
-      );
-    }
-  }, [percentages.fat, animations.dateChanged, fatProgressWidth]);
+    // Animate with delay and spring (after both rings)
+    fatProgressWidth.value = withDelay(
+      ANIMATION_DELAYS.BASE_DELAY + ANIMATION_DELAYS.FAT_STAT,
+      withSpring(fatPercentage, {
+        mass: 1.2,
+        damping: 25,
+        stiffness: 80,
+      })
+    );
+  }, [percentages.fat, fatProgressWidth]);
 
   // Check conditions AFTER all hooks are called
   if (hasNoDailyTargets(targets)) {
@@ -263,9 +253,7 @@ export const NutrientDashboard: React.FC<NutrientDashboardProps> = ({
                     size={ringSize}
                     Icon={ringIcon}
                     smallIcon={ringKey === "protein"}
-                    skipAnimation={
-                      animations.dateChanged || shouldInstantlySyncRings
-                    }
+                    skipAnimation={shouldInstantlySyncRings}
                   />
                 </Animated.View>
               </Pressable>

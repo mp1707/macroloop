@@ -1,7 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useSharedValue, withSpring } from "react-native-reanimated";
 import { useAnimatedNumber } from "@/hooks/useAnimationConfig";
-import { useAppStore } from "@/store/useAppStore";
 import { ANIMATION_DELAYS, ICON_SPRING_CONFIG } from "../utils/constants";
 
 interface NutrientValues {
@@ -26,16 +25,7 @@ export const useNutrientAnimations = ({
   isProteinComplete,
   percentages,
 }: UseNutrientAnimationsParams) => {
-  const { selectedDate } = useAppStore();
-  const prevSelectedDate = useRef(selectedDate);
-
-  // Check if date changed for skipAnimation prop
-  const dateChanged = prevSelectedDate.current !== selectedDate;
-  if (dateChanged) {
-    prevSelectedDate.current = selectedDate;
-  }
-
-  // Animated scales for icon transitions
+    // Animated scales for icon transitions
   const proteinIconScale = useSharedValue(1);
 
   // Animated values for secondary stats totals (UI thread only - zero JS bridging)
@@ -48,45 +38,27 @@ export const useNutrientAnimations = ({
 
   // Trigger count-up animations when secondary stats totals change
   useEffect(() => {
-    if (dateChanged) {
-      animatedFatTotal.setValue(Math.round(totals.fat || 0));
-      animatedCarbsTotal.setValue(Math.round(totals.carbs || 0));
-    } else {
-      animatedFatTotal.animateTo(Math.round(totals.fat || 0), ANIMATION_DELAYS.BASE_DELAY + ANIMATION_DELAYS.FAT_STAT);
-      animatedCarbsTotal.animateTo(Math.round(totals.carbs || 0), ANIMATION_DELAYS.BASE_DELAY);
-    }
-  }, [totals.fat, totals.carbs, selectedDate, dateChanged]);
+    animatedFatTotal.animateTo(Math.round(totals.fat || 0), ANIMATION_DELAYS.BASE_DELAY + ANIMATION_DELAYS.FAT_STAT);
+    animatedCarbsTotal.animateTo(Math.round(totals.carbs || 0), ANIMATION_DELAYS.BASE_DELAY);
+  }, [totals.fat, totals.carbs]);
 
   // Trigger count-up animations when ring label totals change
   useEffect(() => {
-    if (dateChanged) {
-      animatedCaloriesTotal.setValue(Math.round(totals.calories || 0));
-      animatedProteinTotal.setValue(Math.round(totals.protein || 0));
-    } else {
-      animatedCaloriesTotal.animateTo(Math.round(totals.calories || 0), ANIMATION_DELAYS.BASE_DELAY);
-      animatedProteinTotal.animateTo(Math.round(totals.protein || 0), ANIMATION_DELAYS.BASE_DELAY + ANIMATION_DELAYS.RING_STAGGER);
-    }
-  }, [totals.calories, totals.protein, selectedDate, dateChanged]);
+    animatedCaloriesTotal.animateTo(Math.round(totals.calories || 0), ANIMATION_DELAYS.BASE_DELAY);
+    animatedProteinTotal.animateTo(Math.round(totals.protein || 0), ANIMATION_DELAYS.BASE_DELAY + ANIMATION_DELAYS.RING_STAGGER);
+  }, [totals.calories, totals.protein]);
 
   // Trigger icon scale animations when protein reaches 100%
   useEffect(() => {
-    if (dateChanged) {
-      proteinIconScale.value = 1;
+    if (isProteinComplete) {
+      proteinIconScale.value = 0.5;
+      proteinIconScale.value = withSpring(1, ICON_SPRING_CONFIG);
     } else {
-      if (isProteinComplete) {
-        proteinIconScale.value = 0.5;
-        proteinIconScale.value = withSpring(1, ICON_SPRING_CONFIG);
-      } else {
-        proteinIconScale.value = 1;
-      }
+      proteinIconScale.value = 1;
     }
-  }, [percentages.protein, proteinIconScale, selectedDate, dateChanged, isProteinComplete]);
+  }, [percentages.protein, proteinIconScale, isProteinComplete]);
 
   return {
-    // Date change detection
-    dateChanged,
-    selectedDate,
-
     // Icon scales
     proteinIconScale,
 
