@@ -33,7 +33,7 @@ export const FoodLogItem: React.FC<FoodLogItemProps> = ({
   const isItemLoading = Boolean(isLoading ?? item.isEstimating);
   const isItemFailed = Boolean(item.estimationFailed);
 
-  // Disable swipe interactions for loading or failed states
+  // Disable general interactions (edit/favorite) for loading or failed states
   const disableInteractions = isItemLoading || isItemFailed;
 
   return (
@@ -42,7 +42,7 @@ export const FoodLogItem: React.FC<FoodLogItemProps> = ({
       layout={LinearTransition}
     >
       <SwipeToFunctions
-        onDelete={disableInteractions ? undefined : () => onDelete(item)}
+        onDelete={isItemLoading ? undefined : () => onDelete(item)}
         onLeftFunction={
           disableInteractions ? undefined : () => onToggleFavorite(item)
         }

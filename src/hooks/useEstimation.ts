@@ -150,12 +150,6 @@ export const useEstimation = () => {
             t("errors.api.rateLimit.title"),
             t("errors.api.rateLimit.message")
           );
-        } else {
-          // Show generic network error
-          Alert.alert(
-            t("errors.network.title"),
-            t("errors.network.message")
-          );
         }
       }
     },

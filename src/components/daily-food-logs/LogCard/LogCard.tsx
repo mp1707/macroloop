@@ -7,6 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import { View, Pressable, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -14,12 +15,13 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import { AlertCircle } from "lucide-react-native";
 import { Favorite, FoodLog } from "@/types/models";
 import { useTheme, theme } from "@/theme";
 import { Card } from "@/components/Card";
 import { AppText } from "@/components";
 import { ContextMenu, ContextMenuItem } from "@/components/shared/ContextMenu";
+import { Button } from "@/components/shared/Button";
+import { RefreshCw } from "lucide-react-native";
 import { useAppStore } from "@/store/useAppStore";
 import { isNavLocked, lockNav } from "@/utils/navigationLock";
 import { createStyles } from "./LogCard.styles";
@@ -331,7 +333,7 @@ const FailedLogCard: React.FC<FailedLogCardProps> = ({
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const handlePress = useCallback(async () => {
+  const handleRetryPress = useCallback(async () => {
     if (isNavLocked()) return;
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -341,37 +343,53 @@ const FailedLogCard: React.FC<FailedLogCardProps> = ({
   }, [foodLog, onRetry]);
 
   const displayDescription = foodLog.description || t("logCard.noDescription");
+  const imageSource = foodLog.localImagePath || foodLog.supabaseImagePath;
 
   return (
     <Pressable
       style={styles.cardContainer}
-      onPress={handlePress}
       onLongPress={onLongPress}
       delayLongPress={500}
     >
-      <Card style={[styles.card, { borderColor: colors.error, borderWidth: 1 }]}>
-        <View style={styles.contentContainer}>
-          <View style={[styles.leftSection, { maxWidth: "80%" }]}>
-            <AppText role="Headline" style={{ color: colors.error }}>
-              {t("logCard.estimationFailed")}
-            </AppText>
-            <AppText
-              role="Body"
-              style={[styles.description, { color: colors.secondaryText }]}
-              numberOfLines={2}
-            >
-              {displayDescription}
-            </AppText>
-            <AppText
-              role="Caption"
-              style={{ color: colors.error, marginTop: theme.spacing.sm }}
-            >
-              {t("logCard.tapToRetry")}
+      <Card style={styles.card}>
+        <View>
+          <View style={{ marginBottom: 12 }}>
+            <AppText role="Headline" style={{ color: colors.primaryText }}>
+              {"🤔 " + t("logCard.estimationFailed")}
             </AppText>
           </View>
 
-          <View style={[styles.rightSection, failedStyles.iconContainer]}>
-            <AlertCircle size={32} color={colors.error} strokeWidth={1.5} />
+          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+            {imageSource && (
+              <Image
+                source={{ uri: imageSource }}
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: theme.components.cards.cornerRadius,
+                  backgroundColor: colors.secondaryBackground,
+                }}
+                contentFit="cover"
+              />
+            )}
+
+            <View style={{ flex: 1, justifyContent: "center" }}>
+              <AppText
+                role="Body"
+                style={{ color: colors.secondaryText }}
+                numberOfLines={2}
+              >
+                {displayDescription}
+              </AppText>
+            </View>
+
+            <Button
+              label={t("retry")}
+              Icon={RefreshCw}
+              variant="primary"
+              onPress={handleRetryPress}
+              style={{ alignSelf: "flex-end", marginTop: theme.spacing.sm }}
+            />
           </View>
         </View>
       </Card>
@@ -379,12 +397,6 @@ const FailedLogCard: React.FC<FailedLogCardProps> = ({
   );
 };
 
-const failedStyles = StyleSheet.create({
-  iconContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
 
 // Wrapper: choose animated only when needed, otherwise render lightweight static card
 const LogCardInner: React.FC<LogCardProps> = ({
@@ -400,26 +412,6 @@ const LogCardInner: React.FC<LogCardProps> = ({
   contextMenuPreset = "default",
 }) => {
   const { t } = useTranslation();
-  const hasEverBeenLoadingRef = useRef<boolean>(isLoading === true);
-  const [useAnimatedVariant, setUseAnimatedVariant] = useState<boolean>(
-    isLoading === true
-  );
-
-  useEffect(() => {
-    if (isLoading) {
-      hasEverBeenLoadingRef.current = true;
-      setUseAnimatedVariant(true);
-      return;
-    }
-
-    if (hasEverBeenLoadingRef.current) {
-      // Allow animations to complete then switch to static (2000ms to avoid mid-animation switch)
-      const timeout = setTimeout(() => setUseAnimatedVariant(false), 2000);
-      return () => clearTimeout(timeout);
-    }
-
-    setUseAnimatedVariant(false);
-  }, [isLoading]);
 
   const [menuVisible, setMenuVisible] = useState(false);
   const { favorites } = useAppStore();
@@ -511,24 +503,8 @@ const LogCardInner: React.FC<LogCardProps> = ({
     );
   }
 
-  if (!isLoading && !hasEverBeenLoadingRef.current) {
-    return (
-      <>
-        <StaticLogCard
-          foodLog={foodLog}
-          isLoading={false}
-          onLongPress={handleLongPress}
-        />
-        <ContextMenu
-          visible={menuVisible}
-          items={items}
-          onClose={() => setMenuVisible(false)}
-        />
-      </>
-    );
-  }
-
-  if (useAnimatedVariant) {
+  // Show animated loading card if currently loading
+  if (isLoading) {
     return (
       <>
         <AnimatedLogCard
@@ -545,6 +521,7 @@ const LogCardInner: React.FC<LogCardProps> = ({
     );
   }
 
+  // Otherwise, show static card
   return (
     <>
       <StaticLogCard

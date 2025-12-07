@@ -1,5 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
-import { AppState, AppStateStatus } from "react-native";
+import { AppState, AppStateStatus, Alert } from "react-native";
+import { router } from "expo-router";
+import i18next from "i18next";
 
 import { useAppStore } from "@/store/useAppStore";
 import { useLocalization } from "@/context/LocalizationContext";
@@ -31,6 +33,7 @@ export const retryFailedEstimation = async (
     if (__DEV__) {
       console.log("[Recovery] Cannot retry - Pro subscription required");
     }
+    router.push("/paywall");
     return;
   }
 
@@ -43,7 +46,11 @@ export const retryFailedEstimation = async (
   }
 
   // Set back to estimating state
-  updateFoodLog(logId, { isEstimating: true, estimationFailed: false });
+  updateFoodLog(logId, {
+    isEstimating: true,
+    estimationFailed: false,
+    title: "", // Clear title to prevent flash of old/fallback title
+  });
 
   try {
     let imagePath = log.supabaseImagePath;
@@ -83,6 +90,14 @@ export const retryFailedEstimation = async (
       console.log("[Recovery] Retry failed:", logId, error);
     }
     updateFoodLog(logId, { isEstimating: false, estimationFailed: true });
+
+    // Check if it's a rate limit error
+    if (error instanceof Error && error.message === "AI_ESTIMATION_RATE_LIMIT") {
+      Alert.alert(
+        i18next.t("errors.api.rateLimit.title"),
+        i18next.t("errors.api.rateLimit.message")
+      );
+    }
   }
 };
 
