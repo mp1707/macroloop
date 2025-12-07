@@ -14,9 +14,6 @@ import { useSegments } from "expo-router";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 
 const FAT_BASELINE_RANGE = { min: 0.2, max: 0.35 };
-const FAT_BASELINE_LABEL = `${Math.round(
-  FAT_BASELINE_RANGE.min * 100
-)}-${Math.round(FAT_BASELINE_RANGE.max * 100)}`;
 
 export default function TrendsScreen() {
   const [timePeriod, setTimePeriod] = useState<"week" | "month">("week");
@@ -105,7 +102,6 @@ export default function TrendsScreen() {
   );
 
   const selectedMeta = nutrientMeta[selectedMetric];
-  const selectedUnit = selectedMeta.unit;
   const showGoalDelta =
     (selectedMetric === "calories" || selectedMetric === "protein") &&
     typeof dailyTargets?.[selectedMetric] === "number";

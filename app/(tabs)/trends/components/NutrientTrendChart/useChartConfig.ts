@@ -28,7 +28,7 @@ export const useChartConfig = ({
   const config = useMemo<ChartConfig>(() => {
     const screenWidth = Dimensions.get("window").width;
     const chartWidth = screenWidth - theme.spacing.pageMargins.horizontal * 2;
-    const chartHeight = 175;
+    const chartHeight = 145;
 
     const PADDING = { left: 24, right: 24, top: 16, bottom: 0 };
     const contentWidth = chartWidth - PADDING.left - PADDING.right;
