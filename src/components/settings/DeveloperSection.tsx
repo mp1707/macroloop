@@ -15,7 +15,7 @@ export const DeveloperSection = () => {
   const { t } = useTranslation();
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
-  const { clearAllLogs, clearNutritionGoals, isPro, setPro } = useAppStore();
+  const { clearAllLogs, clearNutritionGoals, isPro, setPro, devProOverride, setDevProOverride } = useAppStore();
 
   const handleSeedData = useCallback(() => {
     seedFoodLogs();
@@ -51,9 +51,19 @@ export const DeveloperSection = () => {
     );
   }, [clearNutritionGoals, t]);
 
-  const handleTogglePro = useCallback(() => {
-    setPro(!isPro);
-  }, [isPro, setPro]);
+  const handleToggleDevProOverride = useCallback(() => {
+    const newValue = !devProOverride;
+    setDevProOverride(newValue);
+
+    // When enabling override, set Pro to true
+    // When disabling, leave isPro as-is; real subscription will sync on next foreground
+    if (newValue) {
+      setPro(true);
+      console.log('[DEV] Pro override enabled - app now has Pro features');
+    } else {
+      console.log('[DEV] Pro override disabled - real subscription will sync on next app foreground');
+    }
+  }, [devProOverride, setDevProOverride, setPro]);
 
   const getStoredImages = useCallback(() => {
     const directory = Paths.document;
@@ -182,17 +192,24 @@ export const DeveloperSection = () => {
         <View style={styles.separator} />
         <SettingRow
           icon={BadgeCheck}
-          title={`${t("settings.sections.developer.rows.togglePro.title")} (${
+          title={`${t("settings.sections.developer.rows.togglePro.title")} ${
+            devProOverride ? "(OVERRIDE ACTIVE)" : ""
+          } (${
             isPro
               ? t("settings.sections.developer.rows.togglePro.states.on")
               : t("settings.sections.developer.rows.togglePro.states.off")
           })`}
-          subtitle={t("settings.sections.developer.rows.togglePro.subtitle")}
+          subtitle={
+            devProOverride
+              ? "⚠️ Dev override active - RevenueCat disabled"
+              : t("settings.sections.developer.rows.togglePro.subtitle")
+          }
           actionButton={{
-            label: isPro
-              ? t("settings.sections.developer.rows.togglePro.actions.disable")
-              : t("settings.sections.developer.rows.togglePro.actions.enable"),
-            onPress: handleTogglePro,
+            label: devProOverride
+              ? "Disable Override"
+              : "Enable Override",
+            onPress: handleToggleDevProOverride,
+            tone: devProOverride ? "error" : undefined,
           }}
           accessory="none"
         />

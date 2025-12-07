@@ -43,6 +43,15 @@ const toSnapshot = (info: CustomerInfo): Snapshot => {
 };
 
 export const applyCustomerInfoToStore = (info: CustomerInfo) => {
+  // Skip if dev override is active (dev builds only)
+  if (__DEV__) {
+    const { devProOverride } = useAppStore.getState();
+    if (devProOverride) {
+      console.log('[DEV] Skipping subscription sync - dev Pro override active');
+      return;
+    }
+  }
+
   const snapshot = toSnapshot(info);
   const { setPro, setProMetadata } = useAppStore.getState();
 

@@ -30,6 +30,10 @@ export type AppState = {
   }) => void;
   setVerifyingSubscription: (value: boolean) => void;
 
+  // Dev-only subscription override (excluded from production builds)
+  devProOverride: boolean;
+  setDevProOverride: (value: boolean) => void;
+
   // UI state
   selectedDate: string; // YYYY-MM-DD (for day view)
   selectedMonth: string; // YYYY-MM (for month view)
@@ -314,6 +318,13 @@ export const useAppStore = create<AppState>()(
           state.isVerifyingSubscription = value;
         }),
 
+      // Dev-only Pro override
+      devProOverride: false,
+      setDevProOverride: (value) =>
+        set((state) => {
+          state.devProOverride = value;
+        }),
+
       // UI
       setSelectedDate: (date) =>
         set((state) => {
@@ -362,6 +373,8 @@ export const useAppStore = create<AppState>()(
         selectedDate: state.selectedDate,
         selectedMonth: state.selectedMonth,
         lastUsedUnit: state.lastUsedUnit,
+        // Dev-only: persist dev override in dev builds only
+        ...(__DEV__ && { devProOverride: state.devProOverride }),
         // Exclude: pendingComponentEdit, isVerifyingSubscription
       }),
     }

@@ -21,6 +21,16 @@ export const useRevenueCat = () => {
   );
 
   useEffect(() => {
+    // Skip entire subscription flow in dev mode if override active
+    if (__DEV__) {
+      const { devProOverride } = useAppStore.getState();
+      if (devProOverride) {
+        console.log('[DEV] RevenueCat initialization skipped - dev Pro override active');
+        setVerifyingSubscription(false);
+        return;
+      }
+    }
+
     if (!ensureRevenueCatConfigured()) {
       setVerifyingSubscription(false);
       return;
