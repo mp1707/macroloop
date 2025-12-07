@@ -15,6 +15,7 @@ export type MacrosPerReferencePortion = {
 export interface TextEstimateRequest {
   description: string;
   language: Language;
+  signal?: AbortSignal;
 }
 
 // Legacy V1 refine request (string-based)
@@ -54,6 +55,7 @@ export interface ImageEstimateRequest {
   title?: string;
   description?: string;
   language: Language;
+  signal?: AbortSignal;
 }
 
 export interface FoodEstimateResponse {
@@ -106,8 +108,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export const estimateTextBased = async (
   request: TextEstimateRequest
 ): Promise<FoodEstimateResponse> => {
+  const { signal, ...payload } = request;
   if (__DEV__) {
-    console.log("Text estimation V2 request:", request);
+    console.log("Text estimation V2 request:", payload);
   }
 
   const response = await fetch(`${supabaseUrl}/functions/v1/textEstimation2`, {
@@ -117,7 +120,8 @@ export const estimateTextBased = async (
       Authorization: `Bearer ${supabaseAnonKey}`,
       apikey: supabaseAnonKey,
     },
-    body: JSON.stringify(request),
+    body: JSON.stringify(payload),
+    signal,
   });
 
   if (__DEV__) {
@@ -217,8 +221,9 @@ export const refineEstimation = async (
 export const estimateNutritionImageBased = async (
   request: ImageEstimateRequest
 ): Promise<FoodEstimateResponse> => {
+  const { signal, ...payload } = request;
   if (__DEV__) {
-    console.log("Image estimation V2 request:", request);
+    console.log("Image estimation V2 request:", payload);
   }
 
   const response = await fetch(`${supabaseUrl}/functions/v1/imageEstimation2`, {
@@ -228,7 +233,8 @@ export const estimateNutritionImageBased = async (
       Authorization: `Bearer ${supabaseAnonKey}`,
       apikey: supabaseAnonKey,
     },
-    body: JSON.stringify(request),
+    body: JSON.stringify(payload),
+    signal,
   });
 
   if (__DEV__) {

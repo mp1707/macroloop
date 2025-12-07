@@ -1,16 +1,18 @@
-import { useEffect, useRef, useCallback } from "react";
-import { AppState, AppStateStatus, Alert } from "react-native";
+import { Alert } from "react-native";
 import { router } from "expo-router";
 import i18next from "i18next";
 
 import { useAppStore } from "@/store/useAppStore";
-import { useLocalization } from "@/context/LocalizationContext";
 import {
   estimateNutritionImageBased,
   estimateTextBased,
 } from "@/lib/supabase";
 import { applyEstimationResults } from "@/utils/estimation";
 import { uploadToSupabaseStorage } from "@/utils/uploadToSupabaseStorage";
+import {
+  trackEstimationController,
+  clearEstimationController,
+} from "@/utils/estimationControllers";
 import type { FoodLog } from "@/types/models";
 
 const hasImage = (log: FoodLog): boolean =>
@@ -20,8 +22,8 @@ const hasLocalImage = (log: FoodLog): boolean =>
   !!log.localImagePath && log.localImagePath !== "";
 
 /**
- * Retries a single failed estimation.
- * Can be called from anywhere (doesn't require the hook context).
+ * Retries a single failed estimation after the user taps "Retry".
+ * This no longer auto-runs on foreground events—users stay in control.
  */
 export const retryFailedEstimation = async (
   logId: string,
@@ -30,9 +32,6 @@ export const retryFailedEstimation = async (
   const { foodLogs, updateFoodLog, isPro } = useAppStore.getState();
 
   if (!isPro) {
-    if (__DEV__) {
-      console.log("[Recovery] Cannot retry - Pro subscription required");
-    }
     router.push("/paywall");
     return;
   }
@@ -45,11 +44,14 @@ export const retryFailedEstimation = async (
     return;
   }
 
-  // Set back to estimating state
+  const controller = new AbortController();
+  trackEstimationController(logId, controller);
+
+  // Set back to estimating state while keeping card responsive
   updateFoodLog(logId, {
     isEstimating: true,
     estimationFailed: false,
-    title: "", // Clear title to prevent flash of old/fallback title
+    title: "", // Clear title to prevent stale fallback titles during retry
   });
 
   try {
@@ -70,10 +72,12 @@ export const retryFailedEstimation = async (
           imagePath: imagePath!,
           description: log.description || "",
           language,
+          signal: controller.signal,
         })
       : await estimateTextBased({
           description: log.description || "",
           language,
+          signal: controller.signal,
         });
 
     const completedLog = applyEstimationResults(log, results);
@@ -86,147 +90,25 @@ export const retryFailedEstimation = async (
       console.log("[Recovery] Successfully recovered estimation:", logId);
     }
   } catch (error) {
-    if (__DEV__) {
-      console.log("[Recovery] Retry failed:", logId, error);
-    }
-    updateFoodLog(logId, { isEstimating: false, estimationFailed: true });
-
-    // Check if it's a rate limit error
-    if (error instanceof Error && error.message === "AI_ESTIMATION_RATE_LIMIT") {
-      Alert.alert(
-        i18next.t("errors.api.rateLimit.title"),
-        i18next.t("errors.api.rateLimit.message")
-      );
-    }
-  }
-};
-
-/**
- * Recovers pending estimations when app returns to foreground.
- * - Auto-retries logs with `isEstimating: true` on foreground
- * - Marks logs as `estimationFailed: true` on API failure
- *
- * Call this hook once in the root layout.
- * For manual retries, use `retryFailedEstimation` directly.
- */
-export const useEstimationRecovery = () => {
-  const { currentLanguage } = useLocalization();
-  const language = currentLanguage || "en";
-  const isProcessingRef = useRef(false);
-  const isMountedRef = useRef(true);
-
-  const retryEstimation = useCallback(
-    (logId: string) => {
-      void retryFailedEstimation(logId, language);
-    },
-    [language]
-  );
-
-  const retryPendingEstimations = useCallback(async () => {
-    if (isProcessingRef.current) return;
-    isProcessingRef.current = true;
-
-    try {
-      const { foodLogs, updateFoodLog, isPro } = useAppStore.getState();
-
-      if (!isPro) {
-        if (__DEV__) {
-          console.log("[Recovery] Skipping - Pro subscription required");
-        }
-        return;
-      }
-
-      // Only auto-retry logs that are still estimating (not failed ones)
-      const pendingLogs = foodLogs.filter(
-        (log) => log.isEstimating === true && log.estimationFailed !== true
-      );
-
-      if (pendingLogs.length === 0) return;
-
+    if (error instanceof Error && error.name === "AbortError") {
       if (__DEV__) {
-        console.log(
-          "[Recovery] Found pending estimations:",
-          pendingLogs.length
+        console.log("[Recovery] Retry aborted:", logId);
+      }
+    } else {
+      updateFoodLog(logId, { isEstimating: false, estimationFailed: true });
+
+      // Check if it's a rate limit error
+      if (
+        error instanceof Error &&
+        error.message === "AI_ESTIMATION_RATE_LIMIT"
+      ) {
+        Alert.alert(
+          i18next.t("errors.api.rateLimit.title"),
+          i18next.t("errors.api.rateLimit.message")
         );
       }
-
-      for (const log of pendingLogs) {
-        if (!isMountedRef.current) break;
-
-        try {
-          let imagePath = log.supabaseImagePath;
-
-          // Re-upload image if this is an image-based estimation
-          // (Supabase deletes images after AI call for privacy)
-          if (hasImage(log) && hasLocalImage(log)) {
-            if (__DEV__) {
-              console.log("[Recovery] Re-uploading image for pending:", log.id);
-            }
-            imagePath = await uploadToSupabaseStorage(log.localImagePath!);
-            updateFoodLog(log.id, { supabaseImagePath: imagePath });
-          }
-
-          if (!isMountedRef.current) break;
-
-          const results = hasImage(log)
-            ? await estimateNutritionImageBased({
-                imagePath: imagePath!,
-                description: log.description || "",
-                language,
-              })
-            : await estimateTextBased({
-                description: log.description || "",
-                language,
-              });
-
-          if (!isMountedRef.current) break;
-
-          const completedLog = applyEstimationResults(log, results);
-          updateFoodLog(log.id, {
-            ...completedLog,
-            estimationFailed: false,
-          });
-
-          if (__DEV__) {
-            console.log("[Recovery] Recovered pending estimation:", log.id);
-          }
-        } catch (error) {
-          if (!isMountedRef.current) break;
-
-          if (__DEV__) {
-            console.log("[Recovery] Failed to recover:", log.id, error);
-          }
-          // Mark as failed so user can manually retry
-          updateFoodLog(log.id, { isEstimating: false, estimationFailed: true });
-        }
-      }
-    } finally {
-      isProcessingRef.current = false;
     }
-  }, [language]);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    // Retry on initial mount (handles cold start)
-    void retryPendingEstimations();
-
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (nextAppState === "active") {
-        void retryPendingEstimations();
-      }
-    };
-
-    const subscription = AppState.addEventListener(
-      "change",
-      handleAppStateChange
-    );
-
-    return () => {
-      isMountedRef.current = false;
-      subscription.remove();
-    };
-  }, [retryPendingEstimations]);
-
-  return { retryEstimation };
+  } finally {
+    clearEstimationController(logId);
+  }
 };

@@ -51,7 +51,7 @@ export const FoodLogItem: React.FC<FoodLogItemProps> = ({
       layout={LinearTransition}
     >
       <SwipeToFunctions
-        onDelete={isItemLoading ? undefined : () => onDelete(item)}
+        onDelete={() => onDelete(item)}
         onLeftFunction={
           disableInteractions ? undefined : () => onToggleFavorite(item)
         }

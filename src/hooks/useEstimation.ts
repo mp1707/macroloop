@@ -14,6 +14,10 @@ import {
   type FoodEstimateResponse,
   type RefineFoodComponentInput,
 } from "../lib";
+import {
+  trackEstimationController,
+  clearEstimationController,
+} from "@/utils/estimationControllers";
 
 // Helpers
 const hasImage = (log: { supabaseImagePath?: string | null }): boolean =>
@@ -106,6 +110,9 @@ export const useEstimation = () => {
       const incompleteLog = createEstimationLog(logData);
       addFoodLog(incompleteLog);
 
+      const abortController = new AbortController();
+      trackEstimationController(incompleteLog.id, abortController);
+
       const isImageEstimation = hasImage(logData);
       const estimationFunction = async () => {
         if (__DEV__) {
@@ -120,10 +127,12 @@ export const useEstimation = () => {
               imagePath: logData.supabaseImagePath || "",
               description: logData.description || "",
               language,
+              signal: abortController.signal,
             })
           : estimateTextBased({
               description: logData.description || "",
               language,
+              signal: abortController.signal,
             });
       };
 
@@ -138,19 +147,33 @@ export const useEstimation = () => {
           estimationFailed: false,
         });
       } catch (error) {
-        // Mark as failed instead of deleting - allows user to retry
-        updateFoodLog(incompleteLog.id, {
-          isEstimating: false,
-          estimationFailed: true,
-        });
+        if (error instanceof Error && error.name === "AbortError") {
+          if (__DEV__) {
+            console.log(
+              "[Estimation] Initial estimation aborted",
+              incompleteLog.id
+            );
+          }
+        } else {
+          // Mark as failed instead of deleting - allows user to retry
+          updateFoodLog(incompleteLog.id, {
+            isEstimating: false,
+            estimationFailed: true,
+          });
 
-        // Check if it's a rate limit error
-        if (error instanceof Error && error.message === "AI_ESTIMATION_RATE_LIMIT") {
-          Alert.alert(
-            t("errors.api.rateLimit.title"),
-            t("errors.api.rateLimit.message")
-          );
+          // Check if it's a rate limit error
+          if (
+            error instanceof Error &&
+            error.message === "AI_ESTIMATION_RATE_LIMIT"
+          ) {
+            Alert.alert(
+              t("errors.api.rateLimit.title"),
+              t("errors.api.rateLimit.message")
+            );
+          }
         }
+      } finally {
+        clearEstimationController(incompleteLog.id);
       }
     },
     [addFoodLog, updateFoodLog, isPro, language, t]

@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { View, Pressable, StyleSheet } from "react-native";
+import { View, Pressable, GestureResponderEvent } from "react-native";
 import { Image } from "expo-image";
 import {
   useSharedValue,
@@ -337,6 +337,14 @@ const FailedLogCard: React.FC<FailedLogCardProps> = ({ foodLog, onRetry }) => {
     onRetry?.(foodLog);
   }, [foodLog, onRetry]);
 
+  const handleRetryButtonPress = useCallback(
+    (event: GestureResponderEvent) => {
+      event.stopPropagation();
+      void handleRetryPress();
+    },
+    [handleRetryPress]
+  );
+
   const displayDescription = foodLog.description;
   const imageSource = foodLog.localImagePath || foodLog.supabaseImagePath;
 
@@ -379,6 +387,7 @@ const FailedLogCard: React.FC<FailedLogCardProps> = ({ foodLog, onRetry }) => {
               label={t("paywall.buttons.retry")}
               Icon={RefreshCw}
               variant="primary"
+              onPress={handleRetryButtonPress}
               style={{ alignSelf: "flex-end" }}
             />
           </View>

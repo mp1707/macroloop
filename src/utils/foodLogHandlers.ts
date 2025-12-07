@@ -2,6 +2,7 @@ import { FoodLog, Favorite } from "@/types/models";
 import { generateFoodLogId } from "@/utils/idGenerator";
 import { useHudStore } from "@/store/useHudStore";
 import type { TFunction } from "i18next";
+import { cancelEstimationController } from "@/utils/estimationControllers";
 
 export const createLogAgainHandler = (
   addFoodLog: (log: FoodLog) => void,
@@ -89,9 +90,12 @@ export const createEditHandler = (safeNavigate: (path: string) => void) => {
   };
 };
 
-export const createDeleteHandler = (deleteFoodLog: (id: string) => void | Promise<void>) => {
+export const createDeleteHandler = (
+  deleteFoodLog: (id: string) => void | Promise<void>
+) => {
   return (log: FoodLog | Favorite) => {
-    deleteFoodLog(log.id);
+    cancelEstimationController(log.id);
+    return deleteFoodLog(log.id);
   };
 };
 

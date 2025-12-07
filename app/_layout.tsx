@@ -11,7 +11,6 @@ import {
   useNavigationTransition,
 } from "@/context/NavigationTransitionContext";
 import { useRevenueCat } from "@/hooks/useRevenueCat";
-import { useEstimationRecovery } from "@/hooks/useEstimationRecovery";
 import "@/lib/i18n";
 import { LocalizationProvider } from "@/context/LocalizationContext";
 import { Image } from "expo-image";
@@ -117,8 +116,6 @@ function RootLayoutContent() {
   const { colors } = useTheme();
 
   useRevenueCat();
-  // Auto-recover pending estimations when app returns to foreground
-  useEstimationRecovery();
 
   useEffect(() => {
     // Clear image caches on app start for fresh state
