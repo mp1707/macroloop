@@ -36,6 +36,7 @@ export const createStyles = (colors: Colors) =>
     rightSection: {
       justifyContent: "flex-end",
       alignItems: "flex-start",
+      paddingTop: theme.spacing.sm,
       minWidth: "35%",
     },
     foodComponentList: {

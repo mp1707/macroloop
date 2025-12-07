@@ -10,6 +10,8 @@ import { seedFoodLogs } from "@/utils/seed";
 import { SettingRow } from "./SettingRow";
 import * as FileSystem from "expo-file-system";
 import { Paths } from "expo-file-system";
+import { getCustomerInfo } from "@/lib/revenuecat/client";
+import { applyCustomerInfoToStore } from "@/lib/revenuecat/subscription";
 
 export const DeveloperSection = () => {
   const { t } = useTranslation();
@@ -51,7 +53,7 @@ export const DeveloperSection = () => {
     );
   }, [clearNutritionGoals, t]);
 
-  const handleToggleDevProOverride = useCallback(() => {
+  const handleToggleDevProOverride = useCallback(async () => {
     const newValue = !devProOverride;
     setDevProOverride(newValue);
 
@@ -61,7 +63,15 @@ export const DeveloperSection = () => {
       setPro(true);
       console.log('[DEV] Pro override enabled - app now has Pro features');
     } else {
-      console.log('[DEV] Pro override disabled - real subscription will sync on next app foreground');
+      console.log('[DEV] Pro override disabled - syncing with RevenueCat...');
+      try {
+        const info = await getCustomerInfo();
+        applyCustomerInfoToStore(info);
+        console.log('[DEV] Synced with RevenueCat successfully');
+      } catch (error) {
+        console.error('[DEV] Failed to sync with RevenueCat', error);
+        setPro(false);
+      }
     }
   }, [devProOverride, setDevProOverride, setPro]);
 
