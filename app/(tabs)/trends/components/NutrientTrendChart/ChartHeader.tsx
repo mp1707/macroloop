@@ -69,11 +69,9 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
 
   // Calculate fat percentage pill for fat nutrient
   const shouldShowFatPill =
-    nutrient === "fat" &&
-    typeof calorieGoal === "number" &&
-    daysWithData > 0;
+    nutrient === "fat" && typeof calorieGoal === "number" && daysWithData > 0;
   const fatPercentage = shouldShowFatPill
-    ? Math.round((average * 9 / calorieGoal!) * 100)
+    ? Math.round(((average * 9) / calorieGoal!) * 100)
     : 0;
 
   const periodLabel = t("trends.chart.averagePerDayLabel", { days });
@@ -133,7 +131,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
               role="Caption"
               style={[styles.badgeText, { color: badgeTextColor }]}
             >
-              {isOverTarget ? "+ " : "- "}
+              {isOverTarget ? "+" : "-"}
               {absDiff} {unit} {t("trends.chart.vsGoal")}
             </AppText>
           </View>
