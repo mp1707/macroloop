@@ -22,7 +22,8 @@
     },
     "of": "von",
     "left": "übrig",
-    "over": "drüber"
+    "over": "drüber",
+    "tapToViewDetails": "zwischen Ziel und Differenz umschalten"
   },
   "common": {
     "loading": "Wird geladen …",

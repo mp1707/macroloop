@@ -22,7 +22,8 @@
     },
     "of": "of",
     "left": "left",
-    "over": "over"
+    "over": "over",
+    "tapToViewDetails": "toggle goal or delta data"
   },
   "common": {
     "loading": "Loading…",
