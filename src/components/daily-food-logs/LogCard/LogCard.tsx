@@ -413,6 +413,17 @@ const LogCardInner: React.FC<LogCardProps> = ({
   const { t } = useTranslation();
 
   const [menuVisible, setMenuVisible] = useState(false);
+
+  // Track if we should use the animated variant (loading or transitioning from loading)
+  // We keep using the animated component if it was ever loading in this session to support the exit animation
+  const [shouldUseAnimated, setShouldUseAnimated] = useState(isLoading);
+
+  useEffect(() => {
+    if (isLoading) {
+      setShouldUseAnimated(true);
+    }
+  }, [isLoading]);
+
   const { favorites } = useAppStore();
   const isFavorite = useMemo(
     () => favorites.some((f) => f.id === (foodLog as any).id),
@@ -489,8 +500,8 @@ const LogCardInner: React.FC<LogCardProps> = ({
     return <FailedLogCard foodLog={foodLog as FoodLog} onRetry={onRetry} />;
   }
 
-  // Show animated loading card if currently loading
-  if (isLoading) {
+  // Show animated loading card if currently loading OR if it was loading (to support transition)
+  if (shouldUseAnimated) {
     return (
       <>
         <AnimatedLogCard
