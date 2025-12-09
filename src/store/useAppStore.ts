@@ -11,6 +11,7 @@ import {
 } from "../types/models";
 import { getTodayKey } from "@/utils/dateHelpers";
 import { File } from "expo-file-system";
+import { resolveLocalImagePath } from "@/utils/fileUtils";
 
 export type AppState = {
   foodLogs: FoodLog[];
@@ -88,19 +89,28 @@ export const useAppStore = create<AppState>()(
           return false;
         }
 
+        const resolvedUri = resolveLocalImagePath(uri);
         const { foodLogs, favorites } = get();
         const isReferenced =
-          foodLogs.some((log) => log.localImagePath === uri) ||
-          favorites.some((favorite) => favorite.localImagePath === uri);
+          foodLogs.some(
+            (log) => resolveLocalImagePath(log.localImagePath) === resolvedUri
+          ) ||
+          favorites.some(
+            (favorite) =>
+              resolveLocalImagePath(favorite.localImagePath) === resolvedUri
+          );
 
         if (isReferenced) {
           return false;
         }
 
         try {
-          const file = new File(uri);
-          await file.delete();
-          return true;
+          if (resolvedUri) {
+            const file = new File(resolvedUri);
+            await file.delete();
+            return true;
+          }
+          return false;
         } catch (error) {
           // File doesn't exist or can't be deleted - safe to ignore
           return false;

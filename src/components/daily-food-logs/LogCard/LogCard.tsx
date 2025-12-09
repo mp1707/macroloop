@@ -30,6 +30,7 @@ import { createStyles as createNutritionStyles } from "./NutritionList/Nutrition
 import { FoodComponentList } from "./FoodComponentList";
 import { LogCardTitle } from "./LogCardTitle";
 import { useTranslation } from "react-i18next";
+import { resolveLocalImagePath } from "@/utils/fileUtils";
 
 interface LogCardProps {
   foodLog: FoodLog | Favorite;
@@ -346,7 +347,11 @@ const FailedLogCard: React.FC<FailedLogCardProps> = ({ foodLog, onRetry }) => {
   );
 
   const displayDescription = foodLog.description;
-  const imageSource = foodLog.localImagePath || foodLog.supabaseImagePath;
+  const resolvedLocalImage = useMemo(
+    () => resolveLocalImagePath(foodLog.localImagePath),
+    [foodLog.localImagePath]
+  );
+  const imageSource = resolvedLocalImage || foodLog.supabaseImagePath;
 
   return (
     <Pressable style={styles.cardContainer}>

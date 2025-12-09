@@ -20,6 +20,7 @@ import { useTheme } from "@/theme";
 import { Card } from "@/components/Card";
 import { HeaderButton } from "@/components/shared/HeaderButton";
 import { createStyles } from "./ImageDisplay.styles";
+import { resolveLocalImagePath } from "@/utils/fileUtils";
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
@@ -59,6 +60,11 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
   const styles = useMemo(
     () => createStyles(colors, theme, colorScheme),
     [colors, theme, colorScheme]
+  );
+
+  const resolvedImageUrl = useMemo(
+    () => resolveLocalImagePath(imageUrl),
+    [imageUrl]
   );
 
   // Toggle state for height expansion
@@ -131,12 +137,12 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     const duration = isReducedMotionEnabled ? 0 : 400;
     const exitDuration = isReducedMotionEnabled ? 0 : 200;
 
-    if (imageUrl && !isUploading) {
+    if (resolvedImageUrl && !isUploading) {
       imageOpacity.value = withTiming(1, { duration });
     } else {
       imageOpacity.value = withTiming(0, { duration: exitDuration });
     }
-  }, [imageUrl, isUploading, isReducedMotionEnabled, imageOpacity]);
+  }, [resolvedImageUrl, isUploading, isReducedMotionEnabled, imageOpacity]);
 
   // Height and width toggle animation
   useEffect(() => {
@@ -163,13 +169,14 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
 
   // Trash button visibility animation
   useEffect(() => {
-    const shouldShow = deleteImage && imageUrl && !isUploading && !isExpanded;
+    const shouldShow =
+      deleteImage && resolvedImageUrl && !isUploading && !isExpanded;
     const duration = isReducedMotionEnabled ? 0 : 200;
 
     trashButtonOpacity.value = withTiming(shouldShow ? 1 : 0, { duration });
   }, [
     deleteImage,
-    imageUrl,
+    resolvedImageUrl,
     isUploading,
     isExpanded,
     isReducedMotionEnabled,
@@ -230,9 +237,9 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
     opacity: trashButtonOpacity.value,
   }));
 
-  const canInteract = imageUrl && !isUploading;
+  const canInteract = resolvedImageUrl && !isUploading;
   const shouldShowTrash =
-    deleteImage && imageUrl && !isUploading && !isExpanded;
+    deleteImage && resolvedImageUrl && !isUploading && !isExpanded;
 
   const content = (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
@@ -250,7 +257,7 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
           }
         >
           <Card padding={0} style={styles.imageCard}>
-            {isUploading || !imageUrl ? (
+            {isUploading || !resolvedImageUrl ? (
               <ActivityIndicator
                 size="large"
                 color={colors.white}
@@ -261,11 +268,11 @@ export const ImageDisplay: React.FC<ImageDisplayProps> = ({
               />
             ) : (
               <AnimatedImage
-                source={{ uri: imageUrl }}
+                source={{ uri: resolvedImageUrl }}
                 style={[styles.image, imageAnimatedStyle]}
                 contentFit="cover"
                 cachePolicy="memory-disk"
-                recyclingKey={imageUrl}
+                recyclingKey={resolvedImageUrl}
                 priority="low"
                 // ACCESSIBILITY: Text alternative for image (WCAG 1.1.1)
                 accessible={true}

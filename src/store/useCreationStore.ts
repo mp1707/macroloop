@@ -3,6 +3,7 @@ import { FoodLog } from "@/types/models";
 import { generateFoodLogId } from "@/utils/idGenerator";
 import { File } from "expo-file-system";
 import { useAppStore } from "@/store/useAppStore";
+import { resolveLocalImagePath } from "@/utils/fileUtils";
 
 type DraftsById = Record<string, FoodLog>;
 
@@ -65,16 +66,21 @@ export const useCreationStore = create<CreationState>((set, get) => ({
 
     // Delete the image file if it exists and isn't used by a persisted log
     if (draft?.localImagePath) {
+      const draftPath = resolveLocalImagePath(draft.localImagePath);
       const { foodLogs, favorites } = useAppStore.getState();
+
       const isImageStillReferenced =
-        foodLogs.some((log) => log.localImagePath === draft.localImagePath) ||
+        foodLogs.some(
+          (log) => resolveLocalImagePath(log.localImagePath) === draftPath
+        ) ||
         favorites.some(
-          (favorite) => favorite.localImagePath === draft.localImagePath
+          (favorite) =>
+            resolveLocalImagePath(favorite.localImagePath) === draftPath
         );
 
       try {
-        if (!isImageStillReferenced) {
-          const file = new File(draft.localImagePath);
+        if (!isImageStillReferenced && draftPath) {
+          const file = new File(draftPath);
           await file.delete();
         }
       } catch (error) {

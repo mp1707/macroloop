@@ -14,12 +14,10 @@ import {
   clearEstimationController,
 } from "@/utils/estimationControllers";
 import type { FoodLog } from "@/types/models";
+import { resolveLocalImagePath } from "@/utils/fileUtils";
 
 const hasImage = (log: FoodLog): boolean =>
   !!log.supabaseImagePath && log.supabaseImagePath !== "";
-
-const hasLocalImage = (log: FoodLog): boolean =>
-  !!log.localImagePath && log.localImagePath !== "";
 
 /**
  * Retries a single failed estimation after the user taps "Retry".
@@ -59,11 +57,13 @@ export const retryFailedEstimation = async (
 
     // Re-upload image if this is an image-based estimation
     // (Supabase deletes images after AI call for privacy)
-    if (hasImage(log) && hasLocalImage(log)) {
+    const resolvedLocalImagePath = resolveLocalImagePath(log.localImagePath);
+
+    if (hasImage(log) && resolvedLocalImagePath) {
       if (__DEV__) {
         console.log("[Recovery] Re-uploading image for retry:", logId);
       }
-      imagePath = await uploadToSupabaseStorage(log.localImagePath!);
+      imagePath = await uploadToSupabaseStorage(resolvedLocalImagePath);
       updateFoodLog(logId, { supabaseImagePath: imagePath });
     }
 
