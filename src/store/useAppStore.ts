@@ -332,6 +332,10 @@ export const useAppStore = create<AppState>()(
       devProOverride: false,
       setDevProOverride: (value) =>
         set((state) => {
+          if (!__DEV__) {
+            state.devProOverride = false;
+            return;
+          }
           state.devProOverride = value;
         }),
 
@@ -387,6 +391,19 @@ export const useAppStore = create<AppState>()(
         ...(__DEV__ && { devProOverride: state.devProOverride }),
         // Exclude: pendingComponentEdit, isVerifyingSubscription
       }),
+      merge: (persistedState, currentState) => {
+        const typedState = (persistedState ?? {}) as Partial<AppState>;
+        const mergedState = {
+          ...currentState,
+          ...typedState,
+        };
+
+        if (!__DEV__) {
+          mergedState.devProOverride = false;
+        }
+
+        return mergedState;
+      },
     }
   )
 );

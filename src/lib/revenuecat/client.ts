@@ -5,13 +5,31 @@ import Purchases, {
   PurchasesPackage,
 } from "react-native-purchases";
 
+import { useAppStore } from "@/store/useAppStore";
+
 type Listener = (info: CustomerInfo) => void;
 
 let isConfigured = false;
 
+const shouldBypassRevenueCat = () => {
+  if (!__DEV__) {
+    return false;
+  }
+
+  return useAppStore.getState().devProOverride;
+};
+
 const getApiKey = () => process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY;
 
 export const ensureRevenueCatConfigured = (): boolean => {
+  if (shouldBypassRevenueCat()) {
+    if (isConfigured) {
+      isConfigured = false;
+    }
+    console.log("[RevenueCat] Dev Pro override active - skipping initialization");
+    return false;
+  }
+
   if (isConfigured) {
     return true;
   }
