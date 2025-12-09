@@ -22,9 +22,6 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
   const { t } = useTranslation();
 
   const semanticColor = colors.semantic.fat;
-  const computedPercentage =
-    target > 0 ? Math.round((total / target) * 100) : 0;
-  const progressPercentage = percentage ?? computedPercentage;
 
   return (
     <View style={styles.container}>
@@ -66,23 +63,6 @@ export const FatExplainer: React.FC<FatExplainerProps> = ({
                   g
                 </AppText>
               </View>
-            </View>
-            {/* Progress Bar */}
-            <View
-              style={[
-                styles.progressBarTrack,
-                { backgroundColor: colors.disabledBackground },
-              ]}
-            >
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    backgroundColor: semanticColor,
-                    width: `${Math.min(progressPercentage, 100)}%`,
-                  },
-                ]}
-              />
             </View>
           </View>
 
@@ -192,17 +172,6 @@ const createStyles = (theme: Theme) =>
     },
     unitText: {
       marginLeft: theme.spacing.xs / 2,
-    },
-    progressBarTrack: {
-      width: "55%",
-      height: 5,
-      borderRadius: 2.5,
-      overflow: "hidden",
-      marginTop: theme.spacing.xs,
-    },
-    progressBarFill: {
-      height: "100%",
-      borderRadius: 2.5,
     },
     sectionHeading: {
       marginBottom: theme.spacing.xs,

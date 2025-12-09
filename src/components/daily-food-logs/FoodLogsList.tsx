@@ -118,12 +118,7 @@ export const FoodLogsList: React.FC<FoodLogsListProps> = ({
 
   const ListHeaderComponent = useMemo(
     () => (
-      <View
-        style={{
-          gap: theme.spacing.xs,
-          paddingBottom: theme.spacing.lg,
-        }}
-      >
+      <View style={{ paddingBottom: theme.spacing.lg }}>
         <NutrientDashboard
           percentages={dailyPercentages}
           targets={normalizedTargets}
