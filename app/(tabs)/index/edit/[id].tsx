@@ -15,17 +15,15 @@ import Animated, { Easing, Layout } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useNavigation } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
-import { Calculator, Star } from "lucide-react-native";
+import { Star } from "lucide-react-native";
 
 import { AppText } from "@/components/index";
 import { ComponentsList } from "@/components/refine-page/ComponentsList/ComponentsList";
 import { MacrosCard } from "@/components/refine-page/MacrosCard/MacrosCard";
 import { RecalculateButton } from "@/components/refine-page/RecalculateButton";
-import { InlinePaywallCard } from "@/components/paywall/InlinePaywallCard";
 import { ImageDisplay } from "@/components/shared/ImageDisplay";
 import { TextInput } from "@/components/shared/TextInput";
 import { useEstimation } from "@/hooks/useEstimation";
-import { usePaywall } from "@/hooks/usePaywall";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
 import { makeSelectLogById } from "@/store/selectors";
 import { useAppStore } from "@/store/useAppStore";
@@ -65,10 +63,6 @@ export default function Edit() {
   const { colors, theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
-
-  // Get trial info for paywall
-  const { options } = usePaywall();
-  const trialDays = options[0]?.trialInfo?.days;
 
   const {
     hasUnsavedChanges,
@@ -177,13 +171,19 @@ export default function Edit() {
     scrollRef.current?.scrollToEnd({ animated: true });
 
     try {
-      const result = await runEditEstimation(editedLog, (log) => {
-        replaceEditedLog(log);
-      });
+      const result = await runEditEstimation(
+        editedLog,
+        (log) => {
+          replaceEditedLog(log);
+        },
+        () => {
+          // Called in finally block before isEditEstimating becomes false
+          markReestimated();
+        }
+      );
 
       // Only update UI if we got a result (not cancelled)
       if (result) {
-        markReestimated();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setRevealKey((key) => key + 1);
       }
@@ -423,8 +423,7 @@ export default function Edit() {
               />
             </Animated.View>
 
-            {(isPro || freeRecalculationCount < 50) &&
-              hasUnsavedChanges &&
+            {hasUnsavedChanges &&
               !isEditEstimating &&
               !isVerifyingSubscription &&
               (editedLog?.foodComponents?.length || 0) > 0 && (
@@ -440,26 +439,6 @@ export default function Edit() {
               )}
 
             <Animated.View layout={easeLayout}>
-              {isVerifyingSubscription ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator />
-                </View>
-              ) : (
-                !isPro && freeRecalculationCount >= 50 && (
-                  <InlinePaywallCard
-                    Icon={Calculator}
-                    title={t("editLog.paywall.title")}
-                    body={t("editLog.paywall.body")}
-                    ctaLabel={t("editLog.paywall.cta")}
-                    onPress={handleShowPaywall}
-                    trialDays={trialDays}
-                    testID="edit-inline-paywall"
-                  />
-                )
-              )}
-            </Animated.View>
-
-            <Animated.View layout={easeLayout}>
               <MacrosCard
                 calories={editedLog.calories * (percentageEaten / 100)}
                 protein={editedLog.protein * (percentageEaten / 100)}
@@ -468,9 +447,7 @@ export default function Edit() {
                 processing={isEditEstimating}
                 wasProcessing={previousLoadingRef.current}
                 revealKey={revealKey}
-                hasUnsavedChanges={
-                  isPro || freeRecalculationCount < 50 ? hasUnsavedChanges : false
-                }
+                hasUnsavedChanges={hasUnsavedChanges}
                 changesCount={changesCount}
                 foodComponentsCount={editedLog.foodComponents?.length || 0}
               />

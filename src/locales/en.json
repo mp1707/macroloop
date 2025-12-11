@@ -192,13 +192,6 @@
       "error": {
         "title": "Recalculation failed",
         "reestimationFailed": "We couldn't recalculate your macros. Please check your connection and try again."
-      },
-      "paywall": {
-        "title": "Recalculate with Pro",
-        "body": "Get updated macros after changing ingredients.",
-        "bodyWithTrial": "Get updated macros after changing ingredients. Free for {{days}} days.",
-        "cta": "Unlock recalculation",
-        "ctaWithTrial": "Start free trial"
       }
     }
   },
@@ -227,13 +220,6 @@
     "error": {
       "title": "Recalculation failed",
       "reestimationFailed": "We couldn't recalculate your macros. Please check your connection and try again."
-    },
-    "paywall": {
-      "title": "Recalculate with Pro",
-      "body": "Get updated macros after changing ingredients.",
-      "bodyWithTrial": "Get updated macros after changing ingredients. Free for {{days}} days.",
-      "cta": "Unlock recalculation",
-      "ctaWithTrial": "Start free trial"
     },
     "delete": {
       "label": "Delete Log",
