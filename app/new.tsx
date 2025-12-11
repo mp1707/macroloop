@@ -137,6 +137,7 @@ export default function Create() {
   const favorites = useAppStore((state) => state.favorites);
   const { selectedDate, addFoodLog } = useAppStore();
   const isPro = useAppStore((state) => state.isPro);
+  const freeLogCount = useAppStore((state) => state.freeLogCount);
   const isVerifyingSubscription = useAppStore(
     (state) => state.isVerifyingSubscription
   );
@@ -166,6 +167,7 @@ export default function Create() {
     router,
     draft,
     isPro,
+    freeLogCount,
     isEstimating,
     selectedDate,
     draftId,
@@ -236,6 +238,8 @@ export default function Create() {
     );
   }
 
+  const isProOrFreeLogsAvailable = isPro || freeLogCount < 10;
+
   return (
     <View style={styles.container}>
       <CreateHeader
@@ -246,7 +250,7 @@ export default function Create() {
         <View style={styles.centerContent}>
           <ActivityIndicator />
         </View>
-      ) : !isPro ? (
+      ) : !isProOrFreeLogsAvailable ? (
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}

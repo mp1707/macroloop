@@ -58,6 +58,7 @@ export default function Edit() {
   const clearPendingComponentEdit = useAppStore(
     (state) => state.clearPendingComponentEdit
   );
+  const freeRecalculationCount = useAppStore((state) => state.freeRecalculationCount ?? 0);
 
   const router = useSafeRouter();
   const navigation = useNavigation();
@@ -160,7 +161,7 @@ export default function Edit() {
 
   const handleReestimate = useCallback(async () => {
     if (!editedLog) return;
-    if (!isPro) {
+    if (!isPro && freeRecalculationCount >= 50) {
       handleShowPaywall();
       return;
     }
@@ -210,6 +211,7 @@ export default function Edit() {
   }, [
     editedLog,
     isPro,
+    freeRecalculationCount,
     isEditEstimating,
     handleShowPaywall,
     runEditEstimation,
@@ -421,7 +423,7 @@ export default function Edit() {
               />
             </Animated.View>
 
-            {isPro &&
+            {(isPro || freeRecalculationCount < 50) &&
               hasUnsavedChanges &&
               !isEditEstimating &&
               !isVerifyingSubscription &&
@@ -443,7 +445,7 @@ export default function Edit() {
                   <ActivityIndicator />
                 </View>
               ) : (
-                !isPro && (
+                !isPro && freeRecalculationCount >= 50 && (
                   <InlinePaywallCard
                     Icon={Calculator}
                     title={t("editLog.paywall.title")}
@@ -466,7 +468,9 @@ export default function Edit() {
                 processing={isEditEstimating}
                 wasProcessing={previousLoadingRef.current}
                 revealKey={revealKey}
-                hasUnsavedChanges={isPro ? hasUnsavedChanges : false}
+                hasUnsavedChanges={
+                  isPro || freeRecalculationCount < 50 ? hasUnsavedChanges : false
+                }
                 changesCount={changesCount}
                 foodComponentsCount={editedLog.foodComponents?.length || 0}
               />

@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { Wrench, AlertTriangle, BadgeCheck, Images, Trash2 } from "lucide-react-native";
+import { Wrench, AlertTriangle, BadgeCheck, Images, Trash2, RotateCcw } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Card } from "@/components";
@@ -17,7 +17,20 @@ export const DeveloperSection = () => {
   const { t } = useTranslation();
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
-  const { clearAllLogs, clearNutritionGoals, isPro, setPro, devProOverride, setDevProOverride } = useAppStore();
+  const {
+    clearAllLogs,
+    clearNutritionGoals,
+    isPro,
+    setPro,
+    devProOverride,
+    setDevProOverride,
+    freeLogCount,
+    resetFreeLogCount,
+    setFreeLogCount,
+    freeRecalculationCount,
+    resetFreeRecalculationCount,
+    setFreeRecalculationCount,
+  } = useAppStore();
 
   const handleSeedData = useCallback(() => {
     seedFoodLogs();
@@ -52,6 +65,65 @@ export const DeveloperSection = () => {
       ]
     );
   }, [clearNutritionGoals, t]);
+
+  const handleResetFreeLogCount = useCallback(() => {
+    Alert.alert(
+      "Manage Free Logs",
+      `Current count: ${freeLogCount}`,
+      [
+        {
+          text: "Set to 4",
+          onPress: () => {
+            setFreeLogCount(4);
+          },
+        },
+        {
+          text: "Set to 9",
+          onPress: () => {
+            setFreeLogCount(9);
+          },
+        },
+        {
+          text: "Reset to 0",
+          style: "destructive",
+          onPress: () => {
+            resetFreeLogCount();
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
+  }, [freeLogCount, resetFreeLogCount, setFreeLogCount]);
+
+  const handleManageRecalculations = useCallback(() => {
+    Alert.alert(
+      "Manage Free Recalculations",
+      `Current count: ${freeRecalculationCount}`,
+      [
+        {
+          text: "Set to 49",
+          onPress: () => {
+            setFreeRecalculationCount(49);
+          },
+        },
+        {
+          text: "Reset to 0",
+          style: "destructive",
+          onPress: () => {
+            resetFreeRecalculationCount();
+            Alert.alert("Reset", "Free recalculation count reset to 0.");
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
+  }, [freeRecalculationCount, resetFreeRecalculationCount, setFreeRecalculationCount]);
 
   const handleToggleDevProOverride = useCallback(async () => {
     const newValue = !devProOverride;
@@ -220,6 +292,28 @@ export const DeveloperSection = () => {
               : "Enable Override",
             onPress: handleToggleDevProOverride,
             tone: devProOverride ? "error" : undefined,
+          }}
+          accessory="none"
+        />
+        <View style={styles.separator} />
+        <SettingRow
+          icon={RotateCcw}
+          title="Free Log Count"
+          subtitle={`Current count: ${freeLogCount}/10`}
+          actionButton={{
+            label: "Manage Count",
+            onPress: handleResetFreeLogCount,
+          }}
+          accessory="none"
+        />
+        <View style={styles.separator} />
+        <SettingRow
+          icon={RotateCcw}
+          title="Free Recalc Count"
+          subtitle={`Current count: ${freeRecalculationCount}/50`}
+          actionButton={{
+            label: "Manage Count",
+            onPress: handleManageRecalculations,
           }}
           accessory="none"
         />

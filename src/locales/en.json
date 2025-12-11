@@ -290,6 +290,10 @@
       }
     },
     "toasts": {
+      "freeLogsLeft": {
+        "title": "{{count}} free AI-Logs left",
+        "message": "Subscribe to Pro for unlimited logging."
+      },
       "imageProcessing": {
         "title": "Image processing failed",
         "message": "Please try again."

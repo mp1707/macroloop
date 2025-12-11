@@ -10,6 +10,7 @@ interface UseCreateHandlersParams {
   router: ReturnType<typeof import("@/hooks/useSafeRouter").useSafeRouter>;
   draft: FoodLog | undefined;
   isPro: boolean;
+  freeLogCount: number;
   isEstimating: boolean;
   selectedDate: string;
   draftId: string | null;
@@ -26,6 +27,7 @@ export const useCreateHandlers = ({
   router,
   draft,
   isPro,
+  freeLogCount,
   isEstimating,
   selectedDate,
   draftId,
@@ -52,8 +54,10 @@ export const useCreateHandlers = ({
   }, [router]);
 
   const handleEstimation = useCallback(() => {
-    if (!draft || !isPro || isEstimating) {
-      if (!isPro) {
+    const isProOrFreeLogsAvailable = isPro || freeLogCount < 10;
+    
+    if (!draft || !isProOrFreeLogsAvailable || isEstimating) {
+      if (!isProOrFreeLogsAvailable) {
         handleShowPaywall();
       }
       return;
@@ -63,6 +67,7 @@ export const useCreateHandlers = ({
   }, [
     draft,
     isPro,
+    freeLogCount,
     isEstimating,
     runCreateEstimation,
     router,

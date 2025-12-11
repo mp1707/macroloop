@@ -18,6 +18,7 @@ import {
   trackEstimationController,
   clearEstimationController,
 } from "@/utils/estimationControllers";
+import { showFreeLogsToast } from "@/lib/toast";
 
 // Helpers
 const hasImage = (log: { supabaseImagePath?: string | null }): boolean =>
@@ -77,8 +78,17 @@ const showProRequiredHud = (subtitle: string) => {
 };
 
 export const useEstimation = () => {
-  const { addFoodLog, updateFoodLog } = useAppStore();
+  const addFoodLog = useAppStore((state) => state.addFoodLog);
+  const updateFoodLog = useAppStore((state) => state.updateFoodLog);
   const isPro = useAppStore((state) => state.isPro);
+  const freeLogCount = useAppStore((state) => state.freeLogCount);
+  const incrementFreeLogCount = useAppStore(
+    (state) => state.incrementFreeLogCount
+  );
+  
+  const freeRecalculationCount = useAppStore((state) => state.freeRecalculationCount ?? 0);
+  const incrementFreeRecalculationCount = useAppStore((state) => state.incrementFreeRecalculationCount);
+
   const [isEditEstimating, setIsEditEstimating] = useState(false);
   const { currentLanguage } = useLocalization();
   const language = currentLanguage || "en";
@@ -102,7 +112,7 @@ export const useEstimation = () => {
   // Create page flow: add incomplete log, run initial estimation, update store
   const runCreateEstimation = useCallback(
     async (logData: EstimationInput) => {
-      if (!isPro) {
+      if (!isPro && freeLogCount >= 10) {
         showProRequiredHud("Unlock MacroLoop Pro to use AI estimations.");
         return;
       }
@@ -146,6 +156,22 @@ export const useEstimation = () => {
           ...completedLog,
           estimationFailed: false,
         });
+
+        if (!isPro) {
+          incrementFreeLogCount();
+          // Calculate new count locally as store update might not be reflected immediately in closure
+          const nextCount = freeLogCount + 1;
+          const remaining = 10 - nextCount;
+          
+          if (remaining === 5) {
+            setTimeout(() => {
+              showFreeLogsToast(
+                t("createLog.toasts.freeLogsLeft.title", { count: remaining }),
+                t("createLog.toasts.freeLogsLeft.message")
+              );
+            }, 1000);
+          }
+        }
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
           if (__DEV__) {
@@ -176,7 +202,15 @@ export const useEstimation = () => {
         clearEstimationController(incompleteLog.id);
       }
     },
-    [addFoodLog, updateFoodLog, isPro, language, t]
+    [
+      addFoodLog,
+      updateFoodLog,
+      isPro,
+      freeLogCount,
+      incrementFreeLogCount,
+      language,
+      t,
+    ]
   );
 
   // Edit page flow: refinement based solely on provided components
@@ -185,7 +219,7 @@ export const useEstimation = () => {
       editedEntry: T,
       onComplete: (entry: T) => void
     ) => {
-      if (!isPro) {
+      if (!isPro && freeRecalculationCount >= 50) {
         showProRequiredHud("MacroLoop Pro unlocks AI refinements.");
         return;
       }
@@ -267,6 +301,11 @@ export const useEstimation = () => {
           refined
         );
         onComplete(completedEntry);
+        
+        if (!isPro) {
+          incrementFreeRecalculationCount();
+        }
+
         return completedEntry;
       } catch (error) {
         // Only handle errors if not aborted
@@ -292,7 +331,7 @@ export const useEstimation = () => {
         }
       }
     },
-    [isPro, language]
+    [isPro, freeLogCount, language, freeRecalculationCount, incrementFreeRecalculationCount]
   );
 
   return { runCreateEstimation, runEditEstimation, isEditEstimating };

@@ -53,6 +53,7 @@ export default function EditFavorite() {
   const clearPendingComponentEdit = useAppStore(
     (state) => state.clearPendingComponentEdit
   );
+  const freeRecalculationCount = useAppStore((state) => state.freeRecalculationCount ?? 0);
 
   const router = useSafeRouter();
   const navigation = useNavigation();
@@ -169,7 +170,7 @@ export default function EditFavorite() {
 
   const handleReestimate = useCallback(async () => {
     if (!editedFavorite) return;
-    if (!isPro) {
+    if (!isPro && freeRecalculationCount >= 50) {
       handleShowPaywall();
       return;
     }
@@ -218,6 +219,7 @@ export default function EditFavorite() {
   }, [
     editedFavorite,
     isPro,
+    freeRecalculationCount,
     isEditEstimating,
     handleShowPaywall,
     runEditEstimation,
@@ -399,7 +401,7 @@ export default function EditFavorite() {
               />
             </Animated.View>
 
-            {isPro &&
+            {(isPro || freeRecalculationCount < 50) &&
               hasUnsavedChanges &&
               !isEditEstimating &&
               !isVerifyingSubscription &&
@@ -419,7 +421,7 @@ export default function EditFavorite() {
                   <ActivityIndicator />
                 </View>
               ) : (
-                !isPro && (
+                !isPro && freeRecalculationCount >= 50 && (
                   <InlinePaywallCard
                     Icon={Calculator}
                     title={t("favorites.edit.paywall.title")}
@@ -442,7 +444,9 @@ export default function EditFavorite() {
                 processing={isEditEstimating}
                 wasProcessing={previousLoadingRef.current}
                 revealKey={revealKey}
-                hasUnsavedChanges={isPro ? hasUnsavedChanges : false}
+                hasUnsavedChanges={
+                  isPro || freeRecalculationCount < 50 ? hasUnsavedChanges : false
+                }
                 changesCount={changesCount}
                 foodComponentsCount={editedFavorite.foodComponents?.length || 0}
               />

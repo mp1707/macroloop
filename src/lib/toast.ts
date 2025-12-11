@@ -43,6 +43,17 @@ export const showFavoriteAddedToast = (
 };
 
 /**
+ * Shows a toast for free logs remaining
+ */
+export const showFreeLogsToast = (title: string, subtitle: string) => {
+  useHudStore.getState().show({
+    type: "success",
+    title,
+    subtitle,
+  });
+};
+
+/**
  * Shows a favorite removed HUD using new system
  */
 export const showFavoriteRemovedToast = (
