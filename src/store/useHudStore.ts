@@ -26,8 +26,8 @@ type HudStore = HudState & HudActions & {
 };
 
 const DEFAULT_DURATIONS = {
-  success: 2000,
-  info: 2000,
+  success: 4000,
+  info: 4000,
   error: 4000,
 } as const;
 

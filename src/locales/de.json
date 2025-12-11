@@ -290,6 +290,10 @@
       }
     },
     "toasts": {
+      "freeLogsLeft": {
+        "title": "Noch {{count}} kostenlose KI-Logs",
+        "message": "Hol dir Pro für unbegrenztes Logging."
+      },
       "imageProcessing": {
         "title": "Fehler bei der Bildverarbeitung",
         "message": "Bitte versuche es erneut."

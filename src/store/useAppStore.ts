@@ -35,6 +35,18 @@ export type AppState = {
   devProOverride: boolean;
   setDevProOverride: (value: boolean) => void;
 
+  // Free logs tracking
+  freeLogCount: number;
+  incrementFreeLogCount: () => void;
+  resetFreeLogCount: () => void;
+  setFreeLogCount: (count: number) => void;
+
+  // Free recalculations tracking
+  freeRecalculationCount: number;
+  incrementFreeRecalculationCount: () => void;
+  resetFreeRecalculationCount: () => void;
+  setFreeRecalculationCount: (count: number) => void;
+
   // UI state
   selectedDate: string; // YYYY-MM-DD (for day view)
   selectedMonth: string; // YYYY-MM (for month view)
@@ -335,6 +347,36 @@ export const useAppStore = create<AppState>()(
           state.devProOverride = value;
         }),
 
+      // Free logs tracking
+      freeLogCount: 0,
+      incrementFreeLogCount: () =>
+        set((state) => {
+          state.freeLogCount += 1;
+        }),
+      resetFreeLogCount: () =>
+        set((state) => {
+          state.freeLogCount = 0;
+        }),
+      setFreeLogCount: (count) =>
+        set((state) => {
+          state.freeLogCount = count;
+        }),
+
+      // Free recalculations tracking
+      freeRecalculationCount: 0,
+      incrementFreeRecalculationCount: () =>
+        set((state) => {
+          state.freeRecalculationCount += 1;
+        }),
+      resetFreeRecalculationCount: () =>
+        set((state) => {
+          state.freeRecalculationCount = 0;
+        }),
+      setFreeRecalculationCount: (count) =>
+        set((state) => {
+          state.freeRecalculationCount = count;
+        }),
+
       // UI
       setSelectedDate: (date) =>
         set((state) => {
@@ -380,6 +422,8 @@ export const useAppStore = create<AppState>()(
         isPro: state.isPro,
         isProCanceled: state.isProCanceled,
         proExpirationDate: state.proExpirationDate,
+        freeLogCount: state.freeLogCount,
+        freeRecalculationCount: state.freeRecalculationCount,
         selectedDate: state.selectedDate,
         selectedMonth: state.selectedMonth,
         lastUsedUnit: state.lastUsedUnit,
