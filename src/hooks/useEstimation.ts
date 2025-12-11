@@ -217,7 +217,8 @@ export const useEstimation = () => {
   const runEditEstimation = useCallback(
     async <T extends EditableEntry>(
       editedEntry: T,
-      onComplete: (entry: T) => void
+      onComplete: (entry: T) => void,
+      onSuccess?: () => void
     ) => {
       if (!isPro && freeRecalculationCount >= 50) {
         showProRequiredHud("MacroLoop Pro unlocks AI refinements.");
@@ -281,6 +282,7 @@ export const useEstimation = () => {
       }
 
       setIsEditEstimating(true);
+      let succeeded = false;
       try {
         const refined: RefinedFoodEstimateResponse = await refineEstimation({
           foodComponents: refineInputComponents,
@@ -301,11 +303,12 @@ export const useEstimation = () => {
           refined
         );
         onComplete(completedEntry);
-        
+
         if (!isPro) {
           incrementFreeRecalculationCount();
         }
 
+        succeeded = true;
         return completedEntry;
       } catch (error) {
         // Only handle errors if not aborted
@@ -323,6 +326,11 @@ export const useEstimation = () => {
           isMountedRef.current &&
           activeRequestRef.current === abortController
         ) {
+          // Call success callback BEFORE clearing loading state
+          // This ensures hasUnsavedChanges is reset before isEditEstimating becomes false
+          if (succeeded && onSuccess) {
+            onSuccess();
+          }
           setIsEditEstimating(false);
         }
         // Clear the active request ref if this was the active request

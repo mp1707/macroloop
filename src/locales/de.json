@@ -192,12 +192,6 @@
       "error": {
         "title": "Neuberechnung fehlgeschlagen",
         "reestimationFailed": "Wir konnten deine Makros nicht neu berechnen. Bitte überprüfe deine Verbindung und versuche es erneut."
-      },
-      "paywall": {
-        "title": "Mit Pro neu berechnen",
-        "body": "Erhalte aktualisierte Makros, wenn du Zutaten anpasst.",
-        "cta": "Zum Neuberechnen freischalten",
-        "ctaWithTrial": "Kostenlos testen"
       }
     }
   },
@@ -226,13 +220,6 @@
     "error": {
       "title": "Neuberechnung fehlgeschlagen",
       "reestimationFailed": "Wir konnten deine Makros nicht neu berechnen. Bitte überprüfe deine Verbindung und versuche es erneut."
-    },
-    "paywall": {
-      "title": "Mit Pro neu berechnen",
-      "body": "Erhalte aktualisierte Makros, wenn du Zutaten anpasst.",
-      "bodyWithTrial": "Erhalte aktualisierte Makros, wenn du Zutaten anpasst. {{days}} Tage kostenlos testen.",
-      "cta": "Zum Neuberechnen freischalten",
-      "ctaWithTrial": "Kostenlos testen"
     },
     "delete": {
       "label": "Eintrag löschen",

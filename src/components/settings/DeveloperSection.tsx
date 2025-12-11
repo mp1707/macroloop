@@ -84,6 +84,12 @@ export const DeveloperSection = () => {
           },
         },
         {
+          text: "Set to 10",
+          onPress: () => {
+            setFreeLogCount(10);
+          },
+        },
+        {
           text: "Reset to 0",
           style: "destructive",
           onPress: () => {
@@ -107,6 +113,12 @@ export const DeveloperSection = () => {
           text: "Set to 49",
           onPress: () => {
             setFreeRecalculationCount(49);
+          },
+        },
+        {
+          text: "Set to 50",
+          onPress: () => {
+            setFreeRecalculationCount(50);
           },
         },
         {

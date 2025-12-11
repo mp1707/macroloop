@@ -15,17 +15,15 @@ import Animated, { Easing, Layout } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useNavigation } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
-import { Calculator, Trash2 } from "lucide-react-native";
+import { Trash2 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText } from "@/components/index";
 import { ComponentsList } from "@/components/refine-page/ComponentsList/ComponentsList";
 import { MacrosCard } from "@/components/refine-page/MacrosCard/MacrosCard";
 import { RecalculateButton } from "@/components/refine-page/RecalculateButton";
-import { InlinePaywallCard } from "@/components/paywall/InlinePaywallCard";
 import { TextInput } from "@/components/shared/TextInput";
 import { useEstimation } from "@/hooks/useEstimation";
-import { usePaywall } from "@/hooks/usePaywall";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
 import { makeSelectFavoriteById } from "@/store/selectors";
 import { useAppStore } from "@/store/useAppStore";
@@ -60,10 +58,6 @@ export default function EditFavorite() {
   const { colors, theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
-
-  // Get trial info for paywall
-  const { options } = usePaywall();
-  const trialDays = options[0]?.trialInfo?.days;
 
   const {
     hasUnsavedChanges,
@@ -186,13 +180,19 @@ export default function EditFavorite() {
     scrollRef.current?.scrollToEnd({ animated: true });
 
     try {
-      const result = await runEditEstimation(editedFavorite, (next) => {
-        replaceEditedFavorite(next);
-      });
+      const result = await runEditEstimation(
+        editedFavorite,
+        (next) => {
+          replaceEditedFavorite(next);
+        },
+        () => {
+          // Called in finally block before isEditEstimating becomes false
+          markReestimated();
+        }
+      );
 
       // Only update UI if we got a result (not cancelled)
       if (result) {
-        markReestimated();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setRevealKey((key) => key + 1);
       }
@@ -401,8 +401,7 @@ export default function EditFavorite() {
               />
             </Animated.View>
 
-            {(isPro || freeRecalculationCount < 50) &&
-              hasUnsavedChanges &&
+            {hasUnsavedChanges &&
               !isEditEstimating &&
               !isVerifyingSubscription &&
               (editedFavorite?.foodComponents?.length || 0) > 0 && (
@@ -416,26 +415,6 @@ export default function EditFavorite() {
               )}
 
             <Animated.View layout={easeLayout}>
-              {isVerifyingSubscription ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator />
-                </View>
-              ) : (
-                !isPro && freeRecalculationCount >= 50 && (
-                  <InlinePaywallCard
-                    Icon={Calculator}
-                    title={t("favorites.edit.paywall.title")}
-                    body={t("favorites.edit.paywall.body")}
-                    ctaLabel={t("favorites.edit.paywall.cta")}
-                    onPress={handleShowPaywall}
-                    trialDays={trialDays}
-                    testID="edit-inline-paywall"
-                  />
-                )
-              )}
-            </Animated.View>
-
-            <Animated.View layout={easeLayout}>
               <MacrosCard
                 calories={editedFavorite.calories * (percentageEaten / 100)}
                 protein={editedFavorite.protein * (percentageEaten / 100)}
@@ -444,9 +423,7 @@ export default function EditFavorite() {
                 processing={isEditEstimating}
                 wasProcessing={previousLoadingRef.current}
                 revealKey={revealKey}
-                hasUnsavedChanges={
-                  isPro || freeRecalculationCount < 50 ? hasUnsavedChanges : false
-                }
+                hasUnsavedChanges={hasUnsavedChanges}
                 changesCount={changesCount}
                 foodComponentsCount={editedFavorite.foodComponents?.length || 0}
               />
