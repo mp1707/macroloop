@@ -56,6 +56,7 @@ export const TargetMethodContent = () => {
             icon={Calculator}
             iconColor={colors.accent}
             isSelected={false}
+            recommended={true}
             onSelect={() => handleMethodSelect("calculate")}
             accessibilityLabel={t(
               "onboarding.targetMethod.options.calculate.accessibilityLabel"
@@ -130,7 +131,7 @@ const createScreenStyles = (colors: Colors) =>
     },
   });
 
-const createContentStyles = (colors: Colors, themeObj: Theme) => {
+const createContentStyles = (_colors: Colors, themeObj: Theme) => {
   const { spacing } = themeObj;
 
   return StyleSheet.create({
