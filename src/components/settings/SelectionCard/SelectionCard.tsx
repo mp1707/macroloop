@@ -8,9 +8,11 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import type { LucideIcon } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 import { useTheme, theme } from "@/theme";
 import { createStyles } from "./SelectionCard.styles";
+import { AppText } from "@/components/shared/AppText";
 
 export interface SelectionCardProps {
   // Core functionality
@@ -30,6 +32,9 @@ export interface SelectionCardProps {
     label: string;
   };
 
+  // Optional recommended badge
+  recommended?: boolean;
+
   // Accessibility
   accessibilityLabel?: string;
   accessibilityHint?: string;
@@ -43,11 +48,13 @@ export const SelectionCard: React.FC<SelectionCardProps> = ({
   icon,
   iconColor,
   dailyTarget,
+  recommended,
   accessibilityLabel,
   accessibilityHint,
 }) => {
   const { colors, colorScheme } = useTheme();
   const styles = createStyles(colors, colorScheme);
+  const { t } = useTranslation();
 
   // Press animation shared values
   const pressScale = useSharedValue(1);
@@ -114,6 +121,15 @@ export const SelectionCard: React.FC<SelectionCardProps> = ({
           pressAnimatedStyle,
         ]}
       >
+        {recommended && (
+          <View style={styles.recommendedPillContainer}>
+            <View style={styles.recommendedPill}>
+              <AppText style={styles.recommendedPillText}>
+                {t("common.recommended")}
+              </AppText>
+            </View>
+          </View>
+        )}
         <View style={styles.content}>
           <View style={styles.header}>
             <Animated.View

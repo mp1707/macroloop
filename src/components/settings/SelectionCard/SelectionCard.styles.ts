@@ -108,5 +108,40 @@ export const createStyles = (colors: Colors, colorScheme: ColorScheme) => {
     selectedTargetValue: {
       color: colors.accent,
     },
+
+    // Recommended badge container
+    recommendedPillContainer: {
+      position: "absolute",
+      top: -12,
+      left: spacing.md,
+      zIndex: 10,
+    },
+
+    // Recommended badge pill
+    recommendedPill: {
+      height: 24,
+      paddingHorizontal: spacing.sm,
+      borderRadius: 12,
+      backgroundColor: colors.recommendedBadge.background,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.15,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+
+    // Recommended badge text
+    recommendedPillText: {
+      fontSize: 11,
+      fontWeight: "600",
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+      color: colors.recommendedBadge.text,
+    },
   });
 };
