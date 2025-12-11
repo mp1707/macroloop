@@ -14,7 +14,6 @@ import { useFavoritesFilter } from "@/hooks/create-page/useFavoritesFilter";
 import { useImageProcessor } from "@/hooks/create-page/useImageProcessor";
 import { useCreateHandlers } from "@/hooks/create-page/useCreateHandlers";
 import { CreateHeader } from "@/components/create-page/CreateHeader";
-import { CreatePaywallView } from "@/components/create-page/CreatePaywallView";
 import { TypingModeView } from "@/components/create-page/TypingModeView";
 import { CameraModeView } from "@/components/create-page/CameraModeView";
 import type { CreationMode } from "@/types/creation";
@@ -95,12 +94,6 @@ export const createStyles = (
       gap: theme.spacing.sm,
       paddingHorizontal: theme.spacing.lg,
       flex: 1,
-    },
-    paywallContainer: {
-      flex: 1,
-      justifyContent: "center",
-      paddingBottom: theme.spacing.xl,
-      paddingHorizontal: theme.spacing.lg,
     },
     centerContent: {
       flex: 1,
@@ -238,8 +231,6 @@ export default function Create() {
     );
   }
 
-  const isProOrFreeLogsAvailable = isPro || freeLogCount < 10;
-
   return (
     <View style={styles.container}>
       <CreateHeader
@@ -250,14 +241,6 @@ export default function Create() {
         <View style={styles.centerContent}>
           <ActivityIndicator />
         </View>
-      ) : !isProOrFreeLogsAvailable ? (
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          contentInsetAdjustmentBehavior="automatic"
-        >
-          <CreatePaywallView onShowPaywall={handleShowPaywall} />
-        </ScrollView>
       ) : (
         <>
           {mode === "typing" && (

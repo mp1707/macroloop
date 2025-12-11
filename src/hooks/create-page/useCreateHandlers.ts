@@ -53,25 +53,29 @@ export const useCreateHandlers = ({
     router.push("/paywall");
   }, [router]);
 
-  const handleEstimation = useCallback(() => {
+  const checkAccess = useCallback(() => {
     const isProOrFreeLogsAvailable = isPro || freeLogCount < 10;
+    if (!isProOrFreeLogsAvailable) {
+      handleShowPaywall();
+      return false;
+    }
+    return true;
+  }, [isPro, freeLogCount, handleShowPaywall]);
+
+  const handleEstimation = useCallback(() => {
+    if (!checkAccess()) return;
     
-    if (!draft || !isProOrFreeLogsAvailable || isEstimating) {
-      if (!isProOrFreeLogsAvailable) {
-        handleShowPaywall();
-      }
+    if (!draft || isEstimating) {
       return;
     }
     runCreateEstimation(draft);
     router.back();
   }, [
     draft,
-    isPro,
-    freeLogCount,
     isEstimating,
     runCreateEstimation,
     router,
-    handleShowPaywall,
+    checkAccess,
   ]);
 
   const handleDescriptionChange = useCallback(
@@ -100,6 +104,8 @@ export const useCreateHandlers = ({
   const handleSwitchToCamera = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
+    if (!checkAccess()) return;
+
     if (!cameraPermission?.granted) {
       const result = await requestCameraPermission();
       if (!result.granted) {
@@ -109,10 +115,12 @@ export const useCreateHandlers = ({
     }
 
     setMode("camera");
-  }, [cameraPermission, requestCameraPermission, setMode]);
+  }, [cameraPermission, requestCameraPermission, setMode, checkAccess]);
 
   const handleSwitchToRecording = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    if (!checkAccess()) return;
 
     const hasPermission = await requestPermission();
     if (!hasPermission) {
@@ -124,7 +132,7 @@ export const useCreateHandlers = ({
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     await startRecording();
-  }, [requestPermission, startRecording]);
+  }, [requestPermission, startRecording, checkAccess]);
 
   const handleStopRecording = useCallback(async () => {
     await stopRecording();
