@@ -252,12 +252,6 @@
     "recording": {
       "title": "Recording"
     },
-    "paywall": {
-      "title": "AI logging is a Pro feature",
-      "body": "Log meals effortlessly from a photo, text, or voice.",
-      "cta": "Get Pro now",
-      "ctaWithTrial": "Start {{days}}-day free trial"
-    },
     "permissions": {
       "cameraDenied": {
         "title": "Camera Access Required",

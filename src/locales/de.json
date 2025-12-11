@@ -252,13 +252,6 @@
     "recording": {
       "title": "Aufnahme"
     },
-    "paywall": {
-      "title": "KI-Logging ist eine Pro-Funktion",
-      "body": "Logge Mahlzeiten mühelos per Foto, Text oder Stimme.",
-      "bodyWithTrial": "Logge Mahlzeiten mühelos per Foto, Text oder Stimme. {{days}} Tage kostenlos testen.",
-      "cta": "Jetzt Pro holen",
-      "ctaWithTrial": "{{days}} Tage kostenlos testen"
-    },
     "permissions": {
       "cameraDenied": {
         "title": "Kamerazugriff erforderlich",
