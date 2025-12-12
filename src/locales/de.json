@@ -128,7 +128,9 @@
   },
   "dailyFoodLogs": {
     "emptyState": {
-      "encouragement": "Lass uns Essen protokollieren 🙂"
+      "encouragement": "Lass uns Essen protokollieren 🙂",
+      "headline": "Erste Mahlzeit eintragen",
+      "subheadline": "Foto aufnehmen, sprechen oder tippen"
     },
     "setGoalsCTA": {
       "title": "Lege deine Ziele fest, um loszulegen",

@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useMemo, useCallback } from "react";
 import { FlatList, ListRenderItem, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
 import { FoodLog, Favorite } from "@/types/models";
 import { FoodLogItem } from "./FoodLogItem";
 import { NutrientDashboard } from "./NutrientSummary/NutrientDashboard";
 import { HeaderButton } from "@/components/shared/HeaderButton/HeaderButton.ios";
+import { AppText } from "@/components/shared/AppText";
 import { useTheme } from "@/theme/ThemeProvider";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
 
@@ -42,6 +44,7 @@ export const FoodLogsList: React.FC<FoodLogsListProps> = ({
   onRetry,
 }) => {
   const { colors, theme } = useTheme();
+  const { t } = useTranslation();
   const router = useSafeRouter();
   const flatListRef = useRef<FlatList>(null);
   const prevDataRef = useRef({ length: foodLogs.length });
@@ -124,6 +127,27 @@ export const FoodLogsList: React.FC<FoodLogsListProps> = ({
           targets={normalizedTargets}
           totals={dailyTotals}
         />
+        {!foodLogs.length ? (
+          <View
+            style={{
+              gap: theme.spacing.xs,
+              paddingTop: theme.spacing.sm,
+              paddingBottom: theme.spacing.md,
+              alignItems: "center",
+            }}
+          >
+            <AppText role="Headline" style={{ textAlign: "center" }}>
+              {t("dailyFoodLogs.emptyState.headline")}
+            </AppText>
+            <AppText
+              role="Body"
+              color="secondary"
+              style={{ textAlign: "center" }}
+            >
+              {t("dailyFoodLogs.emptyState.subheadline")}
+            </AppText>
+          </View>
+        ) : null}
         <View
           style={{
             flexDirection: "row",
@@ -157,6 +181,8 @@ export const FoodLogsList: React.FC<FoodLogsListProps> = ({
       dailyPercentages,
       normalizedTargets,
       dailyTotals,
+      foodLogs.length,
+      t,
       theme.spacing,
       handleCameraPress,
       handleMicPress,

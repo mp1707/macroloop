@@ -128,7 +128,9 @@
   },
   "dailyFoodLogs": {
     "emptyState": {
-      "encouragement": "Let’s log some food 🙂"
+      "encouragement": "Let’s log some food 🙂",
+      "headline": "Log your first meal",
+      "subheadline": "Snap, speak, or type"
     },
     "setGoalsCTA": {
       "title": "Set your goals to get started",
