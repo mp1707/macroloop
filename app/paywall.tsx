@@ -19,6 +19,7 @@ import { Button } from "@/components/shared/Button";
 import { RoundButton } from "@/components/shared/RoundButton";
 import { usePaywall } from "@/hooks/usePaywall";
 import { useSafeRouter } from "@/hooks/useSafeRouter";
+import { useAppStore } from "@/store/useAppStore";
 import { Colors, Theme, useTheme } from "@/theme";
 
 const getPaywallFeatures = (t: TFunction) => [
@@ -57,6 +58,8 @@ export default function PaywallScreen() {
     purchase,
     restore,
   } = usePaywall();
+
+  const { freeLogCount, freeRecalculationCount } = useAppStore();
 
   const handleClose = () => {
     if (router.canGoBack()) {
@@ -185,6 +188,13 @@ export default function PaywallScreen() {
 
   const highlightedId = options.length > 1 ? options[0].id : null;
 
+  const selectedOption = options.find((opt) => opt.id === selectedId);
+  const selectedTrialDays = selectedOption?.trialInfo?.days ?? 0;
+  const hasSelectedTrial = Boolean(selectedOption?.trialInfo);
+
+  const hasReachedFreeLimit =
+    freeLogCount >= 10 || freeRecalculationCount >= 50;
+
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
       <RoundButton
@@ -207,7 +217,9 @@ export default function PaywallScreen() {
             {t("paywall.header.title")}
           </AppText>
           <AppText role="Body" color="secondary" style={styles.subtitle}>
-            {t("paywall.header.subtitle")}
+            {hasReachedFreeLimit
+              ? t("paywall.header.subtitleFreeLimitReached")
+              : t("paywall.header.subtitle")}
           </AppText>
         </View>
 
@@ -294,16 +306,6 @@ export default function PaywallScreen() {
                           {t("paywall.options.period.bullets.appleAccount")}
                         </AppText>
                       </View>
-                      <View style={styles.bulletItem}>
-                        <Check
-                          size={14}
-                          color={colors.accent}
-                          style={styles.bulletIcon}
-                        />
-                        <AppText role="Caption" style={styles.bulletText}>
-                          {t("paywall.options.period.bullets.autoRenew")}
-                        </AppText>
-                      </View>
                     </View>
                   </>
                 ) : (
@@ -331,11 +333,9 @@ export default function PaywallScreen() {
           label={
             isPurchasing
               ? t("paywall.buttons.processing")
-              : selectedId &&
-                options.find((opt) => opt.id === selectedId)?.trialInfo
-              ? t("paywall.buttons.primaryWithTrial", {
-                  days: options.find((opt) => opt.id === selectedId)!.trialInfo!
-                    .days,
+              : hasSelectedTrial
+              ? t("paywall.buttons.trialCta", {
+                  days: selectedTrialDays,
                 })
               : t("paywall.buttons.primary")
           }
@@ -347,11 +347,7 @@ export default function PaywallScreen() {
         <View style={styles.legal}>
           <View style={styles.links}>
             <TouchableOpacity
-              onPress={() =>
-                handleOpenLink(
-                  "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-                )
-              }
+              onPress={() => handleOpenLink("https://getmacroloop.app/terms")}
               activeOpacity={0.6}
             >
               <AppText role="Caption" style={styles.link}>
@@ -360,11 +356,7 @@ export default function PaywallScreen() {
             </TouchableOpacity>
             <View style={styles.linkDivider} />
             <TouchableOpacity
-              onPress={() =>
-                handleOpenLink(
-                  "https://mp1707.github.io/macroloopinfo/privacy-policy.html"
-                )
-              }
+              onPress={() => handleOpenLink("https://getmacroloop.app/privacy")}
               activeOpacity={0.6}
             >
               <AppText role="Caption" style={styles.link}>
