@@ -18,6 +18,31 @@ interface VersionChangelog {
 
 const CHANGELOG_DATA_EN: VersionChangelog[] = [
   {
+    version: "1.0.7",
+    changes: [
+      {
+        title: "Persisted food logs",
+        description:
+          "Food logs that got interrupted by network issues or closing the app during the estimation process are not lost anymore! They are now persisted and can be retried later.",
+      },
+      {
+        title: "Simplified main dashboard",
+        description:
+          "The main dashboard was simplified by removing the fat progress bar. Since fat has no hard target, it was removed to save space and reduce confusion.",
+      },
+      {
+        title: "Free trial for new users",
+        description:
+          "New users can now test the app's features without subscribing first.",
+      },
+      {
+        title: "Text clarity improvements",
+        description:
+          "Various text improvements throughout the app for better clarity and understanding.",
+      },
+    ],
+  },
+  {
     version: "1.0.6",
     changes: [
       {
@@ -193,6 +218,31 @@ const CHANGELOG_DATA_EN: VersionChangelog[] = [
 ];
 
 const CHANGELOG_DATA_DE: VersionChangelog[] = [
+  {
+    version: "1.0.7",
+    changes: [
+      {
+        title: "Unterbrochene Logs werden gespeichert",
+        description:
+          "Food-Logs, die durch Netzwerkprobleme oder das Schließen der App während der Schätzung unterbrochen wurden, gehen nicht mehr verloren. Sie werden gespeichert und können später erneut geschätzt werden.",
+      },
+      {
+        title: "Dashboard aufgeräumt",
+        description:
+          "Die Fett-Progressbar wurde entfernt, da Fett kein festes Ziel hat und so mehr Platz frei wird.",
+      },
+      {
+        title: "Kostenlos testen",
+        description:
+          "Neue Nutzer:innen können die App jetzt ohne Abo ausprobieren.",
+      },
+      {
+        title: "Klarere Texte",
+        description:
+          "Verschiedene Texte in der App wurden verständlicher formuliert.",
+      },
+    ],
+  },
   {
     version: "1.0.6",
     changes: [
