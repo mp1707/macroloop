@@ -7,9 +7,8 @@ import { AppText, Card } from "@/components";
 import { useTheme, Colors, Theme } from "@/theme";
 import { SettingRow } from "./SettingRow";
 
-const PRIVACY_URL =
-  "https://mp1707.github.io/macroloopinfo/privacy-policy.html";
-const TERMS_URL = "https://mp1707.github.io/macroloopinfo/";
+const PRIVACY_URL = "https://getmacroloop.app/privacy";
+const TERMS_URL = "https://getmacroloop.app/terms";
 
 export const AboutSection = () => {
   const { t } = useTranslation();

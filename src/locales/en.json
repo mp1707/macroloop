@@ -287,6 +287,7 @@
     "header": {
       "title": "MacroLoop Pro",
       "subtitle": "Save time and stay consistent with effortless AI tracking.",
+      "subtitleFreeLimitReached": "You have used all your free calculations.\nWith Pro you can use AI to log meals without limits.",
       "subtitleWithTrial": "Try Pro free for {{days}} days. Cancel anytime."
     },
     "trial": {
@@ -303,16 +304,16 @@
     },
     "features": {
       "aiLogging": {
-        "title": "AI-powered logging",
-        "description": "Log meals instantly by text, voice, or photo. No more ingredient searches."
+        "title": "Log meals in seconds",
+        "description": "Describe your meal with text, voice or photo. The AI estimates calories and macros for you."
       },
       "instantRecalculation": {
-        "title": "Instant recalculation",
-        "description": "Adjust ingredients and get updated macros right away."
+        "title": "Adjust easily",
+        "description": "Change ingredients or portion size. Your macros update instantly."
       },
       "noAds": {
         "title": "No ads. Period.",
-        "description": "Support an ad‑free app experience."
+        "description": "Stay focused on your goals, not on ads."
       }
     },
     "options": {
@@ -325,8 +326,7 @@
         "perMonth": "per month",
         "bullets": {
           "cancelAnytime": "Cancel anytime",
-          "appleAccount": "Billed through Apple Account",
-          "autoRenew": "Auto-renews monthly"
+          "appleAccount": "Billed through Apple Account"
         },
         "annual": "yearly",
         "sixMonths": "every 6 months",
@@ -344,8 +344,9 @@
       }
     },
     "buttons": {
-      "primary": "Unlock Pro",
+      "primary": "Subscribe to Pro",
       "primaryWithTrial": "Start {{days}}-day free trial",
+      "trialCta": "Try {{days}} days free",
       "processing": "Processing…",
       "retry": "Retry"
     },

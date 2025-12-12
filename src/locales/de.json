@@ -287,6 +287,7 @@
     "header": {
       "title": "MacroLoop Pro",
       "subtitle": "Spare Zeit und bleib konsequent mit mühelosem KI-Tracking.",
+      "subtitleFreeLimitReached": "Du hast deine Gratis Berechnungen genutzt.\nMit Pro erfasst du Mahlzeiten unbegrenzt mit KI.",
       "subtitleWithTrial": "Teste Pro {{days}} Tage kostenlos. Jederzeit kündbar."
     },
     "trial": {
@@ -303,16 +304,16 @@
     },
     "features": {
       "aiLogging": {
-        "title": "KI-gestütztes Protokollieren",
-        "description": "Protokolliere Mahlzeiten sofort per Text, Stimme oder Foto. Kein Suchen nach Zutaten mehr."
+        "title": "Mahlzeiten in Sekunden erfassen",
+        "description": "Beschreibe Mahlzeiten mit Text, Sprache oder Foto."
       },
       "instantRecalculation": {
-        "title": "Sofortige Neuberechnung",
-        "description": "Passe Zutaten an und erhalte sofort aktualisierte Makros, um deine Mahlzeiten zu verfeinern."
+        "title": "Einfach anpassen",
+        "description": "Ändere Zutaten oder die Portionsgröße. Die Nährwerte werden sofort neu berechnet."
       },
       "noAds": {
         "title": "Keine Werbung. Punkt.",
-        "description": "Unterstütze eine werbefreie Entwicklung"
+        "description": "Konzentriere dich auf deine Ziele, nicht auf Werbung."
       }
     },
     "options": {
@@ -325,8 +326,7 @@
         "perMonth": "pro Monat",
         "bullets": {
           "cancelAnytime": "Jederzeit kündbar",
-          "appleAccount": "Abrechnung über Apple-Account",
-          "autoRenew": "Automatische Verlängerung"
+          "appleAccount": "Abrechnung über Apple-Account"
         },
         "annual": "jährlich",
         "sixMonths": "halbjährlich",
@@ -344,8 +344,9 @@
       }
     },
     "buttons": {
-      "primary": "Pro freischalten",
+      "primary": "Pro abonnieren",
       "primaryWithTrial": "{{days}} Tage kostenlos testen",
+      "trialCta": "{{days}} Tage kostenlos testen",
       "processing": "Wird verarbeitet …",
       "retry": "Wiederholen"
     },
