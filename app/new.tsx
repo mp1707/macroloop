@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { ActivityIndicator, Platform, ScrollView, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { KeyboardStickyView } from "react-native-keyboard-controller";
@@ -15,7 +15,10 @@ import { useFavoritesFilter } from "@/hooks/create-page/useFavoritesFilter";
 import { useImageProcessor } from "@/hooks/create-page/useImageProcessor";
 import { useCreateHandlers } from "@/hooks/create-page/useCreateHandlers";
 import { CreateHeader } from "@/components/create-page/CreateHeader";
-import { TypingModeView } from "@/components/create-page/TypingModeView";
+import {
+  TypingModeView,
+  TypingModeViewHandle,
+} from "@/components/create-page/TypingModeView";
 import { CameraModeView } from "@/components/create-page/CameraModeView";
 import { CreateActions } from "@/components/create-page/CreateActions";
 import type { CreationMode } from "@/types/creation";
@@ -143,6 +146,8 @@ export default function Create() {
     (state) => state.isVerifyingSubscription
   );
 
+  const typingModeRef = useRef<TypingModeViewHandle>(null);
+
   const { runCreateEstimation } = useEstimation();
   const {
     requestPermission,
@@ -156,7 +161,6 @@ export default function Create() {
   const {
     handleCancel,
     handleOpenExplainer,
-    handleShowPaywall,
     handleEstimation: handleEstimationBase,
     handleDescriptionChange,
     handleCreateLogFromFavorite,
@@ -227,6 +231,11 @@ export default function Create() {
     setMode("typing");
   };
 
+  const handleStopRecording = () => {
+    handleStopRecordingBase();
+    typingModeRef.current?.focus();
+  };
+
   const canContinue =
     (draft?.description?.trim() !== "" || !!draft?.localImagePath) &&
     !isEstimating;
@@ -265,6 +274,7 @@ export default function Create() {
               keyboardDismissMode={isIOS ? "interactive" : "on-drag"}
             >
               <TypingModeView
+                ref={typingModeRef}
                 draft={draft}
                 filteredFavorites={filteredFavorites}
                 isProcessingImage={isProcessingImage}
@@ -273,7 +283,7 @@ export default function Create() {
                 onRemoveImage={handleRemoveImage}
                 isRecording={isRecording}
                 volumeLevel={volumeLevel}
-                onStopRecording={handleStopRecordingBase}
+                onStopRecording={handleStopRecording}
                 onPercentageChange={handlePercentageChange}
               />
             </ScrollView>

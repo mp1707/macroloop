@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useImperativeHandle, Ref } from "react";
 import { View, TextInput as RNTextInput } from "react-native";
 import Animated, {
   Easing,
@@ -21,6 +21,10 @@ import { PortionSlider } from "@/components/create-page/PortionSlider";
 import { CREATE_ACCESSORY_HEIGHT } from "@/constants/create";
 import { createStyles } from "./TypingModeView.styles";
 
+export interface TypingModeViewHandle {
+  focus: () => void;
+}
+
 interface TypingModeViewProps {
   draft: FoodLog;
   filteredFavorites: Favorite[];
@@ -32,6 +36,7 @@ interface TypingModeViewProps {
   volumeLevel: number;
   onStopRecording: () => void;
   onPercentageChange: (percentage: number) => void;
+  ref?: Ref<TypingModeViewHandle>;
 }
 
 export const TypingModeView = ({
@@ -45,6 +50,7 @@ export const TypingModeView = ({
   volumeLevel,
   onStopRecording,
   onPercentageChange,
+  ref,
 }: TypingModeViewProps) => {
   const { t } = useTranslation();
   const { theme, colors, colorScheme } = useTheme();
@@ -60,6 +66,12 @@ export const TypingModeView = ({
 
   const textInputRef = useRef<RNTextInput>(null);
   useDelayedAutofocus(textInputRef);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      textInputRef.current?.focus();
+    },
+  }));
 
   const isRecordingActive = isRecording;
   const hasImage = !!(draft.localImagePath || isProcessingImage);
