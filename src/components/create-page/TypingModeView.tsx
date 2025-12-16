@@ -36,6 +36,7 @@ interface TypingModeViewProps {
   volumeLevel: number;
   onStopRecording: () => void;
   onPercentageChange: (percentage: number) => void;
+  onSelectionChange?: (selection: { start: number; end: number }) => void;
   ref?: Ref<TypingModeViewHandle>;
 }
 
@@ -50,6 +51,7 @@ export const TypingModeView = ({
   volumeLevel,
   onStopRecording,
   onPercentageChange,
+  onSelectionChange,
   ref,
 }: TypingModeViewProps) => {
   const { t } = useTranslation();
@@ -105,6 +107,9 @@ export const TypingModeView = ({
         containerStyle={styles.textInputContainer}
         focusBorder={false}
         accessibilityLabel={t("createLog.input.accessibilityLabel")}
+        onSelectionChange={(e) =>
+          onSelectionChange?.(e.nativeEvent.selection)
+        }
       />
 
       {sectionTitle && (

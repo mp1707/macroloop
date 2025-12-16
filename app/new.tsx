@@ -136,6 +136,7 @@ export default function Create() {
   const { startNewDraft, clearDraft, updateDraft } = useCreationStore();
   const [draftId, setDraftId] = useState<string | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(0);
 
   const draft = useDraft(draftId);
   const favorites = useAppStore((state) => state.favorites);
@@ -198,6 +199,7 @@ export default function Create() {
     isRecording,
     liveTranscription,
     updateDraft,
+    cursorPosition,
   });
 
   useEffect(() => {
@@ -285,6 +287,9 @@ export default function Create() {
                 volumeLevel={volumeLevel}
                 onStopRecording={handleStopRecording}
                 onPercentageChange={handlePercentageChange}
+                onSelectionChange={(selection) =>
+                  setCursorPosition(selection.start)
+                }
               />
             </ScrollView>
           )}
