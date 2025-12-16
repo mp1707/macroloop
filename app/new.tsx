@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, ScrollView, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import { KeyboardStickyView } from "react-native-keyboard-controller";
 
 import { useAppStore } from "@/store/useAppStore";
 import { useTheme } from "@/theme/ThemeProvider";
@@ -16,9 +17,11 @@ import { useCreateHandlers } from "@/hooks/create-page/useCreateHandlers";
 import { CreateHeader } from "@/components/create-page/CreateHeader";
 import { TypingModeView } from "@/components/create-page/TypingModeView";
 import { CameraModeView } from "@/components/create-page/CameraModeView";
+import { CreateActions } from "@/components/create-page/CreateActions";
 import type { CreationMode } from "@/types/creation";
 import { StyleSheet } from "react-native";
 import type { ColorScheme, Colors, Theme } from "@/theme";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 
 export const createStyles = (
   theme: Theme,
@@ -105,6 +108,11 @@ export const createStyles = (
       justifyContent: "center",
       alignItems: "center",
       backgroundColor: colors.primaryBackground,
+    },
+    floatingActionsContainer: {
+      position: "absolute",
+      right: theme.spacing.xs,
+      bottom: 0,
     },
   });
 
@@ -230,6 +238,11 @@ export default function Create() {
       </View>
     );
   }
+  const hasLiquidGlass = isLiquidGlassAvailable();
+  const offset = {
+    opened: hasLiquidGlass ? theme.spacing.sm : -theme.spacing.sm,
+    closed: -theme.spacing.xl,
+  };
 
   return (
     <View style={styles.container}>
@@ -258,11 +271,6 @@ export default function Create() {
                 onDescriptionChange={handleDescriptionChange}
                 onSelectFavorite={handleCreateLogFromFavorite}
                 onRemoveImage={handleRemoveImage}
-                onSwitchToCamera={handleSwitchToCamera}
-                onSwitchToRecording={handleSwitchToRecording}
-                onEstimate={handleEstimation}
-                canContinue={canContinue}
-                isEstimating={isEstimating}
                 isRecording={isRecording}
                 volumeLevel={volumeLevel}
                 onStopRecording={handleStopRecordingBase}
@@ -275,6 +283,22 @@ export default function Create() {
             <CameraModeView onImageSelected={handleImageProcessed} />
           )}
         </>
+      )}
+
+      {mode === "typing" && !isVerifyingSubscription && (
+        <KeyboardStickyView
+          style={styles.floatingActionsContainer}
+          offset={offset}
+        >
+          <CreateActions
+            onSwitchToCamera={handleSwitchToCamera}
+            onSwitchToRecording={handleSwitchToRecording}
+            isRecordingActive={isRecording}
+            onEstimate={handleEstimation}
+            canContinue={canContinue}
+            isEstimating={isEstimating}
+          />
+        </KeyboardStickyView>
       )}
     </View>
   );
