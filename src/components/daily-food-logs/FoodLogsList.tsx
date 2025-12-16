@@ -157,20 +157,20 @@ export const FoodLogsList: React.FC<FoodLogsListProps> = ({
           }}
         >
           <HeaderButton
-            imageProps={{ systemName: "camera.fill" }}
+            imageProps={{ systemName: "camera" }}
             buttonProps={{ onPress: handleCameraPress }}
             variant="regular"
             size="regular"
           />
           <HeaderButton
-            imageProps={{ systemName: "mic.fill" }}
-            buttonProps={{ onPress: handleMicPress }}
+            imageProps={{ systemName: "plus" }}
+            buttonProps={{ onPress: handleTypingPress }}
             variant="regular"
             size="regular"
           />
           <HeaderButton
-            imageProps={{ systemName: "text.cursor" }}
-            buttonProps={{ onPress: handleTypingPress }}
+            imageProps={{ systemName: "mic" }}
+            buttonProps={{ onPress: handleMicPress }}
             variant="regular"
             size="regular"
           />
