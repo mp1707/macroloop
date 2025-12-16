@@ -15,6 +15,7 @@ import {
 } from "@/utils/estimationControllers";
 import type { FoodLog } from "@/types/models";
 import { resolveLocalImagePath } from "@/utils/fileUtils";
+import { showFreeLogsToast } from "@/lib/toast";
 
 const hasImage = (log: FoodLog): boolean =>
   !!log.supabaseImagePath && log.supabaseImagePath !== "";
@@ -27,9 +28,10 @@ export const retryFailedEstimation = async (
   logId: string,
   language: string
 ): Promise<void> => {
-  const { foodLogs, updateFoodLog, isPro } = useAppStore.getState();
+  const { foodLogs, updateFoodLog, isPro, freeLogCount, incrementFreeLogCount } =
+    useAppStore.getState();
 
-  if (!isPro) {
+  if (!isPro && freeLogCount >= 10) {
     router.push("/paywall");
     return;
   }
@@ -85,6 +87,24 @@ export const retryFailedEstimation = async (
       ...completedLog,
       estimationFailed: false,
     });
+
+    if (!isPro) {
+      incrementFreeLogCount();
+
+      const nextCount = freeLogCount + 1;
+      const remaining = 10 - nextCount;
+
+      if (remaining === 5) {
+        setTimeout(() => {
+          showFreeLogsToast(
+            i18next.t("createLog.toasts.freeLogsLeft.title", {
+              count: remaining,
+            }),
+            i18next.t("createLog.toasts.freeLogsLeft.message")
+          );
+        }, 1000);
+      }
+    }
 
     if (__DEV__) {
       console.log("[Recovery] Successfully recovered estimation:", logId);
