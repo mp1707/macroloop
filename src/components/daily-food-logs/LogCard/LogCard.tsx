@@ -8,11 +8,12 @@ import React, {
 } from "react";
 import { View, Pressable, GestureResponderEvent } from "react-native";
 import { Image } from "expo-image";
-import {
+import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withDelay,
   withSpring,
+  FadeOut,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Favorite, FoodLog } from "@/types/models";
@@ -21,6 +22,7 @@ import { Card } from "@/components/Card";
 import { AppText } from "@/components";
 import { ContextMenu, ContextMenuItem } from "@/components/shared/ContextMenu";
 import { Button } from "@/components/shared/Button";
+import { SkeletonPill } from "@/components/shared";
 import { RefreshCw } from "lucide-react-native";
 import { useAppStore } from "@/store/useAppStore";
 import { isNavLocked, lockNav } from "@/utils/navigationLock";
@@ -134,25 +136,41 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
       <Card elevated={true} style={styles.card}>
         <View style={styles.contentContainer}>
           <View style={styles.leftSection}>
-            <LogCardTitle
-              title={displayTitle}
-              isLoading={isLoading}
-              animated={true}
-              animatedStyle={titleAnimatedStyle}
-              style={styles.title}
-            />
-            {hasNotEatenEverything && (
-              <AppText style={styles.percentageText}>
-                {t("logCard.percentageEaten", {
-                  percentage: foodLog.percentageEaten,
-                })}
-              </AppText>
+            {isLoading && (
+              <Animated.View
+                exiting={FadeOut.duration(200)}
+                style={styles.skeletonTitleContainer}
+              >
+                <AppText role="Headline">{t("logCard.analyzing")}</AppText>
+                <SkeletonPill
+                  width="90%"
+                  height={14}
+                  style={{ marginTop: 4 }}
+                />
+                <SkeletonPill width="60%" height={14} />
+              </Animated.View>
             )}
-            <FoodComponentList
-              foodComponents={foodLog.foodComponents}
-              maxItems={hasNotEatenEverything ? 2 : 3}
-              style={styles.foodComponentList}
-            />
+            <View style={isLoading ? { display: "none" } : {}}>
+              <LogCardTitle
+                title={displayTitle}
+                isLoading={false}
+                animated={true}
+                animatedStyle={titleAnimatedStyle}
+                style={styles.title}
+              />
+              {hasNotEatenEverything && (
+                <AppText style={styles.percentageText}>
+                  {t("logCard.percentageEaten", {
+                    percentage: foodLog.percentageEaten,
+                  })}
+                </AppText>
+              )}
+              <FoodComponentList
+                foodComponents={foodLog.foodComponents}
+                maxItems={hasNotEatenEverything ? 2 : 3}
+                style={styles.foodComponentList}
+              />
+            </View>
           </View>
 
           <View style={styles.rightSection}>

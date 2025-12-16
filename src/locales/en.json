@@ -728,6 +728,7 @@
   "logCard": {
     "fallbackTitle": "New Log",
     "percentageEaten": "{{percentage}}% consumed",
+    "analyzing": "Analyzing ingredients…",
     "estimationFailed": "Estimation failed",
     "tapToRetry": "Tap to retry",
     "noDescription": "No description",

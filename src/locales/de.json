@@ -726,6 +726,7 @@
   "logCard": {
     "fallbackTitle": "Neuer Eintrag",
     "percentageEaten": "{{percentage}}% verzehrt",
+    "analyzing": "Zutaten analysieren …",
     "estimationFailed": "Schätzung fehlgeschlagen",
     "tapToRetry": "Zum Wiederholen tippen",
     "noDescription": "Keine Beschreibung",
