@@ -615,25 +615,37 @@
       }
     },
     "calorieGoal": {
-      "title": "Welches Ziel verfolgst du?",
-      "subtitle": "Basierend auf deinen Angaben schlagen wir dir drei Kalorienziele vor.",
+      "title": "Was ist dein Ziel?",
+      "subtitle": "Basierend auf deinen Angaben haben wir diese Kalorienziele berechnet.",
       "missingData": "Berechnungsdaten fehlen. Bitte starte erneut.",
       "options": {
         "lose": {
           "title": "Abnehmen",
-          "description": "Schaffe ein Kaloriendefizit, um langsam abzunehmen",
+          "description": "Ein Defizit für effektiven Gewichtsverlust.",
           "accessibilityLabel": "Defizit-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um langsam abzunehmen"
         },
+        "lose_mild": {
+          "title": "Langsam abnehmen",
+          "description": "Ein moderates Defizit für einen entspannten Weg.",
+          "accessibilityLabel": "Mildes Defizit-Ziel",
+          "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um sehr langsam abzunehmen"
+        },
         "maintain": {
           "title": "Gewicht halten",
-          "description": "Iss auf Erhalt, um dein Gewicht zu stabilisieren",
+          "description": "Iss auf Erhalt, um dein Gewicht zu stabilisieren.",
           "accessibilityLabel": "Erhaltungs-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um dein aktuelles Gewicht zu halten"
         },
+        "gain_mild": {
+          "title": "Lean Bulk",
+          "description": "Leichter Überschuss: Muskeln aufbauen, kaum Fett ansetzen.",
+          "accessibilityLabel": "Milder Überschuss-Ziel",
+          "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um fettarm aufzubauen"
+        },
         "gain": {
           "title": "Muskeln aufbauen",
-          "description": "Schaffe einen Kalorienüberschuss, um langsam zuzunehmen",
+          "description": "Ein Kalorienüberschuss für maximalen Muskelaufbau.",
           "accessibilityLabel": "Überschuss-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um langsam zuzunehmen"
         }

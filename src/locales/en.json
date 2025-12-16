@@ -617,25 +617,37 @@
       }
     },
     "calorieGoal": {
-      "title": "What’s your goal?",
-      "subtitle": "Based on your answers, we’ll suggest three calorie targets.",
+      "title": "What is your goal?",
+      "subtitle": "Based on your data, we’ve calculated these daily targets for you.",
       "missingData": "Missing calculation data. Please start again.",
       "options": {
         "lose": {
-          "title": "Lose weight",
-          "description": "Create a calorie deficit to lose weight gradually.",
+          "title": "Lose Weight",
+          "description": "Create a deficit to reduce weight effectively.",
           "accessibilityLabel": "Deficit goal",
           "accessibilityHint": "Set {{calories}} calories per day to lose weight gradually"
         },
+        "lose_mild": {
+          "title": "Lose Weight Slowly",
+          "description": "A moderate deficit for a more sustainable approach.",
+          "accessibilityLabel": "Mild deficit goal",
+          "accessibilityHint": "Set {{calories}} calories per day to lose weight slowly"
+        },
         "maintain": {
-          "title": "Maintain",
-          "description": "Eat at maintenance to keep your weight stable.",
+          "title": "Maintain Weight",
+          "description": "Eat at maintenance to stabilize your current weight.",
           "accessibilityLabel": "Maintenance goal",
           "accessibilityHint": "Set {{calories}} calories per day to maintain your current weight"
         },
+        "gain_mild": {
+          "title": "Lean Bulk",
+          "description": "A slight surplus to build muscle with minimal fat gain.",
+          "accessibilityLabel": "Mild surplus goal",
+          "accessibilityHint": "Set {{calories}} calories per day to gain weight slowly"
+        },
         "gain": {
-          "title": "Gain muscle",
-          "description": "Create a calorie surplus to gain weight gradually.",
+          "title": "Build Muscle",
+          "description": "A calorie surplus to maximize muscle growth.",
           "accessibilityLabel": "Surplus goal",
           "accessibilityHint": "Set {{calories}} calories per day to gain weight gradually"
         }

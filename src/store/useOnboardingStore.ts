@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { ProteinGoalType } from "@/types/models";
+import { ProteinGoalType, UserSettings } from "@/types/models";
 
 export type OnboardingState = {
   // User demographic data
@@ -11,7 +11,7 @@ export type OnboardingState = {
   activityLevel?: "sedentary" | "light" | "moderate" | "active" | "veryactive";
 
   // Goal data
-  calorieGoalType?: "lose" | "maintain" | "gain";
+  calorieGoalType?: UserSettings["calorieGoalType"];
   calorieGoal?: number;
   proteinGoal?: number; // g
   proteinGoalType?: ProteinGoalType; // tracking protein calculation method
@@ -31,7 +31,7 @@ export type OnboardingState = {
   setHeight: (height: number) => void;
   setWeight: (weight: number) => void;
   setActivityLevel: (level: "sedentary" | "light" | "moderate" | "active" | "veryactive") => void;
-  setCalorieGoalType: (type: "lose" | "maintain" | "gain") => void;
+  setCalorieGoalType: (type: UserSettings["calorieGoalType"]) => void;
   setCalorieGoal: (goal: number) => void;
   setProteinGoal: (goal: number) => void;
   setProteinGoalType: (type: ProteinGoalType) => void;

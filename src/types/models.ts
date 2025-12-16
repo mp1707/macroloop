@@ -72,7 +72,7 @@ export type UserSettings = {
   weight: number; // kg
   height: number; // cm
   activityLevel: "sedentary" | "light" | "moderate" | "active" | "veryactive";
-  calorieGoalType?: "lose" | "maintain" | "gain";
+  calorieGoalType?: "lose" | "lose_mild" | "maintain" | "gain_mild" | "gain";
   proteinGoalType?: ProteinGoalType;
   fatCalculationPercentage: number;
 };

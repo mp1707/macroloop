@@ -39,7 +39,9 @@ export function calculateCalorieGoals(
   activityLevel: UserSettings["activityLevel"]
 ): {
   lose: number;
+  lose_mild: number;
   maintain: number;
+  gain_mild: number;
   gain: number;
 } {
   const { sex, age, weight, height } = params;
@@ -63,19 +65,26 @@ export function calculateCalorieGoals(
   const maintain = Math.round(rmr * activityMultiplier);
 
   // 3. Calculate goals for weight loss and gain
-  // A standard, safe deficit of 500 kcal for loss and a modest surplus of 300 kcal for lean gain.
+  // Standard deficit/surplus of 500 kcal, mild of 300 kcal.
   let lose = maintain - 500;
+  let lose_mild = maintain - 300;
+  const gain_mild = maintain + 300;
   const gain = maintain + 500;
 
-  // 4. Apply the safety floor to the weight loss goal to prevent unsafe targets
+  // 4. Apply the safety floor to the weight loss goals to prevent unsafe targets
   const safetyFloor = calorieSafetyFloors[sex];
   if (lose < safetyFloor) {
     lose = safetyFloor;
   }
+  if (lose_mild < safetyFloor) {
+    lose_mild = safetyFloor;
+  }
 
   return {
     lose: Math.round(lose),
+    lose_mild: Math.round(lose_mild),
     maintain,
+    gain_mild: Math.round(gain_mild),
     gain: Math.round(gain),
   };
 }

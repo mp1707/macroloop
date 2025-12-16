@@ -101,9 +101,19 @@ export default function Step3GoalsScreen() {
       color: colors.error,
     },
     {
+      id: "lose_mild" as const,
+      Icon: TrendingDown,
+      color: colors.warning,
+    },
+    {
       id: "maintain" as const,
       Icon: Equal,
       color: colors.success,
+    },
+    {
+      id: "gain_mild" as const,
+      Icon: TrendingUp,
+      color: colors.semantic.calories,
     },
     {
       id: "gain" as const,
