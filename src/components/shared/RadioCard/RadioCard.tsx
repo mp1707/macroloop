@@ -218,7 +218,6 @@ export const RadioCard: React.FC<RadioCardProps> = ({
                   <AppText
                     role="Caption"
                     color="secondary"
-                    numberOfLines={2}
                     style={styles.description}
                   >
                     {description}

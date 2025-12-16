@@ -623,31 +623,31 @@
       "options": {
         "lose": {
           "title": "Lose Weight",
-          "description": "Create a deficit to reduce weight effectively.",
+          "description": "A clear calorie deficit for faster fat loss.\n(−500 kcal)",
           "accessibilityLabel": "Deficit goal",
           "accessibilityHint": "Set {{calories}} calories per day to lose weight gradually"
         },
         "lose_mild": {
           "title": "Lose Weight Slowly",
-          "description": "A moderate deficit for a more sustainable approach.",
+          "description": "A gentle deficit for sustainable fat loss.\n(−300 kcal)",
           "accessibilityLabel": "Mild deficit goal",
           "accessibilityHint": "Set {{calories}} calories per day to lose weight slowly"
         },
         "maintain": {
           "title": "Maintain Weight",
-          "description": "Eat at maintenance to stabilize your current weight.",
+          "description": "Eat at maintenance to keep your current weight.",
           "accessibilityLabel": "Maintenance goal",
           "accessibilityHint": "Set {{calories}} calories per day to maintain your current weight"
         },
         "gain_mild": {
           "title": "Lean Bulk",
-          "description": "A slight surplus to build muscle with minimal fat gain.",
+          "description": "Build muscle with minimal fat gain.\n(+300 kcal)",
           "accessibilityLabel": "Mild surplus goal",
           "accessibilityHint": "Set {{calories}} calories per day to gain weight slowly"
         },
         "gain": {
           "title": "Build Muscle",
-          "description": "A calorie surplus to maximize muscle growth.",
+          "description": "A higher surplus to maximize muscle growth.\n(+500 kcal)",
           "accessibilityLabel": "Surplus goal",
           "accessibilityHint": "Set {{calories}} calories per day to gain weight gradually"
         }

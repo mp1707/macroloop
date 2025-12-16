@@ -621,31 +621,31 @@
       "options": {
         "lose": {
           "title": "Abnehmen",
-          "description": "Ein Defizit für effektiven Gewichtsverlust.",
+          "description": "Klares Kaloriendefizit für schnelleren Fettverlust.\n(−500 kcal)",
           "accessibilityLabel": "Defizit-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um langsam abzunehmen"
         },
         "lose_mild": {
           "title": "Langsam abnehmen",
-          "description": "Ein moderates Defizit für einen entspannten Weg.",
+          "description": "Moderates Defizit für nachhaltigen Fettverlust.\n(−300 kcal)",
           "accessibilityLabel": "Mildes Defizit-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um sehr langsam abzunehmen"
         },
         "maintain": {
           "title": "Gewicht halten",
-          "description": "Iss auf Erhalt, um dein Gewicht zu stabilisieren.",
+          "description": "Auf Erhalt essen, um dein aktuelles Gewicht zu halten.",
           "accessibilityLabel": "Erhaltungs-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um dein aktuelles Gewicht zu halten"
         },
         "gain_mild": {
           "title": "Lean Bulk",
-          "description": "Leichter Überschuss: Muskeln aufbauen, kaum Fett ansetzen.",
+          "description": "Muskelaufbau mit minimalem Fettzuwachs.\n(+300 kcal)",
           "accessibilityLabel": "Milder Überschuss-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um fettarm aufzubauen"
         },
         "gain": {
-          "title": "Muskeln aufbauen",
-          "description": "Ein Kalorienüberschuss für maximalen Muskelaufbau.",
+          "title": "Muskelaufbau",
+          "description": "Höherer Kalorienüberschuss für maximalen Muskelzuwachs.\n(+500 kcal)",
           "accessibilityLabel": "Überschuss-Ziel",
           "accessibilityHint": "Setze {{calories}} Kalorien pro Tag, um langsam zuzunehmen"
         }
