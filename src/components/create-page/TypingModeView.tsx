@@ -15,7 +15,6 @@ import { TextInput } from "@/components/shared/TextInput";
 import { AppText } from "@/components/shared/AppText";
 import { FavoritesSection } from "@/components/create-page/FavoritesSection";
 import { ImageSection } from "@/components/create-page/ImageSection";
-import { CreateActions } from "@/components/create-page/CreateActions";
 import { Waveform } from "@/components/create-page/Waveform/Waveform";
 import { HeaderButton } from "@/components/shared/HeaderButton";
 import { PortionSlider } from "@/components/create-page/PortionSlider";
@@ -29,11 +28,6 @@ interface TypingModeViewProps {
   onDescriptionChange: (text: string) => void;
   onSelectFavorite: (favorite: Favorite) => void;
   onRemoveImage: () => void;
-  onSwitchToCamera: () => void;
-  onSwitchToRecording: () => void;
-  onEstimate: () => void;
-  canContinue: boolean;
-  isEstimating: boolean;
   isRecording: boolean;
   volumeLevel: number;
   onStopRecording: () => void;
@@ -47,11 +41,6 @@ export const TypingModeView = ({
   onDescriptionChange,
   onSelectFavorite,
   onRemoveImage,
-  onSwitchToCamera,
-  onSwitchToRecording,
-  onEstimate,
-  canContinue,
-  isEstimating,
   isRecording,
   volumeLevel,
   onStopRecording,
@@ -167,17 +156,6 @@ export const TypingModeView = ({
         <PortionSlider
           value={draft.percentageEaten ?? 100}
           onValueChange={onPercentageChange}
-        />
-      </Animated.View>
-
-      <Animated.View layout={slidingLayout}>
-        <CreateActions
-          onSwitchToCamera={onSwitchToCamera}
-          onSwitchToRecording={onSwitchToRecording}
-          isRecordingActive={isRecordingActive}
-          onEstimate={onEstimate}
-          canContinue={canContinue}
-          isEstimating={isEstimating}
         />
       </Animated.View>
     </Animated.View>

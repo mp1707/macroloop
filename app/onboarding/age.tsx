@@ -7,7 +7,7 @@ import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { Button } from "@/components/index";
 import { OnboardingScreen } from "../../src/components/onboarding/OnboardingScreen";
 import { AppText } from "@/components/shared/AppText";
-import { Picker } from "@react-native-picker/picker";
+import { Host, Picker } from "@expo/ui/swift-ui";
 import { useTranslation } from "react-i18next";
 
 const AgeSelectionScreen = () => {
@@ -17,12 +17,13 @@ const AgeSelectionScreen = () => {
   const { safePush, isNavigating } = useNavigationGuard();
   const [selectedAge, setSelectedAge] = useState<number>(age || 30);
   const { t } = useTranslation();
+  const selectedIndex = useMemo(() => selectedAge - 15, [selectedAge]);
 
   // Create age options array
   const ageOptions = useMemo(() => {
-    const options: number[] = [];
+    const options: string[] = [];
     for (let i = 15; i <= 100; i++) {
-      options.push(i);
+      options.push(i.toString());
     }
     return options;
   }, []);
@@ -33,8 +34,10 @@ const AgeSelectionScreen = () => {
     safePush("/onboarding/sex");
   };
 
-  const handleAgeChange = (value: number) => {
-    setSelectedAge(value);
+  const handleAgeChange = async ({ nativeEvent: { index } }: { nativeEvent: { index: number } }) => {
+    const ageValue = index + 15; // Convert index to age (offset by 15)
+    setSelectedAge(ageValue);
+    await Haptics.selectionAsync();
   };
 
   return (
@@ -57,17 +60,14 @@ const AgeSelectionScreen = () => {
     >
       <View style={styles.pickerSection}>
         <View style={styles.pickerArea}>
-          <View style={styles.pickerCol}>
+          <Host style={{ height: 200, width: 200 }}>
             <Picker
-              selectedValue={selectedAge}
-              onValueChange={(value) => handleAgeChange(Number(value))}
-              itemStyle={{ color: colors.primaryText }}
-            >
-              {ageOptions.map((age) => (
-                <Picker.Item key={age} label={age.toString()} value={age} />
-              ))}
-            </Picker>
-          </View>
+              options={ageOptions}
+              selectedIndex={selectedIndex}
+              onOptionSelected={handleAgeChange}
+              variant="wheel"
+            />
+          </Host>
           <AppText role="Headline" style={styles.unitText}>
             {t("onboarding.age.unit")}
           </AppText>
@@ -92,20 +92,12 @@ const createStyles = (colors: Colors, theme: Theme) => {
     },
     pickerArea: {
       flexDirection: "row",
-      justifyContent: "space-between",
+      justifyContent: "center",
       alignItems: "center",
-      backgroundColor: colors.primaryBackground,
-      borderRadius: theme.components.cards.cornerRadius,
-      minWidth: 200,
-    },
-    pickerCol: {
-      flex: 1,
-      borderRadius: 14,
-      overflow: "hidden",
-      backgroundColor: "transparent",
+      gap: spacing.md,
     },
     unitText: {
-      paddingRight: spacing.md,
+      // Gap in pickerArea handles spacing
     },
   });
 };
