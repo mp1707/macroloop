@@ -11,33 +11,43 @@ import Animated, {
   useAnimatedStyle,
   withSequence,
   withTiming,
-  runOnJS,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
 const WEEKS_TO_SHOW = 26; // Approx 6 months
 
-interface ConsistencyCellProps {
+// Static cell for non-today cells (no shared values needed)
+interface StaticCellProps {
   style: any;
-  isActive: boolean;
-  isToday: boolean;
-  initialDelay?: number;
 }
 
-const ConsistencyCell = React.memo(
-  ({ style, isActive, isToday, initialDelay = 0 }: ConsistencyCellProps) => {
+const StaticCell = React.memo(({ style }: StaticCellProps) => {
+  return <View style={style} />;
+});
+
+// Animated cell only for today's cell (single shared value)
+interface AnimatedCellProps {
+  style: any;
+  isActive: boolean;
+  initialDelay?: number;
+  theme: Theme;
+}
+
+const AnimatedCell = React.memo(
+  ({ style, isActive, initialDelay = 0, theme }: AnimatedCellProps) => {
     const scale = useSharedValue(1);
 
     useEffect(() => {
-      if (isToday && isActive) {
+      if (isActive) {
         const playEffect = () => {
-          // Run haptics
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          // Use theme haptics values
+          Haptics.impactAsync(theme.interactions.haptics.light);
 
-          // Run animation
+          // Use theme animation timing
+          const duration = theme.interactions.press.timing.duration;
           scale.value = withSequence(
-            withTiming(1.3, { duration: 150 }),
-            withTiming(1, { duration: 150 })
+            withTiming(1.3, { duration }),
+            withTiming(1, { duration })
           );
         };
 
@@ -48,7 +58,7 @@ const ConsistencyCell = React.memo(
           playEffect();
         }
       }
-    }, [isActive, isToday, initialDelay]);
+    }, [isActive, initialDelay, theme]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ scale: scale.value }],
@@ -220,13 +230,18 @@ export const ConsistencyGrid = () => {
               const isActive = cellStyle !== styles.cellInactive;
               const isToday = day.dateKey === todayKey;
 
-              return (
-                <ConsistencyCell
+              return isToday ? (
+                <AnimatedCell
                   key={`${day.dateKey}-${metric}`}
                   style={[styles.cell, cellStyle]}
                   isActive={isActive}
-                  isToday={isToday}
                   initialDelay={500}
+                  theme={theme}
+                />
+              ) : (
+                <StaticCell
+                  key={`${day.dateKey}-${metric}`}
+                  style={[styles.cell, cellStyle]}
                 />
               );
             })}
