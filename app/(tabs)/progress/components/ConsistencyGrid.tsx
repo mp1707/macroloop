@@ -16,6 +16,8 @@ import * as Haptics from "expo-haptics";
 
 const WEEKS_TO_SHOW = 26; // Approx 6 months
 
+type CellStatus = "empty" | "partial" | "completed";
+
 // Static cell for non-today cells (no shared values needed)
 interface StaticCellProps {
   style: any;
@@ -28,37 +30,43 @@ const StaticCell = React.memo(({ style }: StaticCellProps) => {
 // Animated cell only for today's cell (single shared value)
 interface AnimatedCellProps {
   style: any;
-  isActive: boolean;
+  status: CellStatus;
   initialDelay?: number;
   theme: Theme;
 }
 
 const AnimatedCell = React.memo(
-  ({ style, isActive, initialDelay = 0, theme }: AnimatedCellProps) => {
+  ({ style, status, initialDelay = 0, theme }: AnimatedCellProps) => {
     const scale = useSharedValue(1);
 
     useEffect(() => {
-      if (isActive) {
-        const playEffect = () => {
-          // Use theme haptics values
-          Haptics.impactAsync(theme.interactions.haptics.light);
+      if (status === "empty") return;
 
-          // Use theme animation timing
-          const duration = theme.interactions.press.timing.duration;
-          scale.value = withSequence(
-            withTiming(1.3, { duration }),
-            withTiming(1, { duration })
-          );
-        };
-
+      const performAnimation = async () => {
+        // Wait for initial delay if set
         if (initialDelay > 0) {
-          const timer = setTimeout(playEffect, initialDelay);
-          return () => clearTimeout(timer);
-        } else {
-          playEffect();
+          await new Promise((resolve) => setTimeout(resolve, initialDelay));
         }
-      }
-    }, [isActive, initialDelay, theme]);
+
+        if (status === "completed") {
+          // Success Animation: Snappy, intense, no spring
+          Haptics.impactAsync(theme.interactions.haptics.light);
+          scale.value = withSequence(
+            withTiming(1.5, { duration: 100 }),
+            withTiming(1, { duration: 100 })
+          );
+        } else if (status === "partial") {
+          // Logged Animation: Snappy, subtle
+          Haptics.impactAsync(theme.interactions.haptics.light);
+          scale.value = withSequence(
+            withTiming(1.2, { duration: 75 }),
+            withTiming(1, { duration: 75 })
+          );
+        }
+      };
+
+      performAnimation();
+    }, [status, initialDelay, theme]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ scale: scale.value }],
@@ -145,36 +153,39 @@ export const ConsistencyGrid = () => {
     return weeks;
   }, [foodLogs]);
 
-  const getCellStyle = (dayData: any) => {
-    if (!dayData?.exists) return styles.cellInactive;
+  const getCellStatus = (dayData: any): CellStatus => {
+    if (!dayData?.exists) return "empty";
 
     if (metric === "calories") {
       const value = dayData.calories || 0;
-      const goal = dailyTargets?.calories || 2000; // Fallback if no goal
+      const goal = dailyTargets?.calories || 2000;
       const percentage = value / goal;
 
-      if (percentage >= 0.8 && percentage <= 1.2) {
-        return { backgroundColor: colors.semantic.calories };
-      } else {
-        // Dim colored square (uses same color as trend chart today bar -> opacity 0.35)
-        return {
-          backgroundColor: colors.semantic.calories,
-          opacity: 0.35,
-        };
-      }
+      // Target met: +/- 20%
+      return percentage >= 0.8 && percentage <= 1.2 ? "completed" : "partial";
     } else {
       // Protein
       const value = dayData.protein || 0;
-      const goal = dailyTargets?.protein || 150; // Fallback
+      const goal = dailyTargets?.protein || 150;
 
-      if (value >= goal * 0.8) {
-        return { backgroundColor: colors.semantic.protein };
-      } else {
-        return {
-          backgroundColor: colors.semantic.protein,
-          opacity: 0.35,
-        };
-      }
+      // Target met: >= 80%
+      return value >= goal * 0.8 ? "completed" : "partial";
+    }
+  };
+
+  const getStyleForStatus = (status: CellStatus) => {
+    if (status === "empty") return styles.cellInactive;
+
+    const baseColor =
+      metric === "calories"
+        ? colors.semantic.calories
+        : colors.semantic.protein;
+
+    if (status === "completed") {
+      return { backgroundColor: baseColor, opacity: 1 };
+    } else {
+      // Partial: Dimmed opacity
+      return { backgroundColor: baseColor, opacity: 0.35 };
     }
   };
 
@@ -257,15 +268,15 @@ export const ConsistencyGrid = () => {
         {gridData.map((week, weekIndex) => (
           <View key={weekIndex} style={styles.column}>
             {week.map((day) => {
-              const cellStyle = getCellStyle(day.data);
-              const isActive = cellStyle !== styles.cellInactive;
+              const status = getCellStatus(day.data);
+              const cellStyle = getStyleForStatus(status);
               const isToday = day.dateKey === todayKey;
 
               return isToday ? (
                 <AnimatedCell
                   key={`${day.dateKey}-${metric}`}
                   style={[styles.cell, cellStyle]}
-                  isActive={isActive}
+                  status={status}
                   initialDelay={500}
                   theme={theme}
                 />
