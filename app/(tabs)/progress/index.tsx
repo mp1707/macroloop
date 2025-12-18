@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import * as Haptics from "expo-haptics";
 import { useAppStore } from "@/store/useAppStore";
@@ -8,6 +8,8 @@ import { useTranslation } from "react-i18next";
 import { calculateTrendsData } from "./components/trendCalculations";
 import { NutrientTrendChart } from "./components/NutrientTrendChart";
 import { MacroAverageCards } from "./components/MacroAverageCards";
+import { ConsistencyGrid } from "./components/ConsistencyGrid";
+import { AppText } from "@/components";
 import type { TrendMetric } from "./components/trendCalculations";
 import { useSegments } from "expo-router";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
@@ -139,35 +141,57 @@ export default function ProgressScreen() {
           layout={LinearTransition}
           style={styles.animatedContainer}
         >
-          {/* Nutrient Chart */}
-          <NutrientTrendChart
-            dailyData={visibleTrendData.dailyData}
-            todayData={visibleTrendData.todayData}
-            goal={shouldShowGoalLine ? selectedTarget : undefined}
-            goalRange={goalRange}
-            days={daysToShow}
-            nutrient={selectedMetric}
-            nutrientLabel={selectedMeta.label}
-            color={selectedMeta.color}
-            unit={selectedMeta.unit}
-            showGoalLine={shouldShowGoalLine}
-            calorieGoal={dailyTargets?.calories}
-            average={visibleTrendData.averages[selectedMetric]}
-            target={showGoalDelta ? selectedTarget : undefined}
-            daysWithData={visibleTrendData.daysWithData}
-            showGoalDelta={showGoalDelta}
-            captionText={captionText}
-            timePeriod={timePeriod}
-            onPeriodChange={handlePeriodChange}
-          />
+          {/* Consistency Section */}
+          <View style={styles.section}>
+            <AppText
+              role="Caption"
+              color="secondary"
+              style={styles.sectionHeader}
+            >
+              {t("progress.sections.consistency")}
+            </AppText>
+            <ConsistencyGrid />
+          </View>
 
-          {/* Macro Average Cards */}
-          <MacroAverageCards
-            averages={visibleTrendData.averages}
-            selectedMetric={selectedMetric}
-            onSelect={handleMacroSelect}
-            dailyTargets={dailyTargets}
-          />
+          {/* Trend Section */}
+          <View style={styles.section}>
+            <AppText
+              role="Caption"
+              color="secondary"
+              style={styles.sectionHeader}
+            >
+              {t("progress.sections.trend")}
+            </AppText>
+            <View style={{ gap: theme.spacing.sm }}>
+              <NutrientTrendChart
+                dailyData={visibleTrendData.dailyData}
+                todayData={visibleTrendData.todayData}
+                goal={shouldShowGoalLine ? selectedTarget : undefined}
+                goalRange={goalRange}
+                days={daysToShow}
+                nutrient={selectedMetric}
+                nutrientLabel={selectedMeta.label}
+                color={selectedMeta.color}
+                unit={selectedMeta.unit}
+                showGoalLine={shouldShowGoalLine}
+                calorieGoal={dailyTargets?.calories}
+                average={visibleTrendData.averages[selectedMetric]}
+                target={showGoalDelta ? selectedTarget : undefined}
+                daysWithData={visibleTrendData.daysWithData}
+                showGoalDelta={showGoalDelta}
+                captionText={captionText}
+                timePeriod={timePeriod}
+                onPeriodChange={handlePeriodChange}
+              />
+
+              <MacroAverageCards
+                averages={visibleTrendData.averages}
+                selectedMetric={selectedMetric}
+                onSelect={handleMacroSelect}
+                dailyTargets={dailyTargets}
+              />
+            </View>
+          </View>
         </Animated.View>
       ) : null}
     </KeyboardAwareScrollView>
@@ -189,6 +213,14 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
       paddingHorizontal: theme.spacing.md,
     },
     animatedContainer: {
-      gap: theme.spacing.sm,
+      gap: theme.spacing.lg, // Increased gap between sections
+    },
+    section: {
+      gap: theme.spacing.xs,
+    },
+    sectionHeader: {
+      marginLeft: theme.spacing.sm,
+      letterSpacing: 0.5,
+      textTransform: "uppercase",
     },
   });

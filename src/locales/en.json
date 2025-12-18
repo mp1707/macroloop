@@ -1029,6 +1029,10 @@
     }
   },
   "progress": {
+    "sections": {
+      "consistency": "Consistency",
+      "trend": "Trend"
+    },
     "timePeriod": {
       "week": "Week",
       "month": "Month"
