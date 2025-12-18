@@ -1032,6 +1032,17 @@
       "goalsReached": "Ziele erreicht",
       "trend": "Verlauf"
     },
+    "consistency": {
+      "legend": {
+        "inRange": "Tage im Zielbereich. (80-120% des Ziels)",
+        "atLeast80": "Tage im Zielbereich. (mindestens 80% des Ziels)",
+        "atLeastOneLog": "Tage mit mindestens einem Eintrag."
+      },
+      "tabs": {
+        "protein": "Protein",
+        "calories": "Kcal"
+      }
+    },
     "timePeriod": {
       "week": "Woche",
       "month": "Monat"

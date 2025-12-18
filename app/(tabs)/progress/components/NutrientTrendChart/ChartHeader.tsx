@@ -209,7 +209,7 @@ const createStyles = (colors: Colors, theme: Theme) =>
       gap: theme.spacing.xs / 2,
     },
     pickerWrapper: {
-      marginBottom: theme.spacing.lg,
+      marginBottom: theme.spacing.md,
     },
     contentContainer: {
       gap: theme.spacing.xs / 2,

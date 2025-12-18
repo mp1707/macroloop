@@ -1034,6 +1034,17 @@
       "goalsReached": "Goals Reached",
       "trend": "Trend"
     },
+    "consistency": {
+      "legend": {
+        "inRange": "Days within target range. (+- 20% of target)",
+        "atLeast80": "Days within target range. (at least 80% of target)",
+        "atLeastOneLog": "Days with at least one log entry."
+      },
+      "tabs": {
+        "protein": "Protein",
+        "calories": "Kcal"
+      }
+    },
     "timePeriod": {
       "week": "Week",
       "month": "Month"

@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppStore } from "@/store/useAppStore";
 import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
-import { Card } from "@/components";
+import { Card, AppText } from "@/components";
 import { formatDateKey } from "@/utils/dateHelpers";
 import { Picker, Host } from "@expo/ui/swift-ui";
 import { useTranslation } from "react-i18next";
@@ -78,9 +78,7 @@ export const ConsistencyGrid = () => {
   const dailyTargets = useAppStore((state) => state.dailyTargets);
   const { t } = useTranslation();
 
-  const [metric, setMetric] = useState<"streak" | "calories" | "protein">(
-    "streak"
-  );
+  const [metric, setMetric] = useState<"calories" | "protein">("calories");
 
   const todayKey = useMemo(() => {
     const today = new Date();
@@ -148,33 +146,20 @@ export const ConsistencyGrid = () => {
   }, [foodLogs]);
 
   const getCellStyle = (dayData: any) => {
-    if (metric === "streak") {
-      return dayData?.exists ? styles.cellActive : styles.cellInactive;
-    }
-
-    if (!dayData) return styles.cellInactive;
+    if (!dayData?.exists) return styles.cellInactive;
 
     if (metric === "calories") {
       const value = dayData.calories || 0;
       const goal = dailyTargets?.calories || 2000; // Fallback if no goal
       const percentage = value / goal;
 
-      if (percentage < 0.5) {
-        return styles.cellInactive;
-      } else if (percentage >= 0.5 && percentage < 0.9) {
-        // Darker shade
-        return {
-          backgroundColor:
-            colors.semanticBadges?.calories?.text || colors.semantic.calories,
-        };
-      } else if (percentage >= 0.9 && percentage <= 1.1) {
-        // Accent
+      if (percentage >= 0.8 && percentage <= 1.2) {
         return { backgroundColor: colors.semantic.calories };
       } else {
-        // > 1.1 -> Darker shade
+        // Dim colored square (uses same color as trend chart today bar -> opacity 0.35)
         return {
-          backgroundColor:
-            colors.semanticBadges?.calories?.text || colors.semantic.calories,
+          backgroundColor: colors.semantic.calories,
+          opacity: 0.35,
         };
       }
     } else {
@@ -182,18 +167,21 @@ export const ConsistencyGrid = () => {
       const value = dayData.protein || 0;
       const goal = dailyTargets?.protein || 150; // Fallback
 
-      if (value >= goal) {
+      if (value >= goal * 0.8) {
         return { backgroundColor: colors.semantic.protein };
+      } else {
+        return {
+          backgroundColor: colors.semantic.protein,
+          opacity: 0.35,
+        };
       }
-      return styles.cellInactive;
     }
   };
 
   const pickerOptions = useMemo(
     () => [
-      "Log streak",
-      t("nutrients.protein.label"),
-      t("nutrients.calories.label"),
+      t("progress.consistency.tabs.calories"),
+      t("progress.consistency.tabs.protein"),
     ],
     [t]
   );
@@ -203,10 +191,24 @@ export const ConsistencyGrid = () => {
   }: {
     nativeEvent: { index: number };
   }) => {
-    if (index === 0) setMetric("streak");
-    else if (index === 1) setMetric("protein");
-    else setMetric("calories");
+    if (index === 0) setMetric("calories");
+    else setMetric("protein");
   };
+
+  const renderLegendItem = (
+    color: string,
+    text: string,
+    opacity: number = 1
+  ) => (
+    <View style={styles.legendItem}>
+      <View
+        style={[styles.legendSquare, { backgroundColor: color, opacity }]}
+      />
+      <AppText role="Caption" color="secondary" style={styles.legendText}>
+        {text}
+      </AppText>
+    </View>
+  );
 
   return (
     <Card style={styles.card} padding={theme.spacing.md}>
@@ -214,14 +216,43 @@ export const ConsistencyGrid = () => {
         <Host matchContents colorScheme={colorScheme}>
           <Picker
             options={pickerOptions}
-            selectedIndex={
-              metric === "streak" ? 0 : metric === "protein" ? 1 : 2
-            }
+            selectedIndex={metric === "calories" ? 0 : 1}
             onOptionSelected={handleMetricChange}
             variant="segmented"
           />
         </Host>
+
+        <View style={styles.legendContainer}>
+          {metric === "calories" && (
+            <>
+              {renderLegendItem(
+                colors.semantic.calories,
+                t("progress.consistency.legend.atLeastOneLog"),
+                0.35
+              )}
+              {renderLegendItem(
+                colors.semantic.calories,
+                t("progress.consistency.legend.inRange")
+              )}
+            </>
+          )}
+
+          {metric === "protein" && (
+            <>
+              {renderLegendItem(
+                colors.semantic.protein,
+                t("progress.consistency.legend.atLeastOneLog"),
+                0.35
+              )}
+              {renderLegendItem(
+                colors.semantic.protein,
+                t("progress.consistency.legend.atLeast80")
+              )}
+            </>
+          )}
+        </View>
       </View>
+
       <View style={styles.grid}>
         {gridData.map((week, weekIndex) => (
           <View key={weekIndex} style={styles.column}>
@@ -260,6 +291,23 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
     header: {
       marginBottom: theme.spacing.md,
     },
+    legendContainer: {
+      marginTop: theme.spacing.md,
+      gap: theme.spacing.xs / 2,
+    },
+    legendItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: theme.spacing.xs,
+    },
+    legendSquare: {
+      width: 9,
+      height: 9,
+      borderRadius: 2,
+    },
+    legendText: {
+      flex: 1,
+    },
     grid: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -274,9 +322,6 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
     },
     cellInactive: {
       backgroundColor: colors.subtleBorder,
-      opacity: 0.5,
-    },
-    cellActive: {
-      backgroundColor: colors.secondaryAccent,
+      opacity: 0.35,
     },
   });
