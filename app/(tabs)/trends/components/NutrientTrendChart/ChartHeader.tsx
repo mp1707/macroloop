@@ -2,8 +2,9 @@ import React, { useMemo } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { Info } from "lucide-react-native";
+import { Picker, Host } from "@expo/ui/swift-ui";
 import { AppText } from "@/components";
-import { useTheme, Colors, Theme } from "@/theme";
+import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
 import { useTranslation } from "react-i18next";
 import type { TrendMetric } from "../trendCalculations";
 
@@ -22,6 +23,8 @@ interface ChartHeaderProps {
   showGoalLine?: boolean;
   captionText?: string; // For fat baseline or carbs no-goal message
   calorieGoal?: number; // For fat percentage calculation
+  timePeriod: "week" | "month";
+  onPeriodChange: (index: number) => void;
 }
 
 export const ChartHeader: React.FC<ChartHeaderProps> = ({
@@ -37,8 +40,10 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
   showGoalLine = true,
   captionText,
   calorieGoal,
+  timePeriod,
+  onPeriodChange,
 }) => {
-  const { colors, theme } = useTheme();
+  const { colors, theme, colorScheme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const router = useRouter();
@@ -107,60 +112,93 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
     return captionText;
   }, [showGoalLine, goal, unit, captionText, t]);
 
+  const pickerOptions = useMemo(
+    () => [t("trends.timePeriod.week"), t("trends.timePeriod.month")],
+    [t]
+  );
+
+  const handlePeriodSelection = ({
+    nativeEvent: { index },
+  }: {
+    nativeEvent: { index: number };
+  }) => {
+    onPeriodChange(index);
+  };
+
   return (
-    <Pressable
-      onPress={handleOpenExplainer}
-      style={({ pressed }) => [
-        styles.container,
-        pressed && styles.containerPressed,
-      ]}
-    >
-      <View style={styles.headerRow}>
+    <View style={styles.container}>
+      <View style={styles.pickerWrapper}>
+        <Host matchContents colorScheme={colorScheme}>
+          <Picker
+            options={pickerOptions}
+            selectedIndex={timePeriod === "week" ? 0 : 1}
+            onOptionSelected={handlePeriodSelection}
+            variant="segmented"
+          />
+        </Host>
+      </View>
+
+      <Pressable
+        onPress={handleOpenExplainer}
+        style={({ pressed }) => [
+          styles.headerRow,
+          pressed && styles.containerPressed,
+        ]}
+      >
         <AppText role="Caption" style={styles.periodLabel}>
           {periodLabel}
         </AppText>
         <Info size={14} color={colors.secondaryText} />
-      </View>
-      <View style={styles.averageRow}>
-        <AppText role="Title1" style={styles.averageNumber}>
-          {formattedValue}
-        </AppText>
-        {shouldShowBadge && (
-          <View style={[styles.badge, { backgroundColor: badgeBackground }]}>
-            <AppText
-              role="Caption"
-              style={[styles.badgeText, { color: badgeTextColor }]}
+      </Pressable>
+
+      <Pressable
+        onPress={handleOpenExplainer}
+        style={({ pressed }) => [
+          styles.contentContainer,
+          pressed && styles.containerPressed,
+        ]}
+      >
+        <View style={styles.averageRow}>
+          <AppText role="Title1" style={styles.averageNumber}>
+            {formattedValue}
+          </AppText>
+          {shouldShowBadge && (
+            <View style={[styles.badge, { backgroundColor: badgeBackground }]}>
+              <AppText
+                role="Caption"
+                style={[styles.badgeText, { color: badgeTextColor }]}
+              >
+                {isOverTarget ? "+" : "-"}
+                {absDiff} {unit} {t("trends.chart.vsGoal")}
+              </AppText>
+            </View>
+          )}
+          {shouldShowFatPill && (
+            <View
+              style={[
+                styles.pill,
+                {
+                  backgroundColor:
+                    colors.semanticSurfaces?.fat || colors.subtleBackground,
+                },
+              ]}
             >
-              {isOverTarget ? "+" : "-"}
-              {absDiff} {unit} {t("trends.chart.vsGoal")}
-            </AppText>
-          </View>
+              <AppText
+                role="Caption"
+                style={[styles.pillText, { color: colors.semantic.fat }]}
+              >
+                {fatPercentage} %
+              </AppText>
+            </View>
+          )}
+        </View>
+        {caption && (
+          <AppText role="Caption" style={styles.caption}>
+            {caption}
+          </AppText>
         )}
-        {shouldShowFatPill && (
-          <View
-            style={[
-              styles.pill,
-              {
-                backgroundColor:
-                  colors.semanticSurfaces?.fat || colors.subtleBackground,
-              },
-            ]}
-          >
-            <AppText
-              role="Caption"
-              style={[styles.pillText, { color: colors.semantic.fat }]}
-            >
-              {fatPercentage} %
-            </AppText>
-          </View>
-        )}
-      </View>
-      {caption && (
-        <AppText role="Caption" style={styles.caption}>
-          {caption}
-        </AppText>
-      )}
-    </Pressable>
+      </Pressable>
+    </View>
   );
 };
 
@@ -168,6 +206,12 @@ const createStyles = (colors: Colors, theme: Theme) =>
   StyleSheet.create({
     container: {
       paddingBottom: theme.spacing.md,
+      gap: theme.spacing.xs / 2,
+    },
+    pickerWrapper: {
+      marginBottom: theme.spacing.lg,
+    },
+    contentContainer: {
       gap: theme.spacing.xs / 2,
     },
     containerPressed: {

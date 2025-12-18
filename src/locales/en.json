@@ -729,6 +729,11 @@
     "fallbackTitle": "New Log",
     "percentageEaten": "{{percentage}}% consumed",
     "analyzing": "Analyzing ingredients…",
+    "loadingStates": {
+      "scanningPhoto": "Scanning photo...",
+      "identifyingIngredients": "Identifying ingredients...",
+      "calculatingMacros": "Calculating macros..."
+    },
     "estimationFailed": "Estimation failed",
     "tapToRetry": "Tap to retry",
     "noDescription": "No description",
@@ -879,28 +884,6 @@
           "language": {
             "title": "Language",
             "subtitle": "Choose the app language."
-          },
-          "changelog": {
-            "title": "What’s New",
-            "subtitle": "New features and improvements."
-          },
-          "copyAppLink": {
-            "title": "Recommend App",
-            "subtitle": "Copy the AppStore link to share MacroLoop.",
-            "toast": {
-              "successTitle": "Link copied",
-              "successSubtitle": "Thanks for sharing MacroLoop.",
-              "errorTitle": "Copy failed",
-              "errorSubtitle": "Please try again."
-            }
-          },
-          "rateApp": {
-            "title": "Rate MacroLoop",
-            "subtitle": "Leave a review in the App Store :)",
-            "toast": {
-              "errorTitle": "Can’t open App Store",
-              "errorSubtitle": "Please try again later."
-            }
           }
         }
       },
@@ -926,9 +909,35 @@
           }
         }
       },
-      "legal": {
-        "label": "LEGAL",
+      "about": {
+        "label": "ABOUT THE APP",
         "rows": {
+          "changelog": {
+            "title": "What's New",
+            "subtitle": "New features and improvements."
+          },
+          "copyAppLink": {
+            "title": "Recommend App",
+            "subtitle": "Copy the AppStore link to share MacroLoop.",
+            "toast": {
+              "successTitle": "Link copied",
+              "successSubtitle": "Thanks for sharing MacroLoop.",
+              "errorTitle": "Copy failed",
+              "errorSubtitle": "Please try again."
+            }
+          },
+          "rateApp": {
+            "title": "Rate MacroLoop",
+            "subtitle": "Leave a review in the App Store :)",
+            "toast": {
+              "errorTitle": "Can't open App Store",
+              "errorSubtitle": "Please try again later."
+            }
+          },
+          "giveFeedback": {
+            "title": "Give Feedback",
+            "subtitle": "Share your thoughts and ideas."
+          },
           "privacy": "Privacy Policy",
           "terms": "Terms of Use"
         },

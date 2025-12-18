@@ -35,6 +35,8 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
     daysWithData,
     showGoalDelta,
     captionText,
+    timePeriod,
+    onPeriodChange,
   } = props;
 
   const { colors, theme } = useTheme();
@@ -93,6 +95,8 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
           showGoalLine={showGoalLine}
           captionText={captionText}
           calorieGoal={props.calorieGoal}
+          timePeriod={timePeriod}
+          onPeriodChange={onPeriodChange}
         />
 
         <View style={styles.chartContainer}>

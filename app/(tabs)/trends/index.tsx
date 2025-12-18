@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Host, Picker } from "@expo/ui/swift-ui";
 import * as Haptics from "expo-haptics";
 import { useAppStore } from "@/store/useAppStore";
 import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
@@ -54,20 +53,11 @@ export default function TrendsScreen() {
     return calculateTrendsData(foodLogs, daysToShow);
   }, [foodLogs, daysToShow, isFocused]);
 
-  // Time period picker options
-  const pickerOptions = useMemo(
-    () => [t("trends.timePeriod.week"), t("trends.timePeriod.month")],
-    [t]
-  );
-
   // Handle time period change
-  const handlePeriodChange = useCallback(
-    ({ nativeEvent: { index } }: { nativeEvent: { index: number } }) => {
-      Haptics.selectionAsync();
-      setTimePeriod(index === 0 ? "week" : "month");
-    },
-    []
-  );
+  const handlePeriodChange = useCallback((index: number) => {
+    Haptics.selectionAsync();
+    setTimePeriod(index === 0 ? "week" : "month");
+  }, []);
 
   const nutrientMeta = useMemo(
     () => ({
@@ -149,18 +139,6 @@ export default function TrendsScreen() {
           layout={LinearTransition}
           style={styles.animatedContainer}
         >
-          {/* Time Period Picker */}
-          <View style={styles.pickerContainer}>
-            <Host matchContents colorScheme={colorScheme}>
-              <Picker
-                options={pickerOptions}
-                selectedIndex={timePeriod === "week" ? 0 : 1}
-                onOptionSelected={handlePeriodChange}
-                variant="segmented"
-              />
-            </Host>
-          </View>
-
           {/* Nutrient Chart */}
           <NutrientTrendChart
             dailyData={visibleTrendData.dailyData}
@@ -179,6 +157,8 @@ export default function TrendsScreen() {
             daysWithData={visibleTrendData.daysWithData}
             showGoalDelta={showGoalDelta}
             captionText={captionText}
+            timePeriod={timePeriod}
+            onPeriodChange={handlePeriodChange}
           />
 
           {/* Macro Average Cards */}
@@ -207,9 +187,6 @@ const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
       paddingTop: theme.spacing.md,
       gap: theme.spacing.sm,
       paddingHorizontal: theme.spacing.md,
-    },
-    pickerContainer: {
-      marginBottom: theme.spacing.md,
     },
     animatedContainer: {
       gap: theme.spacing.sm,

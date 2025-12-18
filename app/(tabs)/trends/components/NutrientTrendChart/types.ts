@@ -18,6 +18,8 @@ export interface NutrientTrendChartProps {
   daysWithData: number;
   showGoalDelta: boolean;
   captionText?: string; // For fat baseline or carbs no-goal message
+  timePeriod: "week" | "month";
+  onPeriodChange: (index: number) => void;
 }
 
 export interface ChartConfig {

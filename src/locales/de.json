@@ -727,6 +727,11 @@
     "fallbackTitle": "Neuer Eintrag",
     "percentageEaten": "{{percentage}}% verzehrt",
     "analyzing": "Zutaten analysieren …",
+    "loadingStates": {
+      "scanningPhoto": "Scanne Foto...",
+      "identifyingIngredients": "Identifiziere Zutaten...",
+      "calculatingMacros": "Berechne Nährwerte..."
+    },
     "estimationFailed": "Schätzung fehlgeschlagen",
     "tapToRetry": "Zum Wiederholen tippen",
     "noDescription": "Keine Beschreibung",
@@ -877,28 +882,6 @@
           "language": {
             "title": "Sprache",
             "subtitle": "Wähle, in welcher Sprache die App angezeigt wird."
-          },
-          "changelog": {
-            "title": "Das ist neu",
-            "subtitle": "Neue Funktionen und Verbesserungen."
-          },
-          "copyAppLink": {
-            "title": "App empfehlen",
-            "subtitle": "Kopiere den AppStore-Link, um MacroLoop zu teilen.",
-            "toast": {
-              "successTitle": "Link kopiert",
-              "successSubtitle": "Danke, dass du MacroLoop teilst.",
-              "errorTitle": "Link konnte nicht kopiert werden",
-              "errorSubtitle": "Versuche es bitte erneut."
-            }
-          },
-          "rateApp": {
-            "title": "MacroLoop bewerten",
-            "subtitle": "Freue mich über jedes Feedback :)",
-            "toast": {
-              "errorTitle": "App Store konnte nicht geöffnet werden",
-              "errorSubtitle": "Bitte später erneut versuchen."
-            }
           }
         }
       },
@@ -924,9 +907,35 @@
           }
         }
       },
-      "legal": {
-        "label": "RECHTLICHES",
+      "about": {
+        "label": "ÜBER DIE APP",
         "rows": {
+          "changelog": {
+            "title": "Das ist neu",
+            "subtitle": "Neue Funktionen und Verbesserungen."
+          },
+          "copyAppLink": {
+            "title": "App empfehlen",
+            "subtitle": "Kopiere den AppStore-Link, um MacroLoop zu teilen.",
+            "toast": {
+              "successTitle": "Link kopiert",
+              "successSubtitle": "Danke, dass du MacroLoop teilst.",
+              "errorTitle": "Link konnte nicht kopiert werden",
+              "errorSubtitle": "Versuche es bitte erneut."
+            }
+          },
+          "rateApp": {
+            "title": "MacroLoop bewerten",
+            "subtitle": "Freue mich über jedes Feedback :)",
+            "toast": {
+              "errorTitle": "App Store konnte nicht geöffnet werden",
+              "errorSubtitle": "Bitte später erneut versuchen."
+            }
+          },
+          "giveFeedback": {
+            "title": "Feedback geben",
+            "subtitle": "Teile deine Gedanken und Ideen."
+          },
           "privacy": "Datenschutzerklärung",
           "terms": "Nutzungsbedingungen"
         },
