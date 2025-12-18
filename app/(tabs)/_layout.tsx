@@ -75,7 +75,7 @@ export default function TabsLayout() {
         <Label selectedStyle={{ color: colors.accent }}>Favorites</Label>
       </NativeTabs.Trigger> */}
 
-      <NativeTabs.Trigger name="progress">
+      <NativeTabs.Trigger name="stats">
         <Icon
           src={{
             default: (

@@ -27,9 +27,9 @@ export default function ProgressScreen() {
     }
     const tabsIndex = segments.lastIndexOf("(tabs)");
     if (tabsIndex === -1) {
-      return segments[segments.length - 1] === "progress";
+      return segments[segments.length - 1] === "stats";
     }
-    return segments[tabsIndex + 1] === "progress";
+    return segments[tabsIndex + 1] === "stats";
   }, [segments]);
 
   // Store selectors

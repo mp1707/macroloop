@@ -93,7 +93,7 @@ function ThemedStack() {
         }}
       />
       <Stack.Screen
-        name="explainer-progress"
+        name="explainer-stats"
         options={{
           presentation: "modal",
           headerShown: false,

@@ -21,6 +21,11 @@ const CHANGELOG_DATA_EN: VersionChangelog[] = [
     version: "1.0.8",
     changes: [
       {
+        title: "Statistics & Consistency",
+        description:
+          "The Trends tab is now Statistics. It features a new Consistency Grid that shows you how consistent you are with your tracking at a glance.",
+      },
+      {
         title: "More goal options",
         description:
           "Added 'Lose Weight Slowly' and 'Lean Bulk' options for sustainable progress with a less aggressive deficit or surplus.",
@@ -240,6 +245,11 @@ const CHANGELOG_DATA_DE: VersionChangelog[] = [
   {
     version: "1.0.8",
     changes: [
+      {
+        title: "Statistik & Konsistenz",
+        description:
+          "Der Trends-Tab ist jetzt Statistik. Das neue Konsistenz-Raster zeigt dir auf einen Blick, wie konsequent du beim Tracking bist.",
+      },
       {
         title: "Mehr Ziel-Optionen",
         description:

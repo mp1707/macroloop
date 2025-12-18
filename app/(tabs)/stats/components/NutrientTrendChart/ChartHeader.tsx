@@ -92,7 +92,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
 
   const handleOpenExplainer = () => {
     router.push({
-      pathname: "/explainer-progress",
+      pathname: "/explainer-stats",
       params: {
         formattedValue,
         days: days.toString(),
