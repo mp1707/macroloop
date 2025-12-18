@@ -14,6 +14,8 @@ import Animated, {
   withDelay,
   withSpring,
   FadeOut,
+  SlideInLeft,
+  SlideOutRight,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Favorite, FoodLog } from "@/types/models";
@@ -50,6 +52,72 @@ interface LogCardProps {
 // Animated variant used only for freshly created entries that transition from loading
 type WithLongPress = {
   onLongPress?: () => void;
+};
+
+const LoadingStateText = ({ hasImage }: { hasImage: boolean }) => {
+  const { t } = useTranslation();
+  const [text, setText] = useState(() => {
+    if (hasImage) return t("logCard.loadingStates.scanningPhoto");
+    return t("logCard.loadingStates.identifyingIngredients");
+  });
+
+  useEffect(() => {
+    let timeout1: NodeJS.Timeout;
+    let timeout2: NodeJS.Timeout;
+
+    if (hasImage) {
+      // 0-4.5s: "Foto wird gescannt..."
+      // 4.5-10s: "Zutaten werden identifiziert..."
+      // 10s+: "Nährwerte werden berechnet..."
+      timeout1 = setTimeout(() => {
+        setText(t("logCard.loadingStates.identifyingIngredients"));
+        timeout2 = setTimeout(() => {
+          setText(t("logCard.loadingStates.calculatingMacros"));
+        }, 5500); // 4.5s + 5.5s = 10s
+      }, 4500);
+    } else {
+      // 0-3s: "Zutaten werden identifiziert..."
+      // 3s+: "Nährwerte werden berechnet..."
+      timeout1 = setTimeout(() => {
+        setText(t("logCard.loadingStates.calculatingMacros"));
+      }, 3000);
+    }
+
+    return () => {
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+    };
+  }, [hasImage, t]);
+
+  return (
+    <View
+      style={{
+        overflow: "hidden",
+        width: "100%",
+        justifyContent: "center",
+      }}
+    >
+      <AppText
+        role="Headline"
+        style={{ opacity: 0 }}
+        numberOfLines={2}
+        accessibilityElementsHidden={true}
+        importantForAccessibility="no-hide-descendants"
+      >
+        {text}
+      </AppText>
+      <Animated.View
+        key={text}
+        entering={SlideInLeft.duration(400)}
+        exiting={SlideOutRight.duration(400)}
+        style={{ position: "absolute", width: "100%" }}
+      >
+        <AppText role="Headline" numberOfLines={2}>
+          {text}
+        </AppText>
+      </Animated.View>
+    </View>
+  );
 };
 
 const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
@@ -125,6 +193,9 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
   }));
 
   const hasNotEatenEverything = (foodLog.percentageEaten ?? 100) !== 100;
+  const hasImage = !!(
+    resolveLocalImagePath(foodLog.localImagePath) || foodLog.supabaseImagePath
+  );
 
   return (
     <Pressable
@@ -141,7 +212,7 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
                 exiting={FadeOut.duration(200)}
                 style={styles.skeletonTitleContainer}
               >
-                <AppText role="Headline">{t("logCard.analyzing")}</AppText>
+                <LoadingStateText hasImage={hasImage} />
                 <SkeletonPill
                   width="90%"
                   height={14}

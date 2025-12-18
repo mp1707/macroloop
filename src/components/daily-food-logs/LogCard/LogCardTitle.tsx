@@ -31,11 +31,7 @@ export const LogCardTitle: React.FC<LogCardTitleProps> = ({
   );
 
   if (animated && animatedStyle) {
-    return (
-      <Animated.View style={animatedStyle}>
-        {textContent}
-      </Animated.View>
-    );
+    return <Animated.View style={animatedStyle}>{textContent}</Animated.View>;
   }
 
   return textContent;
