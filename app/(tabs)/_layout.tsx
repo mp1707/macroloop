@@ -75,7 +75,7 @@ export default function TabsLayout() {
         <Label selectedStyle={{ color: colors.accent }}>Favorites</Label>
       </NativeTabs.Trigger> */}
 
-      <NativeTabs.Trigger name="trends">
+      <NativeTabs.Trigger name="progress">
         <Icon
           src={{
             default: (
@@ -88,7 +88,7 @@ export default function TabsLayout() {
           selectedColor={colors.accent}
         />
         <Label selectedStyle={{ color: colors.accent }}>
-          {t("tabs.trends")}
+          {t("tabs.progress")}
         </Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="favorites">

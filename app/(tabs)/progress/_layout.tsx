@@ -4,7 +4,7 @@ import { useTheme } from "@/theme";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { useTranslation } from "react-i18next";
 
-export default function TrendsLayout() {
+export default function ProgressLayout() {
   const { colors, theme, colorScheme } = useTheme();
   const { t } = useTranslation();
   const isIOS = Platform.OS === "ios";
@@ -35,7 +35,7 @@ export default function TrendsLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: t("tabs.trends"),
+          title: t("tabs.progress"),
           headerLargeTitle: isIOS,
           headerLargeTitleShadowVisible: false,
         }}

@@ -66,7 +66,7 @@
   "tabs": {
     "logging": "Log",
     "calendar": "Calendar",
-    "trends": "Trends",
+    "progress": "Progress",
     "settings": "Settings",
     "favorites": "Favorites"
   },
@@ -1028,7 +1028,7 @@
       }
     }
   },
-  "trends": {
+  "progress": {
     "timePeriod": {
       "week": "Week",
       "month": "Month"

@@ -14,7 +14,7 @@ import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 
 const FAT_BASELINE_RANGE = { min: 0.2, max: 0.35 };
 
-export default function TrendsScreen() {
+export default function ProgressScreen() {
   const [timePeriod, setTimePeriod] = useState<"week" | "month">("week");
   const [selectedMetric, setSelectedMetric] = useState<TrendMetric>("calories");
 
@@ -25,9 +25,9 @@ export default function TrendsScreen() {
     }
     const tabsIndex = segments.lastIndexOf("(tabs)");
     if (tabsIndex === -1) {
-      return segments[segments.length - 1] === "trends";
+      return segments[segments.length - 1] === "progress";
     }
-    return segments[tabsIndex + 1] === "trends";
+    return segments[tabsIndex + 1] === "progress";
   }, [segments]);
 
   // Store selectors
@@ -110,9 +110,9 @@ export default function TrendsScreen() {
       min: (cals * FAT_BASELINE_RANGE.min) / 9,
       max: (cals * FAT_BASELINE_RANGE.max) / 9,
     };
-    captionText = t("trends.chart.fatBaselineSimple");
+    captionText = t("progress.chart.fatBaselineSimple");
   } else if (selectedMetric === "carbs") {
-    captionText = t("trends.chart.carbsNoGoal");
+    captionText = t("progress.chart.carbsNoGoal");
   }
 
   const handleMacroSelect = useCallback((metric: TrendMetric) => {

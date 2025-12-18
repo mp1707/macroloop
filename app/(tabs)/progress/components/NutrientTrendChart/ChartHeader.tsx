@@ -79,7 +79,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
     ? Math.round(((average * 9) / calorieGoal!) * 100)
     : 0;
 
-  const periodLabel = t("trends.chart.averagePerDayLabel", { days });
+  const periodLabel = t("progress.chart.averagePerDayLabel", { days });
 
   const nutrientBadgeColors =
     colors.semanticBadges?.[nutrient as keyof SemanticBadges];
@@ -92,7 +92,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
 
   const handleOpenExplainer = () => {
     router.push({
-      pathname: "/explainer-trends",
+      pathname: "/explainer-progress",
       params: {
         formattedValue,
         days: days.toString(),
@@ -103,7 +103,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
   const caption = useMemo(() => {
     // Priority order: goal > custom caption text
     if (showGoalLine && typeof goal === "number") {
-      return t("trends.chart.goalLabel", {
+      return t("progress.chart.goalLabel", {
         goal: Math.round(goal),
         unit,
       });
@@ -113,7 +113,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
   }, [showGoalLine, goal, unit, captionText, t]);
 
   const pickerOptions = useMemo(
-    () => [t("trends.timePeriod.week"), t("trends.timePeriod.month")],
+    () => [t("progress.timePeriod.week"), t("progress.timePeriod.month")],
     [t]
   );
 
@@ -169,7 +169,7 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
                 style={[styles.badgeText, { color: badgeTextColor }]}
               >
                 {isOverTarget ? "+" : "-"}
-                {absDiff} {unit} {t("trends.chart.vsGoal")}
+                {absDiff} {unit} {t("progress.chart.vsGoal")}
               </AppText>
             </View>
           )}

@@ -91,9 +91,9 @@ function ThemedStack() {
           headerShown: false,
           gestureEnabled: true,
         }}
-      />{" "}
+      />
       <Stack.Screen
-        name="explainer-trends"
+        name="explainer-progress"
         options={{
           presentation: "modal",
           headerShown: false,

@@ -8,7 +8,7 @@ import { HeaderButton } from "@/components/shared/HeaderButton";
 import { AppText } from "@/components";
 import { Colors, Theme, useTheme } from "@/theme";
 
-export default function ExplainerTrendsScreen() {
+export default function ExplainerProgressScreen() {
   const { theme, colors } = useTheme();
   const styles = useMemo(() => createStyles(theme, colors), [theme, colors]);
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function ExplainerTrendsScreen() {
       >
         <View style={styles.hero}>
           <AppText role="Caption" style={styles.heroLabel}>
-            {t("trends.averageDisplay.subtitle")}
+            {t("progress.averageDisplay.subtitle")}
           </AppText>
           <AppText role="Title1" style={styles.heroValue}>
             {params.formattedValue}
@@ -57,10 +57,10 @@ export default function ExplainerTrendsScreen() {
 
         <View style={styles.section}>
           <AppText role="Headline" style={styles.title}>
-            {t("trends.explainer.title")}
+            {t("progress.explainer.title")}
           </AppText>
           <AppText role="Body" style={styles.body}>
-            {t("trends.explainer.body", { days: params.days || "7" })}
+            {t("progress.explainer.body", { days: params.days || "7" })}
           </AppText>
         </View>
       </ScrollView>
