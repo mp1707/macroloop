@@ -16,6 +16,11 @@ import Animated, {
   FadeOut,
   SlideInLeft,
   SlideOutRight,
+  withTiming,
+  withRepeat,
+  interpolate,
+  Extrapolation,
+  Easing,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Favorite, FoodLog } from "@/types/models";
@@ -54,32 +59,72 @@ type WithLongPress = {
   onLongPress?: () => void;
 };
 
-const LoadingStateText = ({ hasImage }: { hasImage: boolean }) => {
+const CyclingPills = () => {
+  const sv = useSharedValue(0);
+
+  useEffect(() => {
+    sv.value = withRepeat(
+      withTiming(1, { duration: 3500, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      false
+    );
+  }, []);
+
+  const createAnimatedStyle = (start: number, end: number, maxW: number) =>
+    useAnimatedStyle(() => ({
+      width: (interpolate(
+        sv.value,
+        [start, end],
+        [0, maxW],
+        Extrapolation.CLAMP
+      ) + "%") as any,
+      opacity: interpolate(
+        sv.value,
+        [start, start + 0.05],
+        [0, 1],
+        Extrapolation.CLAMP
+      ),
+    }));
+
+  const style1 = createAnimatedStyle(0, 0.3, 80);
+  const style2 = createAnimatedStyle(0.3, 0.6, 60);
+  const style3 = createAnimatedStyle(0.6, 0.9, 40);
+
+  const AnimatedPill = ({ style }: { style: any }) => (
+    <Animated.View style={[{ height: 14, overflow: "hidden" }, style]}>
+      <SkeletonPill width="100%" height={14} />
+    </Animated.View>
+  );
+
+  return (
+    <>
+      <AnimatedPill style={style1} />
+      <AnimatedPill style={style2} />
+      <AnimatedPill style={style3} />
+    </>
+  );
+};
+
+const LoadingStateDisplay = ({ hasImage }: { hasImage: boolean }) => {
   const { t } = useTranslation();
-  const [text, setText] = useState(() => {
-    if (hasImage) return t("logCard.loadingStates.scanningPhoto");
-    return t("logCard.loadingStates.identifyingIngredients");
-  });
+  const [phase, setPhase] = useState(hasImage ? 1 : 2);
 
   useEffect(() => {
     let timeout1: NodeJS.Timeout;
     let timeout2: NodeJS.Timeout;
 
     if (hasImage) {
-      // 0-4.5s: "Foto wird gescannt..."
-      // 4.5-10s: "Zutaten werden identifiziert..."
-      // 10s+: "Nährwerte werden berechnet..."
+      setPhase(1);
       timeout1 = setTimeout(() => {
-        setText(t("logCard.loadingStates.identifyingIngredients"));
+        setPhase(2);
         timeout2 = setTimeout(() => {
-          setText(t("logCard.loadingStates.calculatingMacros"));
-        }, 5500); // 4.5s + 5.5s = 10s
+          setPhase(3);
+        }, 5500);
       }, 4500);
     } else {
-      // 0-3s: "Zutaten werden identifiziert..."
-      // 3s+: "Nährwerte werden berechnet..."
+      setPhase(2);
       timeout1 = setTimeout(() => {
-        setText(t("logCard.loadingStates.calculatingMacros"));
+        setPhase(3);
       }, 3000);
     }
 
@@ -87,35 +132,53 @@ const LoadingStateText = ({ hasImage }: { hasImage: boolean }) => {
       clearTimeout(timeout1);
       clearTimeout(timeout2);
     };
-  }, [hasImage, t]);
+  }, [hasImage]);
+
+  const text = useMemo(() => {
+    if (phase === 1) return t("logCard.loadingStates.scanningPhoto");
+    if (phase === 2) return t("logCard.loadingStates.identifyingIngredients");
+    return t("logCard.loadingStates.calculatingMacros");
+  }, [phase, t]);
 
   return (
-    <View
-      style={{
-        overflow: "hidden",
-        width: "100%",
-        justifyContent: "center",
-      }}
-    >
-      <AppText
-        role="Headline"
-        style={{ opacity: 0 }}
-        numberOfLines={2}
-        accessibilityElementsHidden={true}
-        importantForAccessibility="no-hide-descendants"
+    <View style={{ gap: 4, width: "100%" }}>
+      <View
+        style={{
+          overflow: "hidden",
+          width: "100%",
+          justifyContent: "center",
+        }}
       >
-        {text}
-      </AppText>
-      <Animated.View
-        key={text}
-        entering={SlideInLeft.duration(400)}
-        exiting={SlideOutRight.duration(400)}
-        style={{ position: "absolute", width: "100%" }}
-      >
-        <AppText role="Headline" numberOfLines={2}>
+        <AppText
+          role="Headline"
+          style={{ opacity: 0 }}
+          numberOfLines={2}
+          accessibilityElementsHidden={true}
+          importantForAccessibility="no-hide-descendants"
+        >
           {text}
         </AppText>
-      </Animated.View>
+        <Animated.View
+          key={text}
+          entering={SlideInLeft.duration(400)}
+          exiting={SlideOutRight.duration(400)}
+          style={{ position: "absolute", width: "100%" }}
+        >
+          <AppText role="Headline" numberOfLines={2}>
+            {text}
+          </AppText>
+        </Animated.View>
+      </View>
+      {phase < 3 ? (
+        <>
+          <SkeletonPill width="90%" height={14} style={{ marginTop: 4 }} />
+          <SkeletonPill width="60%" height={14} />
+        </>
+      ) : (
+        <>
+          <CyclingPills />
+        </>
+      )}
     </View>
   );
 };
@@ -212,13 +275,7 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
                 exiting={FadeOut.duration(200)}
                 style={styles.skeletonTitleContainer}
               >
-                <LoadingStateText hasImage={hasImage} />
-                <SkeletonPill
-                  width="90%"
-                  height={14}
-                  style={{ marginTop: 4 }}
-                />
-                <SkeletonPill width="60%" height={14} />
+                <LoadingStateDisplay hasImage={hasImage} />
               </Animated.View>
             )}
             <View style={isLoading ? { display: "none" } : {}}>
