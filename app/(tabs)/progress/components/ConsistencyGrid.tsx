@@ -1,13 +1,62 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppStore } from "@/store/useAppStore";
 import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
-import { Card, AppText } from "@/components";
+import { Card } from "@/components";
 import { formatDateKey } from "@/utils/dateHelpers";
 import { Picker, Host } from "@expo/ui/swift-ui";
 import { useTranslation } from "react-i18next";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 
 const WEEKS_TO_SHOW = 26; // Approx 6 months
+
+interface ConsistencyCellProps {
+  style: any;
+  isActive: boolean;
+  isToday: boolean;
+  initialDelay?: number;
+}
+
+const ConsistencyCell = React.memo(
+  ({ style, isActive, isToday, initialDelay = 0 }: ConsistencyCellProps) => {
+    const scale = useSharedValue(1);
+
+    useEffect(() => {
+      if (isToday && isActive) {
+        const playEffect = () => {
+          // Run haptics
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+          // Run animation
+          scale.value = withSequence(
+            withTiming(1.3, { duration: 150 }),
+            withTiming(1, { duration: 150 })
+          );
+        };
+
+        if (initialDelay > 0) {
+          const timer = setTimeout(playEffect, initialDelay);
+          return () => clearTimeout(timer);
+        } else {
+          playEffect();
+        }
+      }
+    }, [isActive, isToday, initialDelay]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+
+    return <Animated.View style={[style, animatedStyle]} />;
+  }
+);
 
 export const ConsistencyGrid = () => {
   const { colors, theme, colorScheme } = useTheme();
@@ -22,6 +71,15 @@ export const ConsistencyGrid = () => {
   const [metric, setMetric] = useState<"streak" | "calories" | "protein">(
     "streak"
   );
+
+  const todayKey = useMemo(() => {
+    const today = new Date();
+    return formatDateKey(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      today.getDate()
+    );
+  }, []);
 
   // Data processing
   const gridData = useMemo(() => {
@@ -157,12 +215,21 @@ export const ConsistencyGrid = () => {
       <View style={styles.grid}>
         {gridData.map((week, weekIndex) => (
           <View key={weekIndex} style={styles.column}>
-            {week.map((day) => (
-              <View
-                key={day.dateKey}
-                style={[styles.cell, getCellStyle(day.data)]}
-              />
-            ))}
+            {week.map((day) => {
+              const cellStyle = getCellStyle(day.data);
+              const isActive = cellStyle !== styles.cellInactive;
+              const isToday = day.dateKey === todayKey;
+
+              return (
+                <ConsistencyCell
+                  key={`${day.dateKey}-${metric}`}
+                  style={[styles.cell, cellStyle]}
+                  isActive={isActive}
+                  isToday={isToday}
+                  initialDelay={500}
+                />
+              );
+            })}
           </View>
         ))}
       </View>
