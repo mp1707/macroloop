@@ -18,6 +18,25 @@ interface VersionChangelog {
 
 const CHANGELOG_DATA_EN: VersionChangelog[] = [
   {
+    version: "1.0.8",
+    changes: [
+      {
+        title: "More goal options",
+        description:
+          "Added 'Lose Weight Slowly' and 'Lean Bulk' options for sustainable progress with a less aggressive deficit or surplus.",
+      },
+      {
+        title: "Improved voice input",
+        description:
+          "Voice input now inserts text exactly where the cursor is positioned.",
+      },
+      {
+        title: "Polished visuals",
+        description: "Updated icons and UI details for a cleaner look.",
+      },
+    ],
+  },
+  {
     version: "1.0.7",
     changes: [
       {
@@ -218,6 +237,26 @@ const CHANGELOG_DATA_EN: VersionChangelog[] = [
 ];
 
 const CHANGELOG_DATA_DE: VersionChangelog[] = [
+  {
+    version: "1.0.8",
+    changes: [
+      {
+        title: "Mehr Ziel-Optionen",
+        description:
+          "Mit „Langsam abnehmen“ und „Lean Bulk“ gibt es jetzt neue Optionen für nachhaltigeren Fortschritt mit weniger aggressivem Defizit/Überschuss.",
+      },
+      {
+        title: "Verbesserte Spracheingabe",
+        description:
+          "Die Spracheingabe fügt Text nun an der Stelle ein, an der sich der Cursor befindet.",
+      },
+      {
+        title: "Optischer Feinschliff",
+        description:
+          "Icons und Details in der Oberfläche wurden für einen frischeren Look überarbeitet.",
+      },
+    ],
+  },
   {
     version: "1.0.7",
     changes: [
