@@ -81,7 +81,7 @@ export const NutrientTrendChart: React.FC<NutrientTrendChartProps> = (props) => 
 
   return (
     <View style={styles.container}>
-      <Card elevated={true} padding={theme.spacing.xl}>
+      <Card elevated={true} padding={theme.spacing.md}>
         <ChartHeader
           average={average}
           target={target}

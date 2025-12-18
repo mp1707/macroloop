@@ -1031,6 +1031,7 @@
   "progress": {
     "sections": {
       "consistency": "Consistency",
+      "goalsReached": "Goals Reached",
       "trend": "Trend"
     },
     "timePeriod": {

@@ -153,6 +153,18 @@ export default function ProgressScreen() {
             <ConsistencyGrid />
           </View>
 
+          {/* Goals Reached Section */}
+          <View style={styles.section}>
+            <AppText
+              role="Caption"
+              color="secondary"
+              style={styles.sectionHeader}
+            >
+              {t("progress.sections.goalsReached")}
+            </AppText>
+            <ConsistencyGrid mode="goals" />
+          </View>
+
           {/* Trend Section */}
           <View style={styles.section}>
             <AppText
