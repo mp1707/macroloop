@@ -28,6 +28,7 @@ const lightColors = {
 
   // Accent & system
   accent: "#1EC8B6",
+  secondaryAccent: "#FF9F1C",
   recording: "#FF4E3A",
   error: "#FF4E3A",
   warning: "#FFB020",
@@ -115,6 +116,7 @@ const darkColors = {
 
   // Main Accent & System Colors
   accent: "#44EBD4",
+  secondaryAccent: "#F3BE68",
   recording: "#FF665A",
   error: "#FF665A",
   warning: "#FFD54F",
