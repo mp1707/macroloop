@@ -1,5 +1,6 @@
 import type { FoodLog } from "@/types/models";
 import { getTodayKey, formatDateKey } from "@/utils/dateHelpers";
+import { aggregateConsumedNutrientsByDate } from "@/utils/nutrientCalculations";
 
 export interface TrendsData {
   averages: {
@@ -67,47 +68,42 @@ export function calculateTrendsData(
     fat: 0,
   });
 
+  // Use centralized utility to calculate nutrients by date with percentageEaten applied
+  const nutrientsByDate = aggregateConsumedNutrientsByDate(foodLogs);
+
+  // Build date totals map for the specified range
   const dateTotalsMap = new Map<
     string,
     { totals: ReturnType<typeof createEmptyTotals>; hasLogs: boolean }
   >();
+
   dateKeys.forEach((dateKey) => {
-    dateTotalsMap.set(dateKey, { totals: createEmptyTotals(), hasLogs: false });
+    const nutrients = nutrientsByDate.get(dateKey);
+    if (nutrients?.exists) {
+      dateTotalsMap.set(dateKey, {
+        totals: {
+          calories: nutrients.calories,
+          protein: nutrients.protein,
+          carbs: nutrients.carbs,
+          fat: nutrients.fat,
+        },
+        hasLogs: true,
+      });
+    } else {
+      dateTotalsMap.set(dateKey, { totals: createEmptyTotals(), hasLogs: false });
+    }
   });
 
-  const todayTotals = createEmptyTotals();
-  const relevantDates = new Set([...dateKeys, todayKey]);
-
-  foodLogs.forEach((log) => {
-    if (!log.logDate || !relevantDates.has(log.logDate)) {
-      return;
-    }
-
-    const percentage = (log.percentageEaten ?? 100) / 100;
-    const calories = (log.calories || 0) * percentage;
-    const protein = (log.protein || 0) * percentage;
-    const carbs = (log.carbs || 0) * percentage;
-    const fat = (log.fat || 0) * percentage;
-
-    if (log.logDate === todayKey) {
-      todayTotals.calories += calories;
-      todayTotals.protein += protein;
-      todayTotals.carbs += carbs;
-      todayTotals.fat += fat;
-      return;
-    }
-
-    const entry = dateTotalsMap.get(log.logDate);
-    if (!entry) {
-      return;
-    }
-
-    entry.totals.calories += calories;
-    entry.totals.protein += protein;
-    entry.totals.carbs += carbs;
-    entry.totals.fat += fat;
-    entry.hasLogs = true;
-  });
+  // Extract today's data
+  const todayNutrients = nutrientsByDate.get(todayKey);
+  const todayTotals = todayNutrients?.exists
+    ? {
+        calories: todayNutrients.calories,
+        protein: todayNutrients.protein,
+        carbs: todayNutrients.carbs,
+        fat: todayNutrients.fat,
+      }
+    : createEmptyTotals();
 
   const dailyData = dateKeys.map((dateKey) => {
     const entry = dateTotalsMap.get(dateKey);

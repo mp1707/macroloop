@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppStore } from "@/store/useAppStore";
-import { useTheme, Colors, Theme, ColorScheme } from "@/theme";
+import { useTheme, Colors, Theme } from "@/theme";
 import { Card, AppText } from "@/components";
 import { formatDateKey } from "@/utils/dateHelpers";
 import { Picker, Host } from "@expo/ui/swift-ui";
@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { aggregateConsumedNutrientsByDate } from "@/utils/nutrientCalculations";
 
 const WEEKS_TO_SHOW = 26; // Approx 6 months
 
@@ -78,10 +79,7 @@ const AnimatedCell = React.memo(
 
 export const ConsistencyGrid = () => {
   const { colors, theme, colorScheme } = useTheme();
-  const styles = useMemo(
-    () => createStyles(colors, theme, colorScheme),
-    [colors, theme, colorScheme]
-  );
+  const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const foodLogs = useAppStore((state) => state.foodLogs);
   const dailyTargets = useAppStore((state) => state.dailyTargets);
   const { t } = useTranslation();
@@ -99,21 +97,8 @@ export const ConsistencyGrid = () => {
 
   // Data processing
   const gridData = useMemo(() => {
-    // 1. Build a lookup map for the data we need
-    const logMap = new Map();
-    foodLogs.forEach((log) => {
-      const percentage = (log.percentageEaten ?? 100) / 100;
-      const existing = logMap.get(log.logDate) || {
-        calories: 0,
-        protein: 0,
-        exists: false,
-      };
-      logMap.set(log.logDate, {
-        exists: true,
-        calories: existing.calories + (log.calories || 0) * percentage,
-        protein: existing.protein + (log.protein || 0) * percentage,
-      });
-    });
+    // Use centralized utility to build nutrient map with percentageEaten applied
+    const logMap = aggregateConsumedNutrientsByDate(foodLogs);
 
     const today = new Date();
     // Adjust to local Monday start of week
@@ -295,7 +280,7 @@ export const ConsistencyGrid = () => {
   );
 };
 
-const createStyles = (colors: Colors, theme: Theme, colorScheme: ColorScheme) =>
+const createStyles = (colors: Colors, theme: Theme) =>
   StyleSheet.create({
     card: {
       width: "100%",

@@ -35,6 +35,7 @@ import { useEditedLog } from "@/components/refine-page/hooks/useEditedLog";
 import { Host, Image, Slider } from "@expo/ui/swift-ui";
 import { createToggleFavoriteHandler } from "@/utils/foodLogHandlers";
 import { useTranslation } from "react-i18next";
+import { calculateConsumedNutrients } from "@/utils/nutrientCalculations";
 
 const easeLayout = Layout.duration(220).easing(Easing.inOut(Easing.quad));
 
@@ -440,10 +441,10 @@ export default function Edit() {
 
             <Animated.View layout={easeLayout}>
               <MacrosCard
-                calories={editedLog.calories * (percentageEaten / 100)}
-                protein={editedLog.protein * (percentageEaten / 100)}
-                carbs={editedLog.carbs * (percentageEaten / 100)}
-                fat={editedLog.fat * (percentageEaten / 100)}
+                {...calculateConsumedNutrients({
+                  ...editedLog,
+                  percentageEaten,
+                })}
                 processing={isEditEstimating}
                 wasProcessing={previousLoadingRef.current}
                 revealKey={revealKey}

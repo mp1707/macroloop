@@ -40,6 +40,7 @@ import { FoodComponentList } from "./FoodComponentList";
 import { LogCardTitle } from "./LogCardTitle";
 import { useTranslation } from "react-i18next";
 import { resolveLocalImagePath } from "@/utils/fileUtils";
+import { calculateConsumedNutrients } from "@/utils/nutrientCalculations";
 
 interface LogCardProps {
   foodLog: FoodLog | Favorite;
@@ -303,14 +304,7 @@ const AnimatedLogCard: React.FC<LogCardProps & WithLongPress> = ({
 
           <View style={styles.rightSection}>
             <NutritionList
-              nutrition={{
-                calories:
-                  foodLog.calories * ((foodLog.percentageEaten ?? 100) / 100),
-                protein:
-                  foodLog.protein * ((foodLog.percentageEaten ?? 100) / 100),
-                carbs: foodLog.carbs * ((foodLog.percentageEaten ?? 100) / 100),
-                fat: foodLog.fat * ((foodLog.percentageEaten ?? 100) / 100),
-              }}
+              nutrition={calculateConsumedNutrients(foodLog)}
               isLoading={isLoading}
               wasLoading={previousLoadingRef.current}
             />
@@ -448,14 +442,7 @@ const StaticLogCard: React.FC<LogCardProps & WithLongPress> = ({
 
           <View style={styles.rightSection}>
             <StaticNutritionList
-              nutrition={{
-                calories:
-                  foodLog.calories * ((foodLog.percentageEaten ?? 100) / 100),
-                protein:
-                  foodLog.protein * ((foodLog.percentageEaten ?? 100) / 100),
-                carbs: foodLog.carbs * ((foodLog.percentageEaten ?? 100) / 100),
-                fat: foodLog.fat * ((foodLog.percentageEaten ?? 100) / 100),
-              }}
+              nutrition={calculateConsumedNutrients(foodLog)}
             />
           </View>
         </View>

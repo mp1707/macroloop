@@ -9,7 +9,7 @@ import { Button } from "@/components/index";
 import { OnboardingScreen } from "../../src/components/onboarding/OnboardingScreen";
 import * as Haptics from "expo-haptics";
 import { Flame, BicepsFlexed, Wheat, Droplet } from "lucide-react-native";
-import { calculateFatGramsFromPercentage } from "@/utils/nutritionCalculations";
+import { calculateFatGramsFromPercentage } from "@/utils/macroTargetCalculations";
 import { DailyTargets, ProteinGoalType } from "@/types/models";
 import { useTranslation } from "react-i18next";
 

@@ -33,6 +33,7 @@ import { useEditableTitle } from "@/components/refine-page/hooks/useEditableTitl
 import { useEditChangeTracker } from "@/components/refine-page/hooks/useEditChangeTracker";
 import { useEditedFavorite } from "@/components/refine-page/hooks/useEditedFavorite";
 import { Host, Image, Slider } from "@expo/ui/swift-ui";
+import { calculateConsumedNutrients } from "@/utils/nutrientCalculations";
 
 const easeLayout = Layout.duration(220).easing(Easing.inOut(Easing.quad));
 
@@ -416,10 +417,10 @@ export default function EditFavorite() {
 
             <Animated.View layout={easeLayout}>
               <MacrosCard
-                calories={editedFavorite.calories * (percentageEaten / 100)}
-                protein={editedFavorite.protein * (percentageEaten / 100)}
-                carbs={editedFavorite.carbs * (percentageEaten / 100)}
-                fat={editedFavorite.fat * (percentageEaten / 100)}
+                {...calculateConsumedNutrients({
+                  ...editedFavorite,
+                  percentageEaten,
+                })}
                 processing={isEditEstimating}
                 wasProcessing={previousLoadingRef.current}
                 revealKey={revealKey}

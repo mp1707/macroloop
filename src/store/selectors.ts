@@ -2,6 +2,7 @@
 
 import { AppState } from "@/store/useAppStore";
 import type { Favorite, FoodLog } from "../types/models"; // Adjust path if needed
+import { aggregateConsumedNutrients } from "@/utils/nutrientCalculations";
 
 /**
  * ## Basic Selectors
@@ -54,19 +55,8 @@ export const selectDailyTotals = (state: AppState, date: string) => {
   // Reuse the basic selector to get the relevant logs first
   const logsForDay = selectLogsForDate(state, date);
 
-  // Use reduce to sum up the values into a single object
-  return logsForDay.reduce(
-    (totals, log) => {
-      const percentage = (log.percentageEaten ?? 100) / 100;
-      totals.calories += (log.calories || 0) * percentage;
-      totals.protein += (log.protein || 0) * percentage;
-      totals.carbs += (log.carbs || 0) * percentage;
-      totals.fat += (log.fat || 0) * percentage;
-      return totals;
-    },
-    // The starting value for our totals object
-    { calories: 0, protein: 0, carbs: 0, fat: 0 }
-  );
+  // Use centralized utility to calculate totals with percentageEaten applied
+  return aggregateConsumedNutrients(logsForDay);
 };
 
 /**
@@ -142,20 +132,16 @@ export interface DailyDataState {
  * Performance: Single pass through foodLogs array instead of 3 passes
  */
 export const selectDailyData = (state: DailyDataState, date: string): DailyData => {
+  // Single pass: filter logs for the date
   const logs: FoodLog[] = [];
-  const totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
-
-  // Single pass: filter logs and calculate totals
   for (const log of state.foodLogs) {
     if (log.logDate === date) {
       logs.push(log);
-      const percentage = (log.percentageEaten ?? 100) / 100;
-      totals.calories += (log.calories || 0) * percentage;
-      totals.protein += (log.protein || 0) * percentage;
-      totals.carbs += (log.carbs || 0) * percentage;
-      totals.fat += (log.fat || 0) * percentage;
     }
   }
+
+  // Use centralized utility to calculate totals with percentageEaten applied
+  const totals = aggregateConsumedNutrients(logs);
 
   // Calculate percentages
   const targets = state.dailyTargets;

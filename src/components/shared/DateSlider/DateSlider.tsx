@@ -18,6 +18,7 @@ import {
   parseDateKey,
   getTodayKey,
 } from "@/utils/dateHelpers";
+import { aggregateConsumedNutrientsByDate } from "@/utils/nutrientCalculations";
 
 const WEEKDAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
 const WEEKS_TO_LOAD_AT_ONCE = 2;
@@ -51,20 +52,11 @@ export const DateSlider = () => {
     return monday;
   }, []);
 
-  // Pre-index food logs by date for O(1) lookups (Phase 2 optimization)
-  const foodLogsByDate = useMemo(() => {
-    const index = new Map<string, { calories: number; protein: number }>();
-    foodLogs.forEach((log) => {
-      const existing = index.get(log.logDate) || {
-        calories: 0,
-        protein: 0,
-      };
-      existing.calories += log.calories * ((log.percentageEaten ?? 100) / 100);
-      existing.protein += log.protein * ((log.percentageEaten ?? 100) / 100);
-      index.set(log.logDate, existing);
-    });
-    return index;
-  }, [foodLogs]);
+  // Pre-index food logs by date for O(1) lookups with percentageEaten applied
+  const foodLogsByDate = useMemo(
+    () => aggregateConsumedNutrientsByDate(foodLogs),
+    [foodLogs]
+  );
 
   const dateRange = useMemo(() => {
     const today = new Date();
@@ -88,10 +80,11 @@ export const DateSlider = () => {
         const dateString = formatDateToLocalString(currentDate);
         const weekdayIndex = (currentDate.getDay() + 6) % 7;
 
-        // O(1) lookup from pre-indexed map
-        const dailyTotals = foodLogsByDate.get(dateString) || {
-          calories: 0,
-          protein: 0,
+        // O(1) lookup from pre-indexed map (only use calories & protein for performance)
+        const dailyNutrients = foodLogsByDate.get(dateString);
+        const dailyTotals = {
+          calories: dailyNutrients?.calories || 0,
+          protein: dailyNutrients?.protein || 0,
         };
 
         const percentages = {
