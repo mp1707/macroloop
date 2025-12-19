@@ -1036,9 +1036,9 @@
     },
     "consistency": {
       "legend": {
-        "inRange": "Days within target range. (90-110% of target)",
-        "atLeast80": "Days within target range. (at least 80% of target)",
-        "atLeastOneLog": "Days with at least one log entry."
+        "inRange": "Goal met (90-110%)",
+        "atLeast80": "Goal met (≥80%)",
+        "atLeastOneLog": "Days with logs"
       },
       "tabs": {
         "protein": "Protein",

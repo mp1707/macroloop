@@ -1034,9 +1034,9 @@
     },
     "consistency": {
       "legend": {
-        "inRange": "Tage im Zielbereich. (90-110% des Ziels)",
-        "atLeast80": "Tage im Zielbereich. (mindestens 80% des Ziels)",
-        "atLeastOneLog": "Tage mit mindestens einem Eintrag."
+        "inRange": "Im Zielbereich (90-110%)",
+        "atLeast80": "Im Zielbereich (≥80%)",
+        "atLeastOneLog": "Min. ein Eintrag"
       },
       "tabs": {
         "protein": "Protein",
