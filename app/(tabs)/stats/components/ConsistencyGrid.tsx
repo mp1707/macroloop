@@ -102,6 +102,7 @@ export const ConsistencyGrid = () => {
     // 1. Build a lookup map for the data we need
     const logMap = new Map();
     foodLogs.forEach((log) => {
+      const percentage = (log.percentageEaten ?? 100) / 100;
       const existing = logMap.get(log.logDate) || {
         calories: 0,
         protein: 0,
@@ -109,8 +110,8 @@ export const ConsistencyGrid = () => {
       };
       logMap.set(log.logDate, {
         exists: true,
-        calories: existing.calories + (log.calories || 0),
-        protein: existing.protein + (log.protein || 0),
+        calories: existing.calories + (log.calories || 0) * percentage,
+        protein: existing.protein + (log.protein || 0) * percentage,
       });
     });
 
@@ -161,8 +162,8 @@ export const ConsistencyGrid = () => {
       const goal = dailyTargets?.calories || 2000;
       const percentage = value / goal;
 
-      // Target met: +/- 20%
-      return percentage >= 0.8 && percentage <= 1.2 ? "completed" : "partial";
+      // Target met: +/- 10%
+      return percentage >= 0.9 && percentage <= 1.1 ? "completed" : "partial";
     } else {
       // Protein
       const value = dayData.protein || 0;
