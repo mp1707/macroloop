@@ -28,7 +28,7 @@ const CHANGELOG_DATA_EN: VersionChangelog[] = [
       {
         title: "More goal options",
         description:
-          "Added 'Lose Weight Slowly' and 'Lean Bulk' options for sustainable progress with a less aggressive deficit or surplus.",
+          "Added 'Lose Weight Slowly' and 'Lean Bulk' options during onboarding for sustainable progress with a less aggressive deficit or surplus.",
       },
       {
         title: "Improved voice input",
@@ -253,7 +253,7 @@ const CHANGELOG_DATA_DE: VersionChangelog[] = [
       {
         title: "Mehr Ziel-Optionen",
         description:
-          "Mit „Langsam abnehmen“ und „Lean Bulk“ gibt es jetzt neue Optionen für nachhaltigeren Fortschritt mit weniger aggressivem Defizit/Überschuss.",
+          "Mit „Langsam abnehmen“ und „Lean Bulk“ gibt es jetzt neue Optionen beim Onboarding für nachhaltigeren Fortschritt mit weniger aggressivem Defizit/Überschuss.",
       },
       {
         title: "Verbesserte Spracheingabe",

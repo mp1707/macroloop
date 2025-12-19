@@ -926,15 +926,15 @@
           },
           "rateApp": {
             "title": "MacroLoop bewerten",
-            "subtitle": "Freue mich über jedes Feedback :)",
+            "subtitle": "Freue mich sehr über dein Feedback im App Store.",
             "toast": {
               "errorTitle": "App Store konnte nicht geöffnet werden",
               "errorSubtitle": "Bitte später erneut versuchen."
             }
           },
           "giveFeedback": {
-            "title": "Feedback geben",
-            "subtitle": "Teile deine Gedanken und Ideen."
+            "title": "Direkt Feedback geben",
+            "subtitle": "Teile deine Gedanken und Ideen per Mail."
           },
           "privacy": "Datenschutzerklärung",
           "terms": "Nutzungsbedingungen"

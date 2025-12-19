@@ -935,8 +935,8 @@
             }
           },
           "giveFeedback": {
-            "title": "Give Feedback",
-            "subtitle": "Share your thoughts and ideas."
+            "title": "Give direct Feedback",
+            "subtitle": "Share your thoughts and ideas via mail."
           },
           "privacy": "Privacy Policy",
           "terms": "Terms of Use"
