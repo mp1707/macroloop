@@ -1035,7 +1035,7 @@
     "consistency": {
       "legend": {
         "inRange": "Im Zielbereich (90-110%)",
-        "atLeast80": "Im Zielbereich (≥80%)",
+        "atLeast80": "Im Zielbereich (≥90%)",
         "atLeastOneLog": "Min. ein Eintrag"
       },
       "tabs": {

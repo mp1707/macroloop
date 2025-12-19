@@ -1037,7 +1037,7 @@
     "consistency": {
       "legend": {
         "inRange": "Goal met (90-110%)",
-        "atLeast80": "Goal met (≥80%)",
+        "atLeast80": "Goal met (≥90%)",
         "atLeastOneLog": "Days with logs"
       },
       "tabs": {

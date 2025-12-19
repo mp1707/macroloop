@@ -154,8 +154,8 @@ export const ConsistencyGrid = () => {
       const value = dayData.protein || 0;
       const goal = dailyTargets?.protein || 150;
 
-      // Target met: >= 80%
-      return value >= goal * 0.8 ? "completed" : "partial";
+      // Target met: >= 90%
+      return value >= goal * 0.9 ? "completed" : "partial";
     }
   };
 
