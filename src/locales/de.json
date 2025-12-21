@@ -68,6 +68,7 @@
     "calendar": "Kalender",
     "progress": "Statistik",
     "settings": "Einstellungen",
+    "appearance": "Erscheinungsbild",
     "favorites": "Favoriten"
   },
   "calendar": {
@@ -1001,6 +1002,24 @@
       },
       "accessibility": {
         "optionLabel": "{{option}}-Sprache"
+      }
+    },
+    "appearance": {
+      "title": "Erscheinungsbild",
+      "subtitle": "Dunkel, Hell, System",
+      "options": {
+        "system": {
+          "label": "Geräteeinstellung nutzen",
+          "subtitle": "Automatisch zwischen Hell- und Dunkelmodus wechseln."
+        },
+        "light": {
+          "label": "Heller Modus",
+          "subtitle": "Immer den hellen Modus verwenden."
+        },
+        "dark": {
+          "label": "Dunkler Modus",
+          "subtitle": "Immer den dunklen Modus verwenden."
+        }
       }
     },
     "changelog": {

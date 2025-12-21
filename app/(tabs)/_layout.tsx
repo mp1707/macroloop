@@ -9,12 +9,29 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Appearance, View } from "react-native";
+import { useEffect } from "react";
 
 export default function TabsLayout() {
   const { t } = useTranslation();
-  const { colors, colorScheme, isThemeLoaded } = useTheme();
+  const { colors, colorScheme, isThemeLoaded, appearancePreference } =
+    useTheme();
   const hasLiquidGlass = isLiquidGlassAvailable();
   const deviceColorScheme = Appearance.getColorScheme();
+  
+  // WORKAROUND: Force native components to respect app theme
+  // Native Tabs currently ignore backgroundColor prop and follow system appearance
+  // This explicitly syncs native appearance with our app theme state
+  useEffect(() => {
+    // If user wants system theme, we should let the system take over
+    // and stop forcing a specific color scheme on native components
+    if (appearancePreference === "system") {
+      Appearance.setColorScheme(null);
+      return;
+    }
+  
+    Appearance.setColorScheme(colorScheme);
+  }, [colorScheme, appearancePreference]);
+
   if (!isThemeLoaded) {
     return (
       <View

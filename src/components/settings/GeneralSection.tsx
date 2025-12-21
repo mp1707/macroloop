@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { Languages } from "lucide-react-native";
+import { Languages, Palette } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Card } from "@/components";
@@ -40,6 +40,14 @@ export const GeneralSection = () => {
           onPress={() => router.push("/settings/language")}
           value={languageValue}
           valueTone="secondary"
+        />
+        <View style={styles.separator} />
+        <SettingRow
+          icon={Palette}
+          title={t("settings.appearance.title", "Appearance")}
+          subtitle={t("settings.appearance.subtitle", "Dark, Light, System")}
+          accessory="chevron"
+          onPress={() => router.push("/settings/appearance")}
         />
       </Card>
     </View>

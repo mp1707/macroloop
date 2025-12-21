@@ -68,6 +68,7 @@
     "calendar": "Calendar",
     "progress": "Stats",
     "settings": "Settings",
+    "appearance": "Appearance",
     "favorites": "Favorites"
   },
   "calendar": {
@@ -1003,6 +1004,24 @@
       },
       "accessibility": {
         "optionLabel": "{{option}} language"
+      }
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Dark, Light, System",
+      "options": {
+        "system": {
+          "label": "Use Device Settings",
+          "subtitle": "Automatically switch between Light and Dark mode."
+        },
+        "light": {
+          "label": "Light Mode",
+          "subtitle": "Always use Light mode."
+        },
+        "dark": {
+          "label": "Dark Mode",
+          "subtitle": "Always use Dark mode."
+        }
       }
     },
     "changelog": {
